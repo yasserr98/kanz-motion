@@ -18,13 +18,19 @@
   const overlay = document.getElementById("overlay");
 
   // ---------- word anchors ----------
-  const norm = (s) => s.replace(/[ً-ْـ*%،؟?!.,:؛«»]/g, "").replace(/[إأآ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").trim();
+  const norm = (s) => s.replace(/[ً-ْـ*%٪،؟?!.,:؛«»…]/g, "").replace(/[إأآ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").trim();
   K.T = function (word, after = 0, which = 0) {
     const n = norm(word);
     const hits = (window.TOKENS || []).filter((t) => t.start >= after - 1e-6 && norm(t.w).includes(n));
     if (!hits[which]) { console.error("anchor not found:", word, after); return after; }
     return hits[which].start;
   };
+
+  // Sequential anchor: finds `word` after the previous K.N() hit, so a scene can be written in script
+  // order before the voice exists (no hand-entered seconds). K.N.at(t) moves the cursor.
+  K.cursor = 0;
+  K.N = function (word, which = 0) { const t = K.T(word, K.cursor, which); K.cursor = t; return t; };
+  K.N.at = (t) => { K.cursor = t; };
 
   // ---------- small DOM helpers ----------
   K.el = function (tag, cls, parent, html) {

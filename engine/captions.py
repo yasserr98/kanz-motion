@@ -16,14 +16,14 @@ import re
 import sys
 from pathlib import Path
 
-PUNCT = "،؟?!.,:؛\"«»()"
+PUNCT = "،؟?!.,:؛\"«»()…"
 
 
 def norm(t):
     t = re.sub(r"[ً-ْـ*]", "", t)  # harakat, tatweel, keyword marks
     t = t.strip(PUNCT + " ")
     t = re.sub("[إأآ]", "ا", t).replace("ى", "ي").replace("ة", "ه")
-    t = t.replace("%", "")
+    t = t.replace("%", "").replace("٪", "")
     t = re.sub(r"^(فال|وال|بال|لل|ال)(?=\d)", "", t)
     return t
 
