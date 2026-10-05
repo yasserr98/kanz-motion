@@ -38,6 +38,13 @@ research; this repo holds the engine.
   the MP4 itself and check fonts, Arabic joining, overlaps and timing. Rendered ≠ approved ≠ posted.
 - **Delivery** (Drive + Airtable `In Review`) follows the Kanz repo's delivery guide.
 
+## Usage discipline (Claude Pro limits)
+
+- One fresh session per video; default model Sonnet 5.5 at medium effort, Opus only for engine
+  work. Follow `docs/EFFICIENCY.md` and add a row to its usage log at the end of every video.
+- Review through one contact sheet (`make.py review`, `make.py check`), not image by image.
+- Run renders in the background; do not poll them.
+
 ## Repo hygiene
 
 - Never commit `node_modules/`, `library/sfx/raw/`, `projects/*/out/` or source voice notes
