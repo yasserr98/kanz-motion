@@ -1,0 +1,9 @@
+{
+  "source": "source.m4a",
+  "_why": "Keep the last clean take of each retake. Cuts: 16.18-21.94 false start; 35.18-39.32 repeated line; 54.76-57.38 slip; 76.58-93.86 three restarts; 106.52-108.92 repeated line; 114.98-118.27 repeated word + pause.",
+  "keep": [[0, 16.18], [21.94, 35.18], [39.32, 54.76], [57.38, 76.58], [93.86, 106.52], [108.92, 114.98], [118.27, 123.29]],
+  "max_pause": 0.45,
+  "pause_to": 0.3,
+  "snap": 0.2,
+  "speed": 1.25
+}
