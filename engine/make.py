@@ -62,6 +62,8 @@ def main():
     arg = sys.argv[3] if len(sys.argv) > 3 else None
     proj = ROOT / "projects" / name
     out = proj / "out"
+    if step in ("captions", "stills", "review", "render") and not (proj / "transcript.json").exists():
+        sys.exit(f"{name} has no voice yet: run `make.py tts {name}` (script route) or `make.py audio {name}` first.")
     if step == "new":
         src = Path(arg)
         scaffold(proj)
