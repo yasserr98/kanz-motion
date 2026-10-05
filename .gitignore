@@ -1,0 +1,8 @@
+node_modules/
+.env
+__pycache__/
+library/sfx/raw/
+projects/*/out/
+projects/*/audio/source.*
+projects/*/audio/*.wav
+*.tmp
