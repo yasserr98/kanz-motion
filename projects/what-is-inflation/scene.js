@@ -1,6 +1,6 @@
 /* What is inflation (Ahmed's voice note, 2026-10-06).
  * One continuous world of boards; the camera travels between them as the argument moves on.
- * Times are anchored to words in the voice (K.T). Numbers on screen: tomato 20 -> 40 (sourced, Al Mal News 2026),
+ * Times are anchored to words in the voice (K.T). Numbers on screen: tomato 20 -> 40 (Al Mal News; 40 documented in 2026, see script.md),
  * ~2% a year (sourced, the Federal Reserve's 2% target), 10,000 جنيه (hypothetical, tagged). The Pepsi rise is shown
  * without a figure. All icons come from the approved inflation batch 04 and earlier approved batches.
  */
@@ -27,7 +27,7 @@ K.tag(b1, num("20") + " جنيه", { x: 790, y: 640, size: 52, at: T("20", 1.5) 
 K.strike(b1, 690, 662, 890, 618, { at: T("لـ40") - 0.15, color: "#d5adef" });
 K.arrow(b1, 660, 580, 470, 580, { at: T("لـ40") - 0.1, bend: 25, seed: 3 });
 K.text(b1, num("40") + " جنيه", { x: 230, y: 640, size: 96, head: true, color: "#d5adef", at: T("لـ40"), from: "pop", sfx: "pop", gain: 0.5 });
-K.text(b1, "المصدر: المال نيوز، أسعار الخضروات 2026", { x: 500, y: 790, size: 26, cls: "muted", at: T("لـ40") + 0.3 });
+K.text(b1, "المصدر: المال نيوز، أسعار الخضروات", { x: 500, y: 790, size: 26, cls: "muted", at: T("لـ40") + 0.3 });
 
 // ---------- 2. Pepsi almost doubled in under 6 months (no figure shown) ----------
 const tPep = T("وكان");

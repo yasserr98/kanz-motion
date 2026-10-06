@@ -13,13 +13,14 @@ Numbers on screen:
 - 10,000 جنيه saved for a year: hypothetical, tagged "مثال افتراضي".
 
 Uncertain, please check:
-- The year in the first line. Three ASR passes heard "20-20", "20-25" and "عشرين وعشرين"; captioned as 2020. Tomatoes at
-  40 جنيه are documented in 2026, not 2020, so if the year is 2020 the claim is likely wrong.
+- The year in the first line: resolved as 2024 from the approved Airtable Brief (recHajI6mdY5zuXfT); ASR heard "20-20"/"20-25".
+  Sources found show tomatoes at ~22-30 جنيه in 2024 (30 in Upper Egypt, 2024-10-06, https://almalnews.com/1864301/) and 40 جنيه
+  in 2026, so the on-screen source line carries no year. Flagged to Ahmed 2026-10-07.
 - "بنسبة مقبولة" (ASR heard "بالنسبة مقاوية" / "مقوية" in all passes).
 - "تغلى" (ASR heard "تغلق").
 
 <!-- captions:start -->
-في 2020 سعر *الطماطم* نط من 20 جنيه لـ40 جنيه،
+في 2024 سعر *الطماطم* نط من 20 جنيه لـ40 جنيه،
 وكان البيبسي اللي حضرتك بتشربه سعره شبه *ضاعف* في أقل من 6 شهور.
 تفتكر ليه حاجة زي كده حصلت، وإيه اللي بيخلّي سعر المنتجات *يعلى* بالشكل ده؟
 ده بسبب حاجة بتسمع عنها كتير، وهي *التضخم*.

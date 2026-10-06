@@ -1,0 +1,27 @@
+{
+  "delivered": "2026-10-07",
+  "version": "what-is-inflation-v3 (top-left logo removed, first line captioned 2024 per the approved Brief)",
+  "requested_by": "Ahmed: send it to Airtable and the Drive but remove the logo on the top left",
+  "drive": {
+    "account": "yasser@kanzms.com",
+    "method": "scripts/kanz_drive_upload.py in the Kanz repo (resumable upload, readback)",
+    "parent": "Kanz Content 1vMk8CG7fRj15FqGpQ0mMbz-vV_MLUhlA",
+    "folder_id": "1-2n46j2dI-mg7OXAsXM8_Dh7OoNcqiBr",
+    "folder_name": "Inflation Video Explainer",
+    "folder_created": true,
+    "folder_url": "https://drive.google.com/drive/folders/1-2n46j2dI-mg7OXAsXM8_Dh7OoNcqiBr",
+    "files": [{"name": "01.mp4", "id": "161UNZC7L2M0Ew9S_CqJF2ToeQj_bq5EF", "bytes": 106858955,
+               "md5": "b89252c98d2beb9e66ba56c5b25749d9", "readback_size_md5_match": true}]
+  },
+  "airtable": {
+    "base": "appjVgbUZdgzOs9DX", "table": "tbl9irDbqdU1zwBGO", "record": "recHajI6mdY5zuXfT",
+    "name": "Inflation Video Explainer",
+    "changed": {"Drive link": "https://drive.google.com/drive/folders/1-2n46j2dI-mg7OXAsXM8_Dh7OoNcqiBr"},
+    "previous_drive_link": "empty",
+    "unchanged": "Brief (Ahmed's approved script, starts 'في 2024'), Post Type (Video), Content Bucket (Education) and all other fields",
+    "status_note": "Status read 'Approved' before the write and 'Ready to be posted' in the write response; this task did not write Status",
+    "verified_from_write_response": true
+  },
+  "open_fact_check": "Tomatoes 20 -> 40 جنيه 'in 2024': sources found show ~22-30 جنيه in 2024 (almalnews.com/1864301) and 40 جنيه in 2026 (almalnews.com/2104489, /2115398). On-screen source line has no year.",
+  "not_done": "No publication or scheduling."
+}
