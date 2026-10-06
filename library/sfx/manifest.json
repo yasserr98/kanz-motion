@@ -648,6 +648,22 @@
   "author": "BigSoundBank"
  },
  {
+  "file": "fire/crackle-01.wav",
+  "category": "fire",
+  "source_file": "big-branching-fire-1-s0987.mp3",
+  "source_page": "https://bigsoundbank.com/big-branching-fire-1-s0987.html",
+  "license": "CC0 1.0 (public domain)",
+  "author": "BigSoundBank"
+ },
+ {
+  "file": "fire/crackle-02.wav",
+  "category": "fire",
+  "source_file": "big-branching-fire-1-s0987.mp3",
+  "source_page": "https://bigsoundbank.com/big-branching-fire-1-s0987.html",
+  "license": "CC0 1.0 (public domain)",
+  "author": "BigSoundBank"
+ },
+ {
   "file": "click/ui-01.wav",
   "category": "click",
   "source_file": "click_001.ogg",

@@ -18,37 +18,52 @@ const b6 = K.board("life", -2800, 1400);
 const b7 = K.board("thread", -1400, 2800);
 K.cam(0, "ground");
 
-// ---------- 1a. a contest: walk a plank lying on the ground, win 1000 ----------
-K.text(bA, "مسابقة", { x: 500, y: 60, size: 90, head: true, at: 0.2 });
-const tHere = T("هنا");
-K.dot(bA, 840, 470, { at: tHere });
-K.tag(bA, "من هنا", { x: 840, y: 360, at: tHere + 0.05 });
-K.dot(bA, 160, 470, { at: T("لهنا") });
-K.tag(bA, "لهنا", { x: 160, y: 360, at: T("لهنا") + 0.05 });
-const plankA = K.img(bA, OBJ + "kanz-wooden-plank-v01.png", { x: 500, y: 470, w: 720, at: T("لوح") });
+// ---------- 1a. a contest: a person, a plank lying on the ground, a prize at the far end; he walks it ----------
+K.text(bA, "مسابقة", { x: 500, y: 45, size: 84, head: true, at: 0.2 });
+const man = K.img(bA, OBJ + "kanz-npc-m01-neutral-v01.png", { x: 850, y: 340, w: 230, at: 0.05, sfx: "pop" });
+gsap.set(man, { zIndex: 4 });
+const plankA = K.img(bA, OBJ + "kanz-wooden-plank-v01.png", { x: 500, y: 470, w: 760, at: 0.45 });
 gsap.set(plankA, { zIndex: 2 });
-K.text(bA, num("1000") + " جنيه", { x: 500, y: 200, size: 104, head: true, color: "#d5adef", at: T("ألف"), from: "pop", sfx: "coin", gain: 0.5 });
-K.img(bA, OBJ + "kanz-egp-banknote-stack-v01.png", { x: 110, y: 640, w: 190, at: T("ألف") + 0.25 });
+const prize = K.img(bA, OBJ + "kanz-egp-banknote-stack-v01.png", { x: 150, y: 415, w: 170, at: 0.9, sfx: "coin" });
+gsap.set(prize, { zIndex: 3 });
+const tHere = T("هنا");
+K.dot(bA, 850, 470, { at: tHere });
+K.tag(bA, "من هنا", { x: 850, y: 570, at: tHere + 0.05 });
+K.dot(bA, 150, 470, { at: T("لهنا") });
+K.tag(bA, "لهنا", { x: 150, y: 570, at: T("لهنا") + 0.05 });
+K.text(bA, num("1000") + " جنيه", { x: 500, y: 150, size: 96, head: true, color: "#d5adef", at: T("ألف"), from: "pop", sfx: "coin", gain: 0.5 });
 const tGround = T("الأرض");
-K.axis(bA, 60, 940, 540, { at: tGround - 0.1 });
-K.tag(bA, "على الأرض", { x: 820, y: 640, at: tGround });
-const tSteps = T("خطوتين");
-[[650, 450], [380, 450]].forEach(([x, y], i) => K.dot(bA, x, y, { at: tSteps + i * 0.3 }));
-K.arrow(bA, 260, 560, 150, 610, { at: T("الجايزة") - 0.15, bend: 20, seed: 4 });
+K.axis(bA, 60, 940, 545, { at: tGround - 0.1 });
+K.tag(bA, "على الأرض", { x: 500, y: 640, at: tGround });
+// two steps along the plank (right -> left), a small hop each, arriving at the prize on "الجايزة"
+const tSteps = T("هتمشي");
+[[590, 0.0], [280, 0.75]].forEach(([x, d], i) => {
+  K.tl.to(man, { left: x, duration: 0.6, ease: "power1.inOut" }, tSteps + 0.3 + d);
+  K.tl.to(man, { y: -26, duration: 0.3, yoyo: true, repeat: 1, ease: "sine.out" }, tSteps + 0.3 + d);
+  K.sfx(tSteps + 0.85 + d, "hit", 0.25);
+});
+K.tl.to(prize, { scale: 1.18, duration: 0.2, yoyo: true, repeat: 1 }, T("الجايزة"));
+K.sfx(T("الجايزة"), "coin", 0.5);
 K.text(bA, "هتوافق؟", { x: 500, y: 780, size: 70, head: true, at: T("هتوافق"), out: T("طيب") + 0.4 });
 
-// ---------- 1b. the same plank across a volcano crater ----------
+// ---------- 1b. the same plank and the same person, now over a burning volcano ----------
 const tVol = T("طيب");
 K.cam(tVol - 0.1, "volcano");
+const man2 = K.img(bB, OBJ + "kanz-npc-m01-neutral-v01.png", { x: 880, y: 290, w: 230, at: tVol + 0.2 });
+gsap.set(man2, { zIndex: 4 });
 const plankB = K.img(bB, OBJ + "kanz-wooden-plank-v01.png", { x: 500, y: 420, w: 720, at: T("اللوح", 12) });
 gsap.set(plankB, { zIndex: 3 });
 K.img(bB, OBJ + "kanz-volcano-crater-v01.png", { x: 500, y: 470, w: 760, at: T("فوهة"), sfx: "hit", gain: 0.45 });
-const volTitle = K.text(bB, "فوهة بركان", { x: 500, y: 60, size: 90, head: true, at: T("بركان") - 0.1, out: T("الألف") - 0.2 });
+const tFire = T("بركان");
+const fire = K.fire(bB, 500, 470, 560, { at: tFire, h: 420, out: T("وعشان") });
+gsap.set(fire, { zIndex: 1 });
+K.sfx(tFire + 6.3, "fire", 0.6, 1); // second crackle so the fire sound lasts through the pull-back
+K.text(bB, "فوهة بركان", { x: 500, y: 60, size: 90, head: true, at: tFire - 0.1, out: T("الألف") - 0.2 });
+// he hesitates: a small tremble while he is asked to cross
+K.tl.to(man2, { x: 4, duration: 0.07, yoyo: true, repeat: 23, ease: "none" }, T("تعدي"));
 const tFirst = T("الأولانية");
 K.dot(bB, 850, 420, { at: tFirst });
 K.tag(bB, "النقطة الأولانية", { x: 840, y: 640, at: tFirst + 0.05, out: T("الألف") - 0.2 });
-K.dashed(bB, 860, 230, 140, 230, { at: T("القطر"), color: "#d5adef" });
-K.tag(bB, "القطر", { x: 500, y: 190, lav: true, at: T("القطر") + 0.1, out: T("الألف") - 0.2 });
 K.dot(bB, 150, 420, { at: T("الأخيرة") });
 K.tag(bB, "النقطة الأخيرة", { x: 160, y: 640, at: T("الأخيرة") + 0.05, out: T("الألف") - 0.2 });
 K.text(bB, "هتوافق؟", { x: 500, y: 780, size: 70, head: true, at: T("هتوافق", 18), out: T("ليه", 19) - 0.3 });
@@ -68,10 +83,13 @@ K.text(bB, "تمن الغلطة", { x: 500, y: 110, size: 140, head: true, color
 const Q = (t) => `<div class="head" style="display:flex;align-items:center;justify-content:center;height:100%;padding:0 40px;font-size:58px;text-align:center">${t}</div>`;
 const tQ = T("وعشان");
 K.cam(tQ - 0.2, "questions");
-K.card(b2, Q("إيه احتمال إن حاجة تمشي غلط؟"), { x: 520, y: 260, w: 780, h: 200, at: T("احتمال") - 0.2, rot: 2 });
-K.card(b2, Q("ولو حصلت، هتكلّفني إيه؟"), { x: 480, y: 560, w: 780, h: 200, at: T("ولو", 30.0) - 0.1, rot: -2 });
-K.underline(b2, 250, 620, 610, { at: T("هتكلّفني"), color: "#d5adef" });
-K.tag(b2, "كمان", { x: 860, y: 430, lav: true, at: T("كمان") });
+K.text(b2, "لما بنبص على المخاطر", { x: 500, y: 60, size: 72, head: true, at: tQ + 0.15 });
+K.text(b2, "؟", { x: 500, y: 450, size: 320, head: true, color: "#d5adef", at: tQ + 0.35, from: "pop", sfx: "pop", out: T("بنسأل") - 0.15 });
+K.tag(b2, "مش بنسأل بس", { x: 500, y: 150, at: T("مش", 27.5) });
+K.card(b2, Q("إيه احتمال إن حاجة تمشي غلط؟"), { x: 520, y: 330, w: 780, h: 200, at: T("بنسأل") - 0.1, rot: 2 });
+K.card(b2, Q("ولو حصلت، هتكلّفني إيه؟"), { x: 480, y: 590, w: 780, h: 200, at: T("ولو", 30.0) - 0.1, rot: -2 });
+K.underline(b2, 250, 620, 640, { at: T("هتكلّفني"), color: "#d5adef" });
+K.tag(b2, "كمان", { x: 860, y: 460, lav: true, at: T("كمان") });
 
 // ---------- 3. same stock, same drop, different lives ----------
 const tTwo = T("نفس", 32.0);

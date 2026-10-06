@@ -20,8 +20,11 @@ voice note ─► transcribe (word timings) ─► cut retakes, tighten pauses, 
 - **Vox devices, Kanz look**: hand-drawn ovals, underlines and arrows that "boil", lavender
   highlights, paper cards with tape, charts that draw on, big numbers, a hook headline,
   captions with one keyword in lavender, 12 fps stepped motion and fine grain.
-- **Sound**: every element registers a cue (paper, tape, marker, click, pop, whoosh, coin, hit);
+- **Sound**: every element registers a cue (paper, tape, marker, click, pop, whoosh, coin, hit, fire);
   the renderer mixes them under the voice from the CC0 library in `library/sfx/`.
+- **Effects**: `K.fire(board, cx, baseY, w, {at, out, h})` draws brand-coloured fire (lavender core to deep plum,
+  flickering tongues, rising embers, pulsing glow) with a CC0 crackle (BigSoundBank s0987); first used in
+  `projects/the-cost-of-a-mistake` for the volcano.
 
 ## Setup (once, on a new computer)
 
@@ -75,7 +78,7 @@ which model to use, how to keep each video cheap, and the usage log.
 | `runtime/` | `kanz.js` (timeline + components) and `kanz.css` (brand tokens, layout) |
 | `brand/` | Kanz fonts, logo and colour tokens (copied from the Kanz repo's `assets/kanz-brand-current`) |
 | `library/objects/` | approved grayscale editorial objects used so far (from the Kanz motion library) |
-| `library/sfx/` | 122 CC0 one-shots + `manifest.json` (source page and licence for each file) |
+| `library/sfx/` | 124 CC0 one-shots + `manifest.json` (source page and licence for each file) |
 | `projects/<name>/` | one video: audio edit list, transcripts, script, scene; `out/` (renders) is not committed |
 | `docs/` | Vox research findings, efficiency guide and usage log |
 

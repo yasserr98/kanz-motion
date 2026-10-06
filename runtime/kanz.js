@@ -264,6 +264,47 @@
     return e;
   };
 
+  // ---------- effects ----------
+  // Brand-coloured fire (lavender core -> deep plum), rising from baseY between cx +- w/2. Flicker, embers and glow are
+  // all timeline tweens, so frames stay deterministic. o: { at, out, h, n (flame tongues), embers, sfx (default true) }
+  K.fire = function (parent, cx, baseY, w, o = {}) {
+    const h = o.h || w * 0.8, t0 = o.at, end = o.out != null ? o.out : (window.DURATION || 60) + 2;
+    const box = K.el("div", "abs", parent);
+    gsap.set(box, { left: cx - w / 2, top: baseY - h, width: w, height: h, pointerEvents: "none", mixBlendMode: "screen" });
+    const glow = K.el("div", "abs", box);
+    gsap.set(glow, { left: -w * 0.15, top: h * 0.25, width: w * 1.3, height: h * 0.95,
+      background: "radial-gradient(ellipse at 50% 85%, rgba(213,173,239,.55) 0%, rgba(120,60,160,.35) 35%, rgba(56,16,77,0) 70%)" });
+    const n = o.n || 9, flames = [];
+    for (let i = 0; i < n; i++) {
+      const r = rnd(i, 3) + 0.5, r2 = rnd(i, 9) + 0.5; // 0..1
+      const fw = w * (0.16 + 0.12 * r), fh = h * (0.45 + 0.5 * r2);
+      const f = K.el("div", "abs", box);
+      gsap.set(f, { left: (w - fw) * Math.min(1, Math.max(0, (i + 0.5) / n + (rnd(i, 17) * 0.14))), top: h - fh, width: fw, height: fh,
+        transformOrigin: "50% 100%", borderRadius: "50% 50% 45% 45% / 70% 70% 30% 30%", filter: "blur(5px)",
+        background: "radial-gradient(ellipse at 50% 88%, #ffffff 0%, #f1e2fb 14%, #d5adef 34%, rgba(150,85,200,.75) 55%, rgba(56,16,77,0) 74%)" });
+      flames.push(f);
+      const d = 0.16 + 0.14 * r;
+      tl.to(f, { scaleY: 0.62 + 0.55 * r2, scaleX: 0.8 + 0.3 * r, x: (r - 0.5) * 18, duration: d, yoyo: true,
+        repeat: Math.max(1, Math.ceil((end - t0) / d)), ease: "sine.inOut" }, t0);
+    }
+    const ne = o.embers == null ? 14 : o.embers;
+    for (let i = 0; i < ne; i++) {
+      const r = rnd(i, 21) + 0.5, r2 = rnd(i, 33) + 0.5, d = 1.1 + 0.9 * r;
+      const e = K.el("div", "abs", box);
+      gsap.set(e, { left: w * (0.2 + 0.6 * r2), top: h * 0.85, width: 6 + 4 * r, height: 6 + 4 * r, borderRadius: "50%",
+        background: "#ead6f7", boxShadow: "0 0 10px 3px rgba(213,173,239,.7)" });
+      hide(e);
+      tl.fromTo(e, { y: 0, x: 0, autoAlpha: 1 }, { y: -h * (0.7 + 0.5 * r), x: (r2 - 0.5) * 80, autoAlpha: 0, duration: d,
+        repeat: Math.max(0, Math.ceil((end - t0 - r * d) / d)), ease: "power1.out", immediateRender: false }, t0 + r * d);
+    }
+    hide(box);
+    tl.fromTo(box, { autoAlpha: 0, scaleY: 0.2, transformOrigin: "50% 100%" }, { autoAlpha: 1, scaleY: 1, duration: 0.6, ease: "power2.out", immediateRender: false }, t0);
+    tl.to(glow, { opacity: 0.65, duration: 0.5, yoyo: true, repeat: Math.max(1, Math.ceil((end - t0) / 0.5)), ease: "sine.inOut" }, t0);
+    if (o.out != null) tl.to(box, { autoAlpha: 0, duration: 0.4 }, o.out);
+    if (o.sfx !== false) { K.sfx(t0, "fire", 0.7, 0); K.sfx(t0, "whoosh", 0.4); }
+    return box;
+  };
+
   // ---------- full-frame moments ----------
   K.headline = function (parts, o) { // parts: [{html, at}] appear word-group by word-group
     const h = document.getElementById("headline");
