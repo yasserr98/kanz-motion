@@ -1,0 +1,31 @@
+{
+  "source": "source.m4a",
+  "_why": "Keep the last clean take of each retake. Cuts: 43.06-50.90 first take of the definition (التكنيكال أناليسيز ... ملايين البشر), repeated in full; 58.34-68.78 three false starts of 'جوه سعر ...', last take kept; 90.08-102.54 'امتى أحسن وقت تشتري / امتى لازم تتراجع' said three times plus an abandoned 'وامتى وازاي تقدر', last take kept; 107.15-111.68 first take of the question 'هل ده معناه انك هتتوقع ...', kept the complete second take (the lone 'بس' before the first take is dropped so no clipped syllable remains).",
+  "keep": [
+    [
+      0,
+      43.06
+    ],
+    [
+      50.9,
+      58.34
+    ],
+    [
+      68.78,
+      90.08
+    ],
+    [
+      102.54,
+      107.15
+    ],
+    [
+      111.68,
+      128.21
+    ]
+  ],
+  "max_pause": 0.45,
+  "pause_to": 0.3,
+  "snap": 0.2,
+  "speed": 1.25,
+  "mute": []
+}

@@ -78,3 +78,4 @@ Agents: read the plan usage (the usage card in the Claude app, or the `get_usage
 | Date | Project | Model / effort | Fresh session? | Fix rounds | 5-hour window Δ | Weekly Δ | Notes |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2026-10-05 | pilot-01 (with engine build) | Opus 5.5 / high | no | v1→v2 | not measured | not measured | includes research and engine; not representative |
+| 2026-10-06 | what-is-technical-analysis (voice note, 128 s → 69.7 s) | Opus 5.5 / low | yes | v1 (1 review fix round) | start not read; end 12% | start not read; end 56% | local Whisper failed (Windows out of commit memory, mkl_malloc); transcribed on Yasser VPS `/root/projects/kanz-motion-transcribe` instead. No new objects: reused gavel (27 Sept, review pending), balance scale, NPC M01 neutral |
