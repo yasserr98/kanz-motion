@@ -31,6 +31,9 @@ repo or a Kanz worktree (worktrees do not contain this folder; use the absolute 
 9. **Record.** Commit the project (not `out/`), push, add a row to the usage log in
    `docs/EFFICIENCY.md`, and update the Kanz backlog. Delivery to Drive + Airtable (`In Review`)
    only when Ahmed asks; rendered ≠ approved ≠ posted.
+   Upload: from the Kanz repo, `python scripts/kanz_drive_upload.py <mp4> --parent 1vMk8CG7fRj15FqGpQ0mMbz-vV_MLUhlA
+   --folder "<exact Airtable Name>" --name 01.mp4` (Kanz account, size+MD5 readback), then set only the
+   record's Drive link to the folder URL and save `projects/<slug>/delivery.json` (see pilot-01).
 
 Ahmed's fix requests come as timestamps ("47s there is a sigh"). Locate the exact moment in the
 audio/frames before changing anything, and say where it really was if it differs.
