@@ -1,0 +1,26 @@
+{
+  "delivered": "2026-10-07",
+  "version": "the-cost-of-a-mistake-v5 (board opening with M01 and purple fire, M02 at 0:38, poker-chips icon, dead frames filled, cough cut)",
+  "requested_by": "Ahmed: push it to the drive and add the link to the airtable record; folder with the name, then inside should be the file",
+  "drive": {
+    "account": "yasser@kanzms.com",
+    "method": "scripts/kanz_drive_upload.py in the Kanz repo (resumable upload, readback)",
+    "parent": "Kanz Content 1vMk8CG7fRj15FqGpQ0mMbz-vV_MLUhlA",
+    "folder_id": "1R2rFO885_OxHoBuN2gyleal7nEDr907r",
+    "folder_name": "Risk Management: Why the Same Loss Hits People Differently",
+    "folder_created": true,
+    "folder_url": "https://drive.google.com/drive/folders/1R2rFO885_OxHoBuN2gyleal7nEDr907r",
+    "files": [{"name": "01.mp4", "id": "1KcyE46t-vC8sKh8r1x7kUsWi4NKn3R58", "bytes": 90898486,
+               "md5": "00b51f7b25649f23b4ff4ceb24b1c7f6", "readback_size_md5_match": true}]
+  },
+  "airtable": {
+    "base": "appjVgbUZdgzOs9DX", "table": "tbl9irDbqdU1zwBGO", "record": "reckSAsWW9V2vu1rS",
+    "name": "Risk Management: Why the Same Loss Hits People Differently",
+    "changed": {"Drive link": "https://drive.google.com/drive/folders/1R2rFO885_OxHoBuN2gyleal7nEDr907r"},
+    "previous_drive_link": "empty",
+    "unchanged": "Brief, Status (Approved), Post Type, Content Bucket and all other fields",
+    "verified_from_write_response": true
+  },
+  "pending_approval": "M02 character and poker-chips icon are candidates (not in the shared icon library).",
+  "not_done": "No publication or scheduling."
+}
