@@ -43,6 +43,7 @@ SOURCES = [
     ("tape", "stick", "bigsoundbank/adhesive-tape-2-s0298.mp3", BSB.format("adhesive-tape-2-s0298"), 3, 0.9),
     ("typewriter", "keys", "bigsoundbank/typewriter-2-s2835.mp3", BSB.format("typewriter-2-s2835"), 8, 0.35),
     ("typewriter", "bell", "bigsoundbank/typewriter-bell-s2844.mp3", BSB.format("typewriter-bell-s2844"), 1, 1.6),
+    ("fire", "crackle", "bigsoundbank/big-branching-fire-1-s0987.mp3", BSB.format("big-branching-fire-1-s0987"), 2, 7.0),
 ]
 KENNEY = [
     ("click", "ui", "kenney_interface-sounds/Audio", ["click_00{}.ogg".format(i) for i in range(1, 6)]),
