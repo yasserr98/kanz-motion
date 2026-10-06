@@ -1,0 +1,10 @@
+{
+  "source": "source.m4a",
+  "_why": "Keep the last clean take of each retake. Cuts: 62.15-73.30 first take of 'بالتالي تكلفة التصنيع والمواد الخام قدام العملة تغلى، فالشركات تضطر ترفع سعر المنتج' (trailed off, repeated in full with 'عليك وهكذا'); 131.17-140.0 first take 'وبما ان كل حاجة سعرها بيتضخم فالأسواق المالية والأصول فيها برضو سعر الأصول فيها بيتضخم' plus abandoned start 'وفي الوضع الراهن', last take 'بما ان كل حاجة ... فأسواق الأصول كمان سعرها بيزيد' kept; tail after 154.4 is silence (ASR hallucinated 'اشتركوا في القناة').",
+  "keep": [[0, 62.6], [73.3, 131.6], [140.0, 154.9]],
+  "max_pause": 0.45,
+  "pause_to": 0.3,
+  "snap": 0.2,
+  "speed": 1.25,
+  "mute": []
+}
