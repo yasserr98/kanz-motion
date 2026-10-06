@@ -1,0 +1,24 @@
+{
+  "delivered": "2026-10-06",
+  "version": "what-is-technical-analysis-v2 (3 throat clears cut, empty boards filled, no closing logo)",
+  "requested_by": "Ahmed: upload the folder with only the video, then add the link to the Airtable record",
+  "drive": {
+    "account": "yasser@kanzms.com",
+    "method": "scripts/kanz_drive_upload.py in the Kanz repo (resumable upload, readback)",
+    "parent": "Kanz Content 1vMk8CG7fRj15FqGpQ0mMbz-vV_MLUhlA",
+    "folder_id": "1E3s63xh5JAdVwcxXxexXAdm_12NRu6or",
+    "folder_name": "What is technical analysis",
+    "folder_url": "https://drive.google.com/drive/folders/1E3s63xh5JAdVwcxXxexXAdm_12NRu6or",
+    "files": [{"name": "01.mp4", "id": "1mhzwjZbOY9LtlRilg5B6nJH1xNNyMScd", "bytes": 73797907,
+               "md5": "b069d1891c4cb83ddfeb3dd2074411c9", "readback_size_md5_match": true}]
+  },
+  "airtable": {
+    "base": "appjVgbUZdgzOs9DX", "table": "tbl9irDbqdU1zwBGO", "record": "receY7UKk35UjB9jo",
+    "name": "What is technical analysis  (record Name has a trailing space; folder name does not)",
+    "changed": {"Drive link": "https://drive.google.com/drive/folders/1E3s63xh5JAdVwcxXxexXAdm_12NRu6or"},
+    "previous_drive_link": "https://drive.google.com/file/d/1TI9603MowwFJESG7MSzbyr6bpwWSsq2W/view?usp=drivesdk (kanz-technical-analysis-filtered-pack-v02.zip)",
+    "unchanged": "Brief, Status (Ready to be posted), Post Type (Video), Content Bucket and all other fields",
+    "verified_from_write_response": true
+  },
+  "not_done": "No publication or scheduling."
+}
