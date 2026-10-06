@@ -8,8 +8,9 @@ Reads <project>/audio/edl.json:
 
 Every keep boundary is snapped to the quietest 10 ms frame within +-snap seconds, so cuts
 land in breaths rather than inside words. Silences longer than max_pause are shortened to
-pause_to. Speed uses ffmpeg atempo (pitch preserved). Output: <project>/audio/voice.wav and
-voice-edit.json (the snapped ranges, for the record).
+pause_to. Speed uses ffmpeg atempo (pitch preserved). Optional "mute": [[start, end, "why"], ...] silences ranges of the
+FINAL voice (seconds as heard in the video), e.g. a sigh or breath, with short fades; timing
+does not change. Output: <project>/audio/voice.wav and voice-edit.json (the snapped ranges).
 """
 import json
 import subprocess
@@ -66,6 +67,23 @@ def tighten(x, max_pause, pause_to):
     return np.concatenate(out)
 
 
+def apply_mutes(path, mutes):
+    """Silence [start, end] ranges of the final voice in place (25 ms fades at each edge)."""
+    pcm = subprocess.run(["ffmpeg", "-v", "error", "-i", str(path), "-ac", "1", "-ar", str(SR), "-f", "s16le", "-"],
+                         capture_output=True, check=True).stdout
+    y = np.frombuffer(pcm, dtype=np.int16).astype(np.float32) / 32768
+    fade = int(0.025 * SR)
+    for m in mutes:
+        a, b = int(m[0] * SR), int(m[1] * SR)
+        gain = np.ones(len(y), np.float32)
+        gain[a:b] = 0
+        gain[max(0, a - fade):a] = np.linspace(1, 0, a - max(0, a - fade))
+        gain[b:b + fade] = np.linspace(0, 1, len(gain[b:b + fade]))
+        y = y * gain
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "s16le", "-ar", str(SR), "-ac", "1", "-i", "-", str(path)],
+                   input=(np.clip(y, -1, 1) * 32767).astype(np.int16).tobytes(), check=True)
+
+
 def main(proj):
     proj = Path(proj)
     edl = json.loads((proj / "audio" / "edl.json").read_text(encoding="utf-8"))
@@ -91,6 +109,8 @@ def main(proj):
     af = f"atempo={edl.get('speed', 1.0)},highpass=f=70,loudnorm=I=-16:TP=-1.5:LRA=11"
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(tmp), "-af", af, "-ar", str(SR), str(out)], check=True)
     tmp.unlink()
+    if edl.get("mute"):
+        apply_mutes(out, edl["mute"])
     dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(out)],
                                capture_output=True, text=True).stdout)
     (proj / "audio" / "voice-edit.json").write_text(json.dumps(
