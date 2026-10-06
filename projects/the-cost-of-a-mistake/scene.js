@@ -132,12 +132,15 @@ K.tag(b4, "التوزيع", { x: 250, y: 810, lav: true, at: T("استثمارا
 
 // ---------- 5. managing risk is not avoiding it ----------
 const tAv = T("بالمناسبة");
-K.cam(tAv - 0.2, "avoid");
-K.text(b5, "مش تجنّب المخاطر", { x: 500, y: 200, size: 80, head: true, at: T("تجنّب") - 0.2 });
-K.strike(b5, 230, 230, 770, 170, { at: T("المخاطر", 63.0) });
-K.text(b5, "تقليل تأثير الخسارة", { x: 500, y: 420, size: 80, head: true, color: "#d5adef", at: T("بتقلل") });
-K.underline(b5, 210, 790, 480, { at: T("تأثير", 64.0), color: "#d5adef" });
-K.img(b5, OBJ + "kanz-wallet-v01.png", { x: 500, y: 660, w: 200, at: T("عليك") });
+K.cam(T("يجب") - 0.3, "avoid");
+K.tag(b5, "بالمناسبة", { x: 500, y: 20, lav: true, at: tAv });
+K.img(b5, OBJ + "kanz-security-shield-v01.png", { x: 390, y: 670, w: 220, at: tAv - 0.05 });
+K.text(b5, "إدارة المخاطر", { x: 500, y: 110, size: 84, head: true, color: "#d5adef", at: T("إدارة", 61.5) });
+K.text(b5, "مش تجنّب المخاطر", { x: 500, y: 250, size: 76, head: true, at: T("مش", 62.5) });
+K.strike(b5, 250, 275, 750, 220, { at: T("المخاطر", 63.3) });
+K.text(b5, "تقليل تأثير الخسارة", { x: 500, y: 440, size: 80, head: true, color: "#d5adef", at: T("بتقلل") });
+K.underline(b5, 210, 790, 500, { at: T("تأثير", 64.0), color: "#d5adef" });
+K.img(b5, OBJ + "kanz-wallet-v01.png", { x: 620, y: 690, w: 190, at: T("عليك") });
 
 // ---------- 6. the market is dynamic, but it shouldn't carry your whole life ----------
 const tLife = T("البورصة", 65.8);
@@ -159,6 +162,8 @@ const tTh = T("شعرة");
 K.cam(tTh - 0.4, "thread", { via: 0.42, dur: 0.9 });
 K.text(b7, "التجارة", { x: 820, y: 400, size: 72, head: true, at: T("التجارة", 78.0) });
 K.text(b7, "القمار", { x: 180, y: 400, size: 72, head: true, at: T("والقمار") });
+K.img(b7, OBJ + "kanz-investment-chart-v01.png", { x: 820, y: 230, w: 230, at: T("التجارة", 77) });
+K.img(b7, OBJ + "kanz-poker-chips-v01.png", { x: 180, y: 230, w: 230, at: T("والقمار"), sfx: "coin" }); // new icon, candidate (Ahmed 2026-10-07)
 const whole = K.line(b7, [[700, 410], [600, 405], [500, 412], [400, 406], [300, 410]], { at: tTh, dur: 0.8, color: "#d5adef", width: 4 });
 const tCut = T("بتتقطع");
 K.tl.to(whole, { autoAlpha: 0, duration: 0.05 }, tCut + 0.2);
