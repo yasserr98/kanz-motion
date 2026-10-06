@@ -36,9 +36,10 @@ K.oval(b1, 250, 425, 190, 215, { at: T("نزّل", 7), seed: 4 });
 K.text(b1, "؟", { x: 500, y: 430, size: 240, head: true, color: "#d5adef", at: T("الفرق"), from: "pop", sfx: "hit", gain: 0.35 });
 
 // ---------- 2. the exchange is an open auction ----------
-const tAuc = T("حاجة", 11) - 0.2;
-K.cam(tAuc, "auction");
-K.img(b2, OBJ + "kanz-auction-gavel-v01.png", { x: 500, y: 380, w: 430, at: T("مزاد"), sfx: "hit", gain: 0.4 });
+// stay on the filled hook board through "خلينا أشرح لك / في حاجة مهمة", move only when the auction arrives
+const tAuc = T("البورصة");
+K.cam(tAuc - 0.45, "auction");
+K.img(b2, OBJ + "kanz-auction-gavel-v01.png", { x: 500, y: 380, w: 430, at: tAuc, sfx: "hit", gain: 0.4 });
 K.text(b2, "مزاد مفتوح", { x: 500, y: 90, size: 96, head: true, color: "#d5adef", at: T("مزاد") + 0.2 });
 const tMil = T("ملايين", 14.5);
 K.text(b2, "ملايين المعاملات اللحظية", { x: 500, y: 690, size: 46, at: tMil });
@@ -86,51 +87,51 @@ const tMil2 = T("ملايين", 36);
 K.tag(b4, "ملايين البشر", { x: 760, y: 220, at: tMil2 + 0.2 });
 
 // ---------- 6. every motive is inside the price ----------
-const tMot = T("جوه", 37);
+const tMot = T("جوه", 36);
 K.cam(tMot - 0.3, "motives");
-K.text(b5, "جوه السعر", { x: 500, y: 50, size: 80, head: true, color: "#d5adef", at: tMot });
-K.axis(b5, 80, 920, 780, { at: tMot + 0.2 });
+K.text(b5, "جوه السعر", { x: 500, y: 50, size: 80, head: true, color: "#d5adef", at: tMot - 0.3 });
+K.axis(b5, 80, 920, 780, { at: tMot - 0.3 });
 const mp = [[100, 430], [190, 390], [280, 540], [360, 500], [440, 650], [530, 470], [620, 250], [700, 300], [780, 590], [900, 420]];
-K.line(b5, mp, { at: T("الدوافع", 38.5), dur: 2.0 });
+K.line(b5, mp, { at: tMot - 0.25, dur: 2.8 });
 const emo = [
   K.text(b5, "الخوف", { x: 280, y: 610, size: 48, at: T("الخوف") }),
   K.text(b5, "الرعب", { x: 440, y: 720, size: 48, at: T("الرعب") }),
   K.text(b5, "النشوة", { x: 620, y: 175, size: 54, head: true, color: "#d5adef", at: T("النشوة") }),
   K.text(b5, "الهلع", { x: 780, y: 660, size: 48, at: T("الهلع") }),
 ];
-const calc = K.img(b5, OBJ + "kanz-calculator-v01.png", { x: 140, y: 230, w: 170, at: T("المنطق", 43.5) });
-const calcTag = K.tag(b5, "المنطق الحسابي", { x: 150, y: 345, at: T("المنطق", 43.5) + 0.15 });
+const calc = K.img(b5, OBJ + "kanz-calculator-v01.png", { x: 140, y: 230, w: 170, at: T("المنطق", 42.5) });
+const calcTag = K.tag(b5, "المنطق الحسابي", { x: 150, y: 345, at: T("المنطق", 42.5) + 0.15 });
 // ...and each one ends as a buy or a sell
-const tAll = T("كل", 44.8);
-[...emo, calc, calcTag].forEach((e) => { K.fadeTo(e, tAll, 0.35); K.out(e, T("بيع", 48.5) - 0.1); });
-K.tag(b5, "بيع", { x: 620, y: 170, at: T("بيع", 48.5) });
-K.tag(b5, "شرا", { x: 440, y: 720, lav: true, at: T("شرا", 49) });
+const tAll = T("كل", 43.8);
+[...emo, calc, calcTag].forEach((e) => { K.fadeTo(e, tAll, 0.35); K.out(e, T("بيع", 47.5) - 0.1); });
+K.tag(b5, "بيع", { x: 620, y: 170, at: T("بيع", 47.5) });
+K.tag(b5, "شرا", { x: 440, y: 720, lav: true, at: T("شرا", 48) });
 // we can see them in the price, so we analyse them
 K.rect(b5, 70, 140, 860, 670, { at: T("نشوفهم") });
 
 // ---------- 7. it helps you enter with a plan ----------
-const tPlan = T("يساعدك", 52.5);
+const tPlan = T("يساعدك", 51.5);
 K.cam(tPlan - 0.5, "plan");
-K.text(b6, "خطة", { x: 500, y: 50, size: 96, head: true, color: "#d5adef", at: T("خطة", 53.5) });
-K.tag(b6, "توضيحي", { x: 500, y: 150, at: tPlan + 0.2 });
-K.axis(b6, 80, 920, 760, { at: tPlan });
-K.line(b6, [[100, 420], [190, 470], [280, 560], [360, 600], [440, 540], [530, 480], [610, 500], [700, 400], [800, 330], [900, 280]], { at: tPlan + 0.1, dur: 1.6 });
-const tBuy = T("تشتري", 55);
+K.text(b6, "خطة", { x: 500, y: 50, size: 96, head: true, color: "#d5adef", at: tPlan - 0.3 });
+K.tag(b6, "توضيحي", { x: 500, y: 150, at: tPlan });
+K.axis(b6, 80, 920, 760, { at: tPlan - 0.4 });
+K.line(b6, [[100, 420], [190, 470], [280, 560], [360, 600], [440, 540], [530, 480], [610, 500], [700, 400], [800, 330], [900, 280]], { at: tPlan - 0.3, dur: 1.6 });
+const tBuy = T("تشتري", 54);
 K.dot(b6, 360, 600, { at: tBuy });
 K.tag(b6, "إمتى تشتري", { x: 360, y: 690, lav: true, at: tBuy + 0.1 });
-const tBack = T("تتراجع", 56.3);
+const tBack = T("تتراجع", 55.3);
 K.dashed(b6, 120, 650, 880, 650, { at: tBack, color: "#fff", dur: 0.5 });
 K.tag(b6, "إمتى تتراجع", { x: 760, y: 700, at: tBack + 0.2 });
 
 // ---------- 8. does it predict every move exactly? No: probabilities ----------
-const tAsk = T("هل", 57.5);
+const tAsk = T("هل", 56.5);
 K.cam(tAsk - 0.3, "odds", { via: 0.42, dur: 1.0 });
 K.text(b7, "بتتوقع كل حركة بالظبط؟", { x: 500, y: 60, size: 64, head: true, at: tAsk + 0.3, out: T("الإجابة") });
 K.axis(b7, 80, 920, 760, { at: tAsk + 0.2 });
 K.line(b7, [[100, 560], [180, 520], [250, 580], [330, 480], [400, 500], [480, 440]], { at: tAsk + 0.4, dur: 1.2 });
-K.punch("لا.", T("الإجابة"), T("التحليل", 62) - 0.04, { size: 220 });
-const tOdds = T("احتمالات", 63.5);
-K.dot(b7, 480, 440, { at: T("بيساعدك", 62.8) });
+K.punch("لا.", T("الإجابة"), T("التحليل", 61) - 0.04, { size: 220 });
+const tOdds = T("احتمالات", 62.5);
+K.dot(b7, 480, 440, { at: T("بيساعدك", 61.8) });
 K.dashed(b7, 480, 440, 900, 230, { at: tOdds, color: "#d5adef", dur: 0.6 });
 K.dashed(b7, 480, 440, 900, 450, { at: tOdds + 0.15, color: "rgba(255,255,255,.7)", dur: 0.6 });
 K.dashed(b7, 480, 440, 900, 680, { at: tOdds + 0.3, color: "#d5adef", dur: 0.6 });
@@ -140,16 +141,10 @@ const noGuar = K.text(b7, "مش ضمان", { x: 500, y: 160, size: 54, at: T("ب
 // ---------- 9. use it next to market understanding and your risk tolerance ----------
 const tUse = T("تستخدمه");
 K.cam(tUse - 0.3, "use");
-K.img(b8, OBJ + "kanz-balance-scale-v01.png", { x: 500, y: 430, w: 520, at: tUse });
+K.img(b8, OBJ + "kanz-balance-scale-v01.png", { x: 500, y: 430, w: 520, at: tUse - 0.25 });
 K.tag(b8, "التحليل الفني", { x: 500, y: 110, lav: true, at: tUse + 0.2 });
 K.tag(b8, "فهمك للسوق", { x: 770, y: 720, at: T("فهمك") });
 K.tag(b8, "المخاطر اللي تقدر تتحملها", { x: 280, y: 720, at: T("والمخاطر") });
 
-// ---------- outro ----------
-const tEnd = window.DURATION + 0.05;
-K.captionsTo = tEnd;
-K.wipe(tEnd, { hold: true });
-K.tl.set("#logo", { zIndex: 30 }, tEnd);
-K.tl.to("#logo", { left: 390, top: 900, width: 300, duration: 0.5, ease: "power3.inOut" }, tEnd + 0.25);
-K.tl.to("#headline", { autoAlpha: 0, duration: 0.2 }, tEnd);
-K.duration = tEnd + 1.6;
+// ---------- end: no closing logo or wipe (Ahmed, 2026-10-06); hold the last board briefly ----------
+K.duration = window.DURATION + 0.5;
