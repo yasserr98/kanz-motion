@@ -1,0 +1,24 @@
+{
+  "delivered": "2026-10-06",
+  "version": "pilot-01-v3 (sigh at 47.72-48.56 s muted)",
+  "requested_by": "Ahmed: upload the folder with only the video, then add the link to the Airtable record",
+  "drive": {
+    "account": "yasser@kanzms.com",
+    "method": "scripts/kanz_drive_upload.py in the Kanz repo (resumable upload, readback)",
+    "parent": "Kanz Content 1vMk8CG7fRj15FqGpQ0mMbz-vV_MLUhlA",
+    "folder_id": "1DjowmTMl2FPGhoTTk7zmVFlxozto81Io",
+    "folder_name": "Why Good News Can Make a Stock Fall",
+    "folder_url": "https://drive.google.com/drive/folders/1DjowmTMl2FPGhoTTk7zmVFlxozto81Io",
+    "files": [{"name": "01.mp4", "id": "1v1aSKMOCwiWjPM2r1sYY9Koci01GBaJs", "bytes": 72104973,
+               "md5": "8c3c1b90edf4e542696b2d42f8b21b91", "readback_size_md5_match": true}]
+  },
+  "airtable": {
+    "base": "appjVgbUZdgzOs9DX", "table": "tbl9irDbqdU1zwBGO", "record": "rec5BatGWuhufTrxp",
+    "name": "Why Good News Can Make a Stock Fall",
+    "changed": {"Drive link": "https://drive.google.com/drive/folders/1DjowmTMl2FPGhoTTk7zmVFlxozto81Io"},
+    "previous_drive_link": "https://drive.google.com/file/d/1nxlXgvdnO-ER-gwP9Mi03YB5sJ1uM3W3/view?usp=drivesdk (kanz-good-news-elements-filtered-v03.zip)",
+    "unchanged": "Brief, Status (Approved), Post Type (Video), Content Bucket and all other fields",
+    "verified_from_write_response": true
+  },
+  "not_done": "No publication or scheduling."
+}
