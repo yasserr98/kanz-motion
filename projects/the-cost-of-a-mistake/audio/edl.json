@@ -1,0 +1,41 @@
+{
+  "source": "source.m4a",
+  "_why": "Keep the last clean take of each retake. Cuts: 40.2-44.0 first take 'وعشان كده لما بنبص على المخاطر مش بنسأل' (stopped, repeated in full); 54.5-75.1 three takes of 'تخيل اتنين اشتروا نفس السهم / واحد حاطط فيه جزء صغير من فلوسه' (plus unrecognised speech 67.6-71.0), last full take from 75.24 kept; 114.6-124.9 abandoned 'وبالمناسبة', the second 'بالمناسبة' kept; 125.9-130.5 first take 'ادارة المخاطر مش معناها تجنب المخاطر'; 150.4-178.4 first take 'في شعرة بين التجارة والقمار', mumbled attempts 156-173 and an aside to himself ('انعن ابو شكلك', 173.8-175.6), last take from 178.7 kept.",
+  "keep": [
+    [
+      0,
+      40.2
+    ],
+    [
+      44.0,
+      54.5
+    ],
+    [
+      75.1,
+      114.6
+    ],
+    [
+      124.9,
+      125.9
+    ],
+    [
+      130.5,
+      150.4
+    ],
+    [
+      178.4,
+      185.3
+    ]
+  ],
+  "max_pause": 0.45,
+  "pause_to": 0.3,
+  "snap": 0.2,
+  "speed": 1.25,
+  "mute": [
+    [
+      66.6,
+      67.0,
+      "audible breath before 'البورصة' (breaths.py, 0.40 s)"
+    ]
+  ]
+}
