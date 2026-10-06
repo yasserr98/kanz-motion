@@ -45,6 +45,7 @@ A Freesound key there is optional.
 python engine/make.py new my-video "path/to/voice-note.m4a"
 # 1. read projects/my-video/transcript.raw.json, write projects/my-video/audio/edl.json (keep last good takes)
 python engine/make.py audio my-video
+python engine/make.py breaths my-video          # sighs/breaths to mute: audio/edl.json "mute"
 # 2. write projects/my-video/script.md (fix recognition slips, mark *keywords*) and scene.js (the visuals)
 python engine/make.py review my-video 2,10,30   # one contact sheet: out/review.jpg
 python engine/make.py render my-video v1

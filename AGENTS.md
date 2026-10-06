@@ -5,6 +5,36 @@ This repo turns a voice note into a Kanz Reel. It lives inside the Kanz working 
 (`github.com/yasserr98/kanz-motion`, private). The Kanz repo holds the brand authority and
 research; this repo holds the engine.
 
+## When Ahmed says "create a video" / "make a Reel"
+
+Work in this folder (`D:\Claude Projects\Kanz\kanz-motion`), even if the chat opened in the Kanz
+repo or a Kanz worktree (worktrees do not contain this folder; use the absolute path).
+
+1. **Inputs.** Find out which route: a **voice note** (file path) or a **written script** (ElevenLabs
+   voice; needs `ELEVENLABS_API_KEY` in `.env` and a voice id). Ask only for what is missing.
+   If the chat runs on Opus, mention once that `docs/EFFICIENCY.md` recommends Sonnet 5.5 (medium).
+2. **Project.** `python engine/make.py new <slug> <voice-note>` or `python engine/make.py script <slug>`.
+   English slug, e.g. `real-estate-never-loses`.
+3. **Voice.**
+   - Voice note: write `audio/edl.json` (keep the last clean take of each retake, reasons in `_why`),
+     then `make.py audio <slug>`; read the new transcript through.
+   - Script: paste the copy verbatim into `script.md` (never rewrite; flag doubts), mark `*keywords*`,
+     `make.py sample <slug> 1.0` and `1.15` for Ahmed to pick, then `make.py tts <slug> <speed>`.
+4. **Breaths and sighs.** `python engine/breaths.py projects/<slug>`; mute real ones via `"mute"` in
+   `audio/edl.json` and re-run `engine/edit_audio.py`. Mention any you left in.
+5. **Script and captions.** Voice note: correct `script.md` from the transcript and flag uncertain words.
+6. **Scene.** Copy the closest finished `scene.js` (pilot-01 for a voice note, real-estate-never-loses
+   for a script) and adapt it. Approved `library/objects/` only; new objects go through Codex + Ahmed.
+7. **Review.** `make.py review <slug> <times>` → look at `out/review.jpg`, fix, repeat.
+8. **Render and check.** `make.py render <slug> v1` in the background, then `make.py check <slug> v1`
+   (frames from the MP4 + loudness ≈ −16 LUFS). Open the MP4 for Ahmed (`ii <path>`).
+9. **Record.** Commit the project (not `out/`), push, add a row to the usage log in
+   `docs/EFFICIENCY.md`, and update the Kanz backlog. Delivery to Drive + Airtable (`In Review`)
+   only when Ahmed asks; rendered ≠ approved ≠ posted.
+
+Ahmed's fix requests come as timestamps ("47s there is a sigh"). Locate the exact moment in the
+audio/frames before changing anything, and say where it really was if it differs.
+
 ## Before a new video
 
 1. Read `README.md` and `docs/VOX-RESEARCH-FINDINGS.md` (what to keep, adapt and drop).

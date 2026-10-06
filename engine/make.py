@@ -8,6 +8,7 @@ Script route (ElevenLabs voice, needs .env)
     python engine/make.py sample <name> [speed]     # first two paragraphs only, to choose voice/speed
     python engine/make.py tts <name> [speed]        # full voice + word timings + captions
 Both routes
+    python engine/make.py breaths <name>            # list audible breaths/sighs to mute (audio/edl.json "mute")
     python engine/make.py captions <name>           # align script.md to the final voice
     python engine/make.py review <name> 2,10,30     # stills -> one contact sheet out/review.jpg
     python engine/make.py render <name> [version]   # full MP4 in projects/<name>/out/
@@ -83,6 +84,8 @@ def main():
     elif step == "tts":
         run([PY, "engine/tts.py", proj, "--speed", arg or "1.0"])
         run([PY, "engine/captions.py", proj])
+    elif step == "breaths":
+        run([PY, "engine/breaths.py", proj])
     elif step == "captions":
         run([PY, "engine/captions.py", proj])
     elif step in ("stills", "review"):
