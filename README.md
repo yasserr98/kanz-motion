@@ -1,5 +1,7 @@
 # Kanz Motion
 
+**Handover workflow: Claude with the Codex plugin.** Start with [HANDOVER-SETUP.md](docs/HANDOVER-SETUP.md) for assistant setup and installation. Static carousels use the separate [Codex-only carousel repository](https://github.com/yasserr98/kanz-carousels).
+
 Turns a voice note into a Kanz-branded, Vox-style explainer Reel (1080×1920), using Kanz's
 approved fonts, colours and editorial objects, with timed Arabic captions and sound effects.
 
