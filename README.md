@@ -52,6 +52,7 @@ python engine/make.py new my-video "path/to/voice-note.m4a"
 python engine/make.py audio my-video
 python engine/make.py breaths my-video          # sighs/breaths to mute: audio/edl.json "mute"
 # 2. write projects/my-video/script.md (fix recognition slips, mark *keywords*) and scene.js (the visuals)
+python engine/lint.py projects/my-video         # safe zones, dead stretches, thin frames: out/lint.jpg
 python engine/make.py review my-video 2,10,30   # one contact sheet: out/review.jpg
 python engine/make.py render my-video v1
 python engine/make.py check my-video v1         # frames from the MP4 + loudness: out/check-v1.jpg
@@ -77,7 +78,7 @@ which model to use, how to keep each video cheap, and the usage log.
 | Path | What |
 | --- | --- |
 | `engine/` | make (step runner), transcribe, tts (ElevenLabs), edit_audio, captions, render, sfx_library, contact (review sheets) |
-| `runtime/` | `kanz.js` (timeline + components) and `kanz.css` (brand tokens, layout) |
+| `runtime/` | `kanz.js` (timeline + components) and `kanz.css` (brand tokens, layout); `kanz-look.js/.css` look v2 for new videos (safe zones, light, depth, documents, photos, maps, counting numbers, piles), see [docs/LOOK-V2.md](docs/LOOK-V2.md) |
 | `brand/` | Kanz fonts, logo and colour tokens (copied from the Kanz repo's `assets/kanz-brand-current`) |
 | `library/objects/` | approved grayscale editorial objects used so far (from the Kanz motion library) |
 | `library/sfx/` | 124 CC0 one-shots + `manifest.json` (source page and licence for each file) |

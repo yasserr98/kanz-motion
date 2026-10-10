@@ -23,9 +23,10 @@ repo or a Kanz worktree (worktrees do not contain this folder; use the absolute 
 4. **Breaths and sighs.** `python engine/breaths.py projects/<slug>`; mute real ones via `"mute"` in
    `audio/edl.json` and re-run `engine/edit_audio.py`. Mention any you left in.
 5. **Script and captions.** Voice note: correct `script.md` from the transcript and flag uncertain words.
-6. **Scene.** Copy the closest finished `scene.js` (pilot-01 for a voice note, real-estate-never-loses
+6. **Scene.** New videos use look v2 (`docs/LOOK-V2.md`, `K.look()`; the template has it). Copy the closest finished `scene.js` (pilot-01 for a voice note, real-estate-never-loses
    for a script) and adapt it. Approved `library/objects/` only; new objects go through Codex + Ahmed.
-7. **Review.** `make.py review <slug> <times>` → look at `out/review.jpg`, fix, repeat.
+7. **Review.** `python engine/lint.py projects/<slug>` (safe zones, dead stretches, thin frames, hook;
+   fix or justify each flag), then `make.py review <slug> <times>` → look at `out/review.jpg`, fix, repeat.
 8. **Render and check.** `make.py render <slug> v1` in the background, then `make.py check <slug> v1`
    (frames from the MP4 + loudness ≈ −16 LUFS). Open the MP4 for Ahmed (`ii <path>`).
 9. **Record.** Commit the project (not `out/`), push, add a row to the usage log in
@@ -41,6 +42,8 @@ audio/frames before changing anything, and say where it really was if it differs
 ## Before a new video
 
 1. Read `README.md` and `docs/VOX-RESEARCH-FINDINGS.md` (what to keep, adapt and drop).
+   Then `docs/LOOK-V2.md` (safe zones, light, depth, evidence and number components; Ahmed 2026-10-10)
+   and `projects/_look-demo/scene.js`, which uses each one.
 2. Read `projects/pilot-01/scene.js` as the worked example.
 3. If the Kanz repo is available alongside, follow its brand authority:
    `docs/21-kanz-visual-identity.md`, `brand/explainer-icons/README.md`,
