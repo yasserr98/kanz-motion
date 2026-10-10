@@ -116,6 +116,22 @@ Open on the most dramatic image of the story, then rewind into it. The first vis
 
 ## 8. Characters and objects that act
 
-New assets still come from Codex under the Kanz icon-style rules, and Ahmed approves each one first.
-The request list is `docs/CODEX-ASSET-REQUESTS.md`: more poses for M01/F01/M02, and objects split
-into parts (like the balance scale) so they can move.
+Codex batch 2026-10-10 (Ahmed: "create whatever you need"). The files are in `library/objects/`; their prompts and
+checks are in `library/objects/PROVENANCE-2026-10-10.md`. They are candidates until Ahmed reviews the sheet.
+
+- **Poses:**
+  - M01: pointing, shrug, celebrating, thinking, counting money, walk A/B.
+  - F01: pointing, thinking, celebrating, worried, walk A/B.
+  - M02: pointing, shrug, worried.
+  Every pose sits on the same 1254 px square at the same scale as the neutral, so poses swap in place.
+- **Object states:**
+  - wallet open (empty / with cash), safe open, savings jar (empty / half; the original is full);
+  - calculator with a blank screen (put a live `K.count` on it), house with a blank for-sale sign;
+  - money bag spilling, share certificate (token object for stock videos).
+- `K.swap(img, src, t, { sfx })` changes the state or pose in place on a word; its shadow and glow carry over.
+  Example: `K.swap(wallet, OBJ + "kanz-wallet-open-empty-v01.png", N("فاضية"))`.
+- `K.walk(board, [walkA, walkB], { from: [x, y], to: [x, y], at, dur, w, rest: neutral, sfx: "hit" })` makes a
+  character cross a board with the two-frame cycle. Frames face left (right to left reads naturally in Arabic);
+  walking right mirrors them.
+
+Any further requests go in `docs/CODEX-ASSET-REQUESTS.md`.
