@@ -1,0 +1,183 @@
+/* The cost of a mistake / risk management (Ahmed's voice note, 2026-10-07).
+ * v2 opening (Ahmed 2026-10-07: drop the POV plates): two stacked boards, the plank on the ground and the same plank
+ * across a volcano crater; on "هي هي" the camera pulls back to show both at once. Icons: approved library plus the
+ * 27 Sept risk-management plank and crater cutouts. No numbers beyond the spoken prize.
+ */
+const { T, num } = K;
+const OBJ = "../../library/objects/";
+const RED = "#e5534b"; // genuine losses only
+/* LOOK V2 SAMPLE (2026-10-10): a before/after copy of the delivered v5 opening (0-32.6 s). Not for posting;
+ * the delivered project is untouched. Changes: K.look(), camera closer, safe-zone placements, glow on the prize,
+ * counting prize, blurred foreground, camera follows the walk. */
+K.look();
+
+// ---------- world layout (boards advance right -> left, like reading Arabic) ----------
+const bA = K.board("ground", 0, 0);
+const bB = K.board("volcano", 0, 1250);   // directly under the ground board, so both fit in one pulled-back view
+const b2 = K.board("questions", -1400, 0);
+const b3 = K.board("two", -2800, 0);
+const b4 = K.board("rm", 0, 2900);
+const b5 = K.board("avoid", -1400, 1400);
+const b6 = K.board("life", -2800, 1400);
+const b7 = K.board("thread", -1400, 2800);
+K.cam(0, "ground", { scale: 1.25 });
+K.fg(bA, OBJ + "kanz-egp-banknote-stack-v01.png", { x: -40, y: 800, w: 400, at: 0.9 });
+
+// ---------- 1a. a contest: a person, a plank lying on the ground, a prize at the far end; he walks it ----------
+K.text(bA, "مسابقة", { x: 500, y: 105, size: 84, head: true, at: 0.2, out: T("هتمشي") + 0.1 });
+const man = K.img(bA, OBJ + "kanz-npc-m01-neutral-v01.png", { x: 850, y: 340, w: 230, at: 0.05, sfx: "pop" });
+gsap.set(man, { zIndex: 4 });
+const plankA = K.img(bA, OBJ + "kanz-wooden-plank-v01.png", { x: 500, y: 470, w: 760, at: 0.45 });
+gsap.set(plankA, { zIndex: 2 });
+const prize = K.img(bA, OBJ + "kanz-egp-banknote-stack-v01.png", { x: 150, y: 415, w: 200, at: 0.9, sfx: "coin", glow: 300, float: 5 });
+gsap.set(prize, { zIndex: 3 });
+const tHere = T("هنا");
+K.dot(bA, 850, 470, { at: tHere });
+K.tag(bA, "من هنا", { x: 790, y: 570, at: tHere + 0.05, out: T("هتمشي") + 0.1 });
+K.dot(bA, 150, 470, { at: T("لهنا") });
+K.tag(bA, "لهنا", { x: 210, y: 570, at: T("لهنا") + 0.05 });
+K.count(bA, { x: 440, y: 215, from: 0, to: 1000, digits: "en", group: false, dur: 0.8, size: 96, color: "#d5adef", suffix: " جنيه", at: T("ألف"), out: T("هتمشي") + 0.1 });
+K.tag(bA, num("1000") + " جنيه", { x: 135, y: 318, lav: true, size: 36, at: T("هتمشي") + 1.9 }); // stays with the prize while the camera follows the walk
+const tGround = T("الأرض");
+K.axis(bA, 60, 940, 545, { at: tGround - 0.1 });
+K.tag(bA, "على الأرض", { x: 500, y: 640, at: tGround });
+// two steps along the plank (right -> left), a small hop each, arriving at the prize on "الجايزة"
+const tSteps = T("هتمشي");
+K.push(tSteps + 0.2, "ground", 1.35, 2.4, { dx: -120, dy: 20 }); // follow the walk to the prize
+[[590, 0.0], [280, 0.75]].forEach(([x, d], i) => {
+  K.tl.to(man, { left: x, duration: 0.6, ease: "power1.inOut" }, tSteps + 0.3 + d);
+  K.tl.to(man, { y: -26, duration: 0.3, yoyo: true, repeat: 1, ease: "sine.out" }, tSteps + 0.3 + d);
+  K.sfx(tSteps + 0.85 + d, "hit", 0.25);
+});
+K.tl.to(prize, { scale: 1.18, duration: 0.2, yoyo: true, repeat: 1 }, T("الجايزة"));
+K.sfx(T("الجايزة"), "coin", 0.5);
+K.text(bA, "هتوافق؟", { x: 500, y: 780, size: 70, head: true, at: T("هتوافق"), out: T("طيب") + 0.4 });
+
+// ---------- 1b. the same plank and the same person, now over a burning volcano ----------
+const tVol = T("طيب");
+K.cam(tVol - 0.1, "volcano", { scale: 1.22 });
+const man2 = K.img(bB, OBJ + "kanz-npc-m01-neutral-v01.png", { x: 880, y: 290, w: 230, at: tVol + 0.2 });
+gsap.set(man2, { zIndex: 4 });
+const plankB = K.img(bB, OBJ + "kanz-wooden-plank-v01.png", { x: 500, y: 420, w: 720, at: T("اللوح", 12) });
+gsap.set(plankB, { zIndex: 3 });
+K.img(bB, OBJ + "kanz-volcano-crater-v01.png", { x: 500, y: 470, w: 760, at: T("فوهة"), sfx: "hit", gain: 0.45 });
+const tFire = T("بركان");
+const fire = K.fire(bB, 500, 470, 560, { at: tFire, h: 420, out: T("وعشان") });
+gsap.set(fire, { zIndex: 1 });
+K.sfx(tFire + 6.3, "fire", 0.6, 1); // second crackle so the fire sound lasts through the pull-back
+K.text(bB, "فوهة بركان", { x: 500, y: 110, size: 90, head: true, at: tFire - 0.1, out: T("الألف") - 0.2 });
+// he hesitates: a small tremble while he is asked to cross
+K.tl.to(man2, { x: 4, duration: 0.07, yoyo: true, repeat: 23, ease: "none" }, T("تعدي"));
+const tFirst = T("الأولانية");
+K.dot(bB, 850, 420, { at: tFirst });
+K.tag(bB, "النقطة الأولانية", { x: 715, y: 578, at: tFirst + 0.05, out: T("الألف") - 0.2 });
+K.dot(bB, 150, 420, { at: T("الأخيرة") });
+K.tag(bB, "النقطة الأخيرة", { x: 270, y: 590, at: T("الأخيرة") + 0.05, out: T("الألف") - 0.2 });
+K.text(bB, "هتوافق؟", { x: 500, y: 780, size: 70, head: true, at: T("هتوافق", 18), out: T("ليه", 19) - 0.3 });
+K.text(bB, "ليه؟", { x: 500, y: 780, size: 110, head: true, color: "#d5adef", at: T("ليه", 19), sfx: "pop", out: T("الألف") - 0.2 });
+
+// ---------- 1c. pull back: same prize, same distance; the cost of a mistake is what changed ----------
+const tWide = T("الألف");
+K.cam(tWide - 0.1, "ground", { dy: 560, scale: 0.58, dur: 0.9 });
+K.text(bA, "نفس الجايزة", { x: 500, y: 975, size: 92, head: true, at: tWide + 0.3 });
+K.text(bA, "نفس المسافة", { x: 500, y: 1105, size: 92, head: true, at: T("والمسافة") });
+K.punch("تمن الغلطة", T("تمن"), T("وتمن") - 0.04, { size: 170 });
+const tCost = T("وتمن");
+K.text(bA, "تمن الغلطة", { x: 500, y: 780, size: 70, head: true, cls: "muted", at: tCost });
+K.text(bB, "تمن الغلطة", { x: 500, y: 110, size: 140, head: true, color: RED, at: tCost + 0.35, from: "pop", sfx: "hit", gain: 0.45 });
+
+// ---------- 2. two questions, not one ----------
+const Q = (t) => `<div class="head" style="display:flex;align-items:center;justify-content:center;height:100%;padding:0 40px;font-size:58px;text-align:center">${t}</div>`;
+const tQ = T("وعشان");
+K.cam(tQ - 0.2, "questions");
+K.text(b2, "لما بنبص على المخاطر", { x: 500, y: 60, size: 72, head: true, at: tQ + 0.15 });
+K.text(b2, "؟", { x: 500, y: 450, size: 320, head: true, color: "#d5adef", at: tQ + 0.35, from: "pop", sfx: "pop", out: T("بنسأل") - 0.15 });
+K.tag(b2, "مش بنسأل بس", { x: 500, y: 150, at: T("مش", 27.5) });
+K.card(b2, Q("إيه احتمال إن حاجة تمشي غلط؟"), { x: 520, y: 330, w: 780, h: 200, at: T("بنسأل") - 0.1, rot: 2 });
+K.card(b2, Q("ولو حصلت، هتكلّفني إيه؟"), { x: 490, y: 590, w: 700, h: 200, at: T("ولو", 30.0) - 0.1, rot: -2 });
+K.underline(b2, 250, 620, 640, { at: T("هتكلّفني"), color: "#d5adef" });
+K.tag(b2, "كمان", { x: 860, y: 460, lav: true, at: T("كمان") });
+
+// ---------- 3. same stock, same drop, different lives ----------
+const tTwo = T("نفس", 32.0);
+K.cam(tTwo - 0.2, "two");
+K.text(b3, "نفس السهم", { x: 500, y: 40, size: 64, head: true, at: T("اتنين") });
+K.img(b3, OBJ + "kanz-npc-m02-neutral-v01.png", { x: 760, y: 330, w: 240, at: T("واحد", 34.8) }); // new character M02 (Ahmed 2026-10-07)
+K.img(b3, OBJ + "kanz-npc-m01-neutral-v01.png", { x: 240, y: 330, w: 240, at: T("والتاني", 36.5) });
+// how much of their money is in it: outline = all their money, fill = the part in the stock
+K.bar(b3, { x: 760, y: 760, w: 90, h: 230, outline: true, color: "transparent", at: T("جزء", 35.5) });
+const smallFill = K.bar(b3, { x: 760, y: 760, w: 90, h: 50, color: "#d5adef", at: T("صغير") });
+K.tag(b3, "جزء صغير", { x: 760, y: 800, at: T("صغير") + 0.1 });
+K.bar(b3, { x: 240, y: 760, w: 90, h: 230, outline: true, color: "transparent", at: T("تحويشة") - 0.2 });
+const fullFill = K.bar(b3, { x: 240, y: 760, w: 90, h: 230, color: "#d5adef", at: T("تحويشة") });
+K.tag(b3, "تحويشة العمر", { x: 240, y: 800, at: T("عمره") });
+K.img(b3, OBJ + "kanz-house-v01.png", { x: 110, y: 600, w: 130, at: T("الإيجار") });
+K.tag(b3, "+ الإيجار", { x: 110, y: 690, lav: true, at: T("الإيجار") + 0.1 });
+// the stock falls about the same for both
+const tDrop = T("نزل");
+K.line(b3, [[400, 150], [450, 175], [500, 165], [550, 215], [600, 245]], { at: tDrop - 0.2, dur: 0.9, color: RED, width: 6 });
+K.tl.to([smallFill, fullFill], { scaleY: 0.6, duration: 0.6, ease: "power2.inOut" }, tDrop + 0.4);
+K.tag(b3, "زعلان", { x: 760, y: 120, at: T("زعلان") });
+K.tag(b3, "مش هيدفع الإيجار", { x: 240, y: 120, at: T("يدفع") });
+K.text(b3, "؟", { x: 110, y: 470, size: 110, head: true, color: RED, at: T("الإيجار", 43.5), from: "pop", sfx: "hit", gain: 0.4 });
+K.oval(b3, 240, 470, 200, 330, { at: T("تمامًا"), seed: 5 });
+
+// ---------- 4. risk management: before you enter, count the loss too ----------
+const tRm = T("وهنا");
+K.cam(tRm - 0.3, "rm", { via: 0.42, dur: 0.9 });
+K.text(b4, "إدارة المخاطر", { x: 500, y: 60, size: 90, head: true, color: "#d5adef", at: T("إدارة", 47.5) });
+K.text(b4, "Risk Management", { x: 500, y: 160, size: 40, cls: "muted", at: T("الريسك") });
+const win = K.tag(b4, "هتكسب كام؟", { x: 760, y: 300, size: 44, at: T("هتكسب") });
+K.strike(b4, 640, 320, 880, 280, { at: T("وبس") });
+K.img(b4, OBJ + "kanz-calculator-v01.png", { x: 230, y: 330, w: 220, at: T("احسب") });
+K.tag(b4, "لو خسرت، هخسر قد إيه؟", { x: 640, y: 430, size: 44, lav: true, at: T("هخسر") });
+K.tag(b4, "هقدر أتحمل؟", { x: 640, y: 530, size: 44, at: T("أتحمل") });
+K.img(b4, OBJ + "kanz-egp-banknote-stack-v01.png", { x: 760, y: 700, w: 230, at: T("المبلغ") });
+K.tag(b4, "المبلغ", { x: 760, y: 810, at: T("المبلغ") + 0.15 });
+K.img(b4, OBJ + "kanz-pie-chart-v01.png", { x: 250, y: 680, w: 240, at: T("وتوزّع") });
+K.tag(b4, "التوزيع", { x: 250, y: 810, lav: true, at: T("استثماراتك") });
+
+// ---------- 5. managing risk is not avoiding it ----------
+const tAv = T("بالمناسبة");
+K.cam(T("يجب") - 0.3, "avoid");
+K.tag(b5, "بالمناسبة", { x: 500, y: 20, lav: true, at: tAv });
+K.img(b5, OBJ + "kanz-security-shield-v01.png", { x: 390, y: 670, w: 220, at: tAv - 0.05 });
+K.text(b5, "إدارة المخاطر", { x: 500, y: 110, size: 84, head: true, color: "#d5adef", at: T("إدارة", 61.5) });
+K.text(b5, "مش تجنّب المخاطر", { x: 500, y: 250, size: 76, head: true, at: T("مش", 62.5) });
+K.strike(b5, 250, 275, 750, 220, { at: T("المخاطر", 63.3) });
+K.text(b5, "تقليل تأثير الخسارة", { x: 500, y: 440, size: 80, head: true, color: "#d5adef", at: T("بتقلل") });
+K.underline(b5, 210, 790, 500, { at: T("تأثير", 64.0), color: "#d5adef" });
+K.img(b5, OBJ + "kanz-wallet-v01.png", { x: 620, y: 690, w: 190, at: T("عليك") });
+
+// ---------- 6. the market is dynamic, but it shouldn't carry your whole life ----------
+const tLife = T("البورصة", 65.8);
+K.cam(tLife - 0.2, "life");
+K.axis(b6, 80, 920, 330, { at: tLife });
+K.line(b6, [[100, 260], [180, 200], [250, 280], [330, 180], [410, 250], [490, 140], [570, 230], [650, 160], [730, 260], [820, 170], [900, 210]],
+  { at: tLife + 0.1, dur: 1.4 });
+K.tag(b6, "ديناميكي ومرن", { x: 300, y: 60, at: T("ومرن") });
+K.tag(b6, "ميزة، مش عيب", { x: 700, y: 60, lav: true, at: T("ميزته") });
+K.text(b6, "حياتك", { x: 500, y: 430, size: 64, head: true, at: T("حياتك", 69.5) });
+K.img(b6, OBJ + "kanz-house-v01.png", { x: 760, y: 620, w: 200, at: T("حمولة") });
+K.img(b6, OBJ + "kanz-wallet-v01.png", { x: 500, y: 640, w: 180, at: T("ووزن") });
+K.img(b6, OBJ + "kanz-investment-chart-v01.png", { x: 240, y: 620, w: 200, at: T("ووزن") + 0.25 });
+K.tag(b6, "البورصة جزء", { x: 240, y: 770, lav: true, at: T("الوحيدة") });
+K.tag(b6, "مش كل حاجة", { x: 600, y: 790, at: T("متوقف") });
+
+// ---------- 7. a hair between trading and gambling ----------
+const tTh = T("شعرة");
+K.cam(tTh - 0.4, "thread", { via: 0.42, dur: 0.9 });
+K.text(b7, "التجارة", { x: 820, y: 400, size: 72, head: true, at: T("التجارة", 78.0) });
+K.text(b7, "القمار", { x: 180, y: 400, size: 72, head: true, at: T("والقمار") });
+K.img(b7, OBJ + "kanz-investment-chart-v01.png", { x: 820, y: 230, w: 230, at: T("التجارة", 77) });
+K.img(b7, OBJ + "kanz-poker-chips-v01.png", { x: 180, y: 230, w: 230, at: T("والقمار"), sfx: "coin" }); // new icon, candidate (Ahmed 2026-10-07)
+const whole = K.line(b7, [[700, 410], [600, 405], [500, 412], [400, 406], [300, 410]], { at: tTh, dur: 0.8, color: "#d5adef", width: 4 });
+const tCut = T("بتتقطع");
+K.tl.to(whole, { autoAlpha: 0, duration: 0.05 }, tCut + 0.2);
+K.line(b7, [[700, 410], [600, 405], [520, 411], [490, 440]], { at: tCut + 0.2, dur: 0.15, color: "#d5adef", width: 4 });
+K.sfx(tCut + 0.2, "hit", 0.45);
+K.line(b7, [[300, 410], [400, 406], [470, 409], [500, 380]], { at: tCut + 0.2, dur: 0.15, color: "#d5adef", width: 4 });
+K.text(b7, "اعتبار للمخاطر", { x: 500, y: 640, size: 80, head: true, color: "#d5adef", at: T("اعتبار") });
+
+// ---------- end: no closing logo (as on the recent Reels) ----------
+K.duration = window.DURATION + 0.5;
