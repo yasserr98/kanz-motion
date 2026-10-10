@@ -73,8 +73,8 @@ K.tag(B.infl, "دخل الإيجار؟", { x: 870, y: 680, lav: true, at: N("ا�
 // ---------- 6. "the price went up" doesn't mean the money is in your pocket ----------
 const tPocket = N("كدة") - 0.3;
 K.cam(tPocket, "pocket");
-K.text(B.pocket, "سعرها زاد…", { x: 500, y: 110, size: 72, head: true, at: N("سعرها") });
-const wallet = K.img(B.pocket, OBJ + "kanz-wallet-v01.png", { x: 500, y: 470, w: 380, at: K.cursor + 0.1 });
+const wallet = K.img(B.pocket, OBJ + "kanz-wallet-v01.png", { x: 500, y: 470, w: 380, at: tPocket + 0.5 });
+K.text(B.pocket, "سعرها زاد…", { x: 500, y: 110, size: 72, head: true, at: N("كلمة") });
 const tPk = N("جيبك");
 K.oval(B.pocket, 500, 470, 260, 230, { at: tPk - 0.3, seed: 5 });
 K.tag(B.pocket, "مش في جيبك", { x: 500, y: 740, lav: true, at: tPk, size: 44 });
@@ -126,7 +126,10 @@ K.text(B.build, "ولا بتجيب دخل", { x: 230, y: 680, size: 38, cls: "mu
 // ---------- 10. real estate can lose in more than one way ----------
 const tWays = N("عشان");
 K.cam(tWays - 0.3, "ways", { via: 0.42, dur: 1.0 });
-K.text(B.ways, "بأكتر من طريقة", { x: 500, y: 60, size: 64, head: true, color: "#d5adef", at: N("طريقة") });
+const lose = K.text(B.ways, "العقار ممكن يخسر", { x: 500, y: 60, size: 64, head: true, at: N("العقار") });
+const tWay = N("طريقة");
+K.fadeTo(lose, tWay - 0.2, 0, { dur: 0.2 });
+K.text(B.ways, "بأكتر من طريقة", { x: 500, y: 60, size: 64, head: true, color: "#d5adef", at: tWay });
 const rows = [["البيع", "سعر البيع يقل", "kanz-price-tag-v01.png"],
   ["تتآكل", "قيمته تتآكل مع الغلاء", "kanz-grocery-basket-v01.png"],
   ["مصاريفه", "المصاريف والتأخير<br>ياكلوا المكسب", "kanz-hourglass-v01.png"]];
@@ -158,11 +161,5 @@ qs.forEach(([w, html, img], i) => {
   K.text(B.ask, html, { x: 430, y, size: 70, head: true, at: t + 0.05, color: i === 2 ? "#d5adef" : "#fff" });
 });
 
-// ---------- outro ----------
-const tEnd = window.DURATION + 0.15;
-K.captionsTo = tEnd;
-K.wipe(tEnd, { hold: true });
-K.tl.set("#logo", { zIndex: 30 }, tEnd);
-K.tl.to("#logo", { left: 390, top: 900, width: 300, duration: 0.5, ease: "power3.inOut" }, tEnd + 0.25);
-K.tl.to("#headline", { autoAlpha: 0, duration: 0.2 }, tEnd);
-K.duration = tEnd + 1.6;
+// ---------- end: no closing logo or wipe, no top-left logo (Ahmed, 2026-10-06/07, as on the recent Reels) ----------
+K.duration = window.DURATION + 1.0;
