@@ -1,6 +1,6 @@
 {
-  "delivered": "2026-10-10",
-  "version": "real-estate-never-loses-v2 (voice fix round: per-paragraph voice with pauses, 'مش كده وبس' stumble and Standard-Arabic forms fixed, 'بسعر أقل')",
+  "delivered": "2026-10-10 (v2); replaced with v4 2026-10-11",
+  "version": "real-estate-never-loses-v4 (look v2, no \"مثال افتراضي\", old bar chart restored at 0:16-0:29; voice as v2)",
   "requested_by": "Ahmed: send it to the Drive and update Airtable with the link",
   "drive": {
     "account": "yasser@kanzms.com",
@@ -9,15 +9,28 @@
     "folder_id": "13xmakD73tV-mT48_D_QZX3HUvKjH1jfv",
     "folder_name": "Real Estate doesn't lose myth",
     "folder_url": "https://drive.google.com/drive/folders/13xmakD73tV-mT48_D_QZX3HUvKjH1jfv",
-    "files": [{"name": "01.mp4", "id": "1cpaheGoG37DUlIfGe_JtC7Lc5QSCtB3g", "bytes": 93355422,
-               "md5": "7cdbc343d7b705681aa6c8d8c99586d8", "readback_size_md5_match": true}]
+    "files": [
+      {
+        "name": "01.mp4",
+        "id": "1cpaheGoG37DUlIfGe_JtC7Lc5QSCtB3g",
+        "bytes": 91695719,
+        "md5": "052184aa795a52dbf44ae6e198bdad00",
+        "readback_size_md5_match": true,
+        "history": "v2 (93355422 bytes, md5 7cdbc343d7b705681aa6c8d8c99586d8) replaced in place by v4 at Ahmed's request 2026-10-11; same file id and folder link"
+      }
+    ]
   },
   "airtable": {
-    "base": "appjVgbUZdgzOs9DX", "table": "tbl9irDbqdU1zwBGO", "record": "reccX24eL2BeitWut",
+    "base": "appjVgbUZdgzOs9DX",
+    "table": "tbl9irDbqdU1zwBGO",
+    "record": "reccX24eL2BeitWut",
     "name": "Real Estate doesn't lose myth",
-    "changed": {"Drive link": "https://drive.google.com/drive/folders/13xmakD73tV-mT48_D_QZX3HUvKjH1jfv"},
+    "changed": {
+      "Drive link": "https://drive.google.com/drive/folders/13xmakD73tV-mT48_D_QZX3HUvKjH1jfv"
+    },
     "unchanged": "Brief (still says 'بسعر بأقل'; the video says 'بسعر أقل', user approved), Status (In Review) and all other fields",
-    "verified_from_write_response": true
+    "verified_from_write_response": true,
+    "note_2026_10_11": "Drive link (folder) unchanged by the v4 replacement, so no Airtable write was needed"
   },
   "not_done": "No publication or scheduling."
 }
