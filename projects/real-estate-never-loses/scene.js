@@ -61,27 +61,24 @@ K.push(tBuy + 0.2, "buy", 1.1, 1.6, { dx: -120 });
 // ---------- 4. prices up 20%: the flat needed 1.2 million to keep its purchasing power ----------
 const tIf = N("لو");
 K.cam(tIf - 0.3, "infl", { via: 0.42, dur: 1.0 });
+K.axis(B.infl, 140, 860, 720, { at: tIf + 0.5 });
 const tPct = N("٢٠٪");
-const pctLbl = K.text(B.infl, "الأسعار", { x: 500, y: 60, size: 44, cls: "muted", at: tPct - 0.1 });
-const pct = K.text(B.infl, num("+٢٠٪"), { x: 500, y: 170, size: 130, head: true, color: L, at: tPct, from: "pop", sfx: "pop" });
-const basket = K.img(B.infl, OBJ + "kanz-grocery-basket-v01.png", { x: 820, y: 150, w: 220, at: tPct + 0.2, shadow: false });
+K.text(B.infl, "الأسعار", { x: 800, y: 150, size: 40, cls: "muted", at: tPct - 0.1 });
+K.text(B.infl, num("+٢٠٪"), { x: 800, y: 240, size: 96, head: true, color: L, at: tPct, from: "pop", sfx: "pop" });
+// the v1/v2 bar chart, restored at Ahmed's request (2026-10-10): price vs what it needed to keep its value
 const tFlat = N("شقتك");
-K.fadeTo(pct, tFlat - 0.1, 0.35, { scale: 0.7 });
-K.fadeTo(pctLbl, tFlat - 0.1, 0);
-// two banknote stacks at true relative height: price 1.1M (11) vs needed 1.2M (12)
-K.stack(B.infl, OBJ + "kanz-egp-banknote-v01.png", { x: 640, y: 740, n: 11, w: 200, step: 28, at: tFlat });
-K.text(B.infl, "سعرها<br>مليون و١٠٠ ألف", { x: 640, y: 830, size: 36, w: 280, at: tFlat + 0.3 });
+K.bar(B.infl, { x: 560, y: 720, w: 190, h: 300, at: tFlat, color: "#c7c2cc" });
+K.text(B.infl, "سعرها<br>مليون و١٠٠ ألف", { x: 560, y: 790, size: 34, w: 300, at: tFlat + 0.1 });
 const tNeed = N("لمليون");
-const ghost = K.stack(B.infl, OBJ + "kanz-egp-banknote-v01.png", { x: 350, y: 740, n: 12, w: 200, step: 28, at: tNeed, shadow: false });
-ghost.forEach((e) => K.fadeTo(e, tNeed + 1.1, 0.35));
-K.text(B.infl, "المطلوب<br>مليون و٢٠٠ ألف", { x: 350, y: 830, size: 36, w: 280, cls: "muted", at: tNeed + 0.2 });
-K.tag(B.infl, "نفس القوة الشرائية", { x: 350, y: 330, lav: true, at: N("قوتها") });
-const tPaper = N("الورق");
-K.fadeTo(pct, tPaper - 0.2, 0);
-K.tag(B.infl, "على الورق: زاد", { x: 640, y: 360, at: tPaper });
+K.bar(B.infl, { x: 300, y: 720, w: 190, h: 390, at: tNeed, color: "rgba(255,255,255,0)", outline: true });
+K.text(B.infl, "المطلوب<br>مليون و٢٠٠ ألف", { x: 300, y: 790, size: 34, w: 300, cls: "muted", at: tNeed + 0.1 });
+K.dashed(B.infl, 430, 330, 430, 420, { at: N("تحافظ"), color: L, dur: 0.3 });
+const tPower = N("قوتها");
+K.tag(B.infl, "نفس القوة الشرائية", { x: 300, y: 285, lav: true, at: tPower });
+K.push(tPower - 1.0, "infl", 1.12, 3.0);
+K.tag(B.infl, "على الورق: زاد", { x: 560, y: 370, at: N("الورق") });
 const tReal = N("الحقيقية");
-K.fadeTo(basket, tReal - 0.25, 0, { dur: 0.2 });
-K.text(B.infl, "قيمتها الحقيقية قلت", { x: 500, y: 150, size: 64, head: true, color: L, at: tReal });
+K.text(B.infl, "قيمتها الحقيقية قلت", { x: 330, y: 165, size: 44, head: true, w: 340, color: L, at: tReal });
 
 // ---------- 5. ...and that's before costs and any rental income ----------
 const tCost = N("المصاريف");
