@@ -6,3 +6,4 @@ projects/*/out/
 projects/*/audio/source.*
 projects/*/audio/*.wav
 *.tmp
+projects/*/audio/_tts/

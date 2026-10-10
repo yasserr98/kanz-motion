@@ -4,7 +4,7 @@ Source: Ahmed's script, 2026-10-05. Voice: ElevenLabs v4 (`engine/tts.py`). The 
 spoken exactly as written and is also the caption source; `*word*` marks the caption keyword (stripped before TTS).
 Blank lines are paragraph pauses. All figures are the script's hypothetical example ("خلينا نقول" / "لو"), not market data.
 
-Copy notes for Ahmed (left unchanged, not rewritten): "مش كدة و بس" and "تبيع بسعر بأقل" are spoken as written.
+Copy notes: "تبيع بسعر بأقل" changed to "تبيع بسعر أقل" (v1 voice check, user approved 2026-10-10; the Airtable Brief still has the old wording). "مش كدة و بس" stays in the captions; `say.json` holds the spelling the voice reads.
 
 <!-- captions:start -->
 هل فعلًا العقار *مبيخسرش*؟
@@ -22,7 +22,7 @@ Copy notes for Ahmed (left unchanged, not rewritten): "مش كدة و بس" and 
 مش كدة و بس كلمة سعرها زاد مش معناها ان فلوسها في *جيبك*
 
 ممكن تسمع إن شقتك «تساوي ٣ مليون»، لكن لما تعرضها للبيع تفضل *شهور* من غير مشتري بالسعر ده.
-ولو محتاج الفلوس *بسرعة*، ممكن تضطر تبيع بسعر بأقل.
+ولو محتاج الفلوس *بسرعة*، ممكن تضطر تبيع بسعر أقل.
 
 ولو لسه تحت *الإنشاء*؟
 

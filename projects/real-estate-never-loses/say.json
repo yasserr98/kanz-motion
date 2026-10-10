@@ -1,0 +1,9 @@
+{
+  "_why": "Spelling the voice reads; captions keep script.md. Fixes from the v1 voice check (2026-10-10, Ahmed confirmed): 'كدة و بس' was read as a question plus a stretched 'و'; 'إنت' came out as Standard Arabic 'anta'; '٣ مليون' was read 'تلاتة ملايين'; 'مبيخسرش' was heard as 'ما بيخسرش'.",
+  "replace": [
+    ["مش كدة و بس كلمة", "مش كده وبس، كلمة"],
+    ["إنت بتدفع", "إنتا بتدفع"],
+    ["تساوي ٣ مليون", "تساوي تلاتة مليون"],
+    ["مبيخسرش", "مَبِيخْسَرْشْ"]
+  ]
+}

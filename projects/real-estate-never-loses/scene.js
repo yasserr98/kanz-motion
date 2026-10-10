@@ -90,7 +90,7 @@ K.text(B.sell, "من غير مشتري", { x: 260, y: 600, size: 40, cls: "muted
 const tFast = N("بسرعة");
 [house3, tag3, cal].forEach((e) => K.fadeTo(e, tFast - 0.1, 0.18, { scale: 0.92 }));
 K.img(B.sell, OBJ + "kanz-hourglass-v01.png", { x: 500, y: 440, w: 300, at: tFast });
-const tLow = N("بأقل");
+const tLow = N("أقل");
 K.arrow(B.sell, 700, 650, 700, 760, { at: tLow - 0.2, bend: 0.001, color: "#fff" });
 K.tag(B.sell, "بسعر أقل", { x: 500, y: 720, lav: true, at: tLow, size: 44 });
 

@@ -6,7 +6,9 @@ Voice-note route
 Script route (ElevenLabs voice, needs .env)
     python engine/make.py script <name>             # create projects/<name>/ with a script.md to fill in
     python engine/make.py sample <name> [speed]     # first two paragraphs only, to choose voice/speed
-    python engine/make.py tts <name> [speed]        # full voice + word timings + captions
+    python engine/make.py tts <name> [speed] [pause] # script check, voice per paragraph joined by [pause] s (0.25),
+                                                    # captions, then the voice check (Scribe vs script)
+    python engine/make.py voicecheck <name>         # re-run the voice check alone
 Both routes
     python engine/make.py breaths <name>            # list audible breaths/sighs to mute (audio/edl.json "mute")
     python engine/make.py captions <name>           # align script.md to the final voice
@@ -82,8 +84,13 @@ def main():
     elif step == "sample":
         run([PY, "engine/tts.py", proj, "--sample", "--speed", arg or "1.0"])
     elif step == "tts":
-        run([PY, "engine/tts.py", proj, "--speed", arg or "1.0"])
+        run([PY, "engine/voicecheck.py", proj, "--pre"])
+        pause = sys.argv[4] if len(sys.argv) > 4 else "0.25"
+        run([PY, "engine/tts.py", proj, "--speed", arg or "1.0", "--pause", pause])
         run([PY, "engine/captions.py", proj])
+        run([PY, "engine/voicecheck.py", proj])
+    elif step == "voicecheck":
+        run([PY, "engine/voicecheck.py", proj])
     elif step == "breaths":
         run([PY, "engine/breaths.py", proj])
     elif step == "captions":

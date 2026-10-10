@@ -20,6 +20,13 @@ repo or a Kanz worktree (worktrees do not contain this folder; use the absolute 
      then `make.py audio <slug>`; read the new transcript through.
    - Script: paste the copy verbatim into `script.md` (never rewrite; flag doubts), mark `*keywords*`,
      `make.py sample <slug> 1.0` and `1.15` for Ahmed to pick, then `make.py tts <slug> <speed>`.
+     `tts` runs the voice checks itself: before generating, `voicecheck.py --pre` lists script patterns
+     the cloned voice is known to get wrong (`library/voice/lexicon.json`); it generates one paragraph at
+     a time with real pauses (cached in `audio/_tts`, so fix rounds re-roll only changed paragraphs); after,
+     Scribe re-transcribes the voice and prints WORD / STUMBLE / PAUSE / FLAT / EAR findings. Fix them with
+     voice-only spelling in `projects/<slug>/say.json` (captions keep script.md), delete that paragraph's
+     `audio/_tts/pNN.json`, re-run. Tell Ahmed the EAR times to listen to. When he hears a new failure,
+     add it to the lexicon (`replace` if a respelling fixes it, `watch` if it only needs flagging).
 4. **Breaths and sighs.** `python engine/breaths.py projects/<slug>`; mute real ones via `"mute"` in
    `audio/edl.json` and re-run `engine/edit_audio.py`. Mention any you left in.
 5. **Script and captions.** Voice note: correct `script.md` from the transcript and flag uncertain words.
