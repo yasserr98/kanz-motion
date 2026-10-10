@@ -1,0 +1,23 @@
+{
+  "delivered": "2026-10-10",
+  "version": "real-estate-never-loses-v2 (voice fix round: per-paragraph voice with pauses, 'مش كده وبس' stumble and Standard-Arabic forms fixed, 'بسعر أقل')",
+  "requested_by": "Ahmed: send it to the Drive and update Airtable with the link",
+  "drive": {
+    "account": "yasser@kanzms.com",
+    "method": "scripts/kanz_drive_upload.py in the Kanz repo (resumable upload, readback)",
+    "parent": "Kanz Content 1vMk8CG7fRj15FqGpQ0mMbz-vV_MLUhlA",
+    "folder_id": "13xmakD73tV-mT48_D_QZX3HUvKjH1jfv",
+    "folder_name": "Real Estate doesn't lose myth",
+    "folder_url": "https://drive.google.com/drive/folders/13xmakD73tV-mT48_D_QZX3HUvKjH1jfv",
+    "files": [{"name": "01.mp4", "id": "1cpaheGoG37DUlIfGe_JtC7Lc5QSCtB3g", "bytes": 93355422,
+               "md5": "7cdbc343d7b705681aa6c8d8c99586d8", "readback_size_md5_match": true}]
+  },
+  "airtable": {
+    "base": "appjVgbUZdgzOs9DX", "table": "tbl9irDbqdU1zwBGO", "record": "reccX24eL2BeitWut",
+    "name": "Real Estate doesn't lose myth",
+    "changed": {"Drive link": "https://drive.google.com/drive/folders/13xmakD73tV-mT48_D_QZX3HUvKjH1jfv"},
+    "unchanged": "Brief (still says 'بسعر بأقل'; the video says 'بسعر أقل', user approved), Status (In Review) and all other fields",
+    "verified_from_write_response": true
+  },
+  "not_done": "No publication or scheduling."
+}
