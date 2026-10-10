@@ -1,5 +1,7 @@
 # Codex asset requests for look v2 (2026-10-10)
 
+**Status 2026-10-10:** batch 1 generated (Ahmed: "create whatever you need from codex"). See `library/objects/PROVENANCE-2026-10-10.md` for what was made, the prompts and the checks. Moving parts were made as **states** (open/closed, empty/half/full) rather than separate layers: separate generations don't line up pixel for pixel, while a state swap (`K.swap`) works with any of them.
+
 Ahmed approved this direction on 2026-10-10: characters that react and objects that can move, so scenes
 act instead of just appearing. **These are requests, not approved assets.** Each file is made in Codex
 and reviewed by Ahmed before it goes into `library/objects/`.

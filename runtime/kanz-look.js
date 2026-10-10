@@ -13,6 +13,7 @@
  *   K.photo                      real photo in the approved grayscale treatment, slow push, credit line
  *   K.map / K.pin / K.outline    grayscale base map, lavender pins with labels, drawn region outlines
  *   K.count / K.pile / K.stack   numbers that count up, objects that pile up, bars built from objects
+ *   K.swap / K.walk              change state or pose on a word; two-frame walk between two points
  *   K.SAFE / K.safeGuide         platform safe zones (engine/lint.py checks every frame against them)
  */
 (function () {
@@ -133,8 +134,9 @@
       });
     }
     if (gl || sh) followers.push((q) => {
-      const op = e.style.visibility === "hidden" ? 0 : parseFloat(e.style.opacity === "" ? 1 : e.style.opacity);
-      const dx = gsap.getProperty(e, "x"), dy = gsap.getProperty(e, "y"), sc = gsap.getProperty(e, "scaleX");
+      const c = showing(e, q); // after K.swap the shadow and glow follow the new state
+      const op = c.style.visibility === "hidden" ? 0 : parseFloat(c.style.opacity === "" ? 1 : c.style.opacity);
+      const dx = gsap.getProperty(c, "x"), dy = gsap.getProperty(c, "y"), sc = gsap.getProperty(c, "scaleX");
       if (sh) {
         const lift = Math.max(0, -dy) / 260;
         sh.style.opacity = String(op * Math.max(0.25, 1 - lift));
@@ -350,6 +352,55 @@
     }
     if (o.out != null) tl.to(items, { autoAlpha: 0, duration: 0.3 }, o.out);
     return items;
+  };
+
+  // ---------- states and poses (Codex asset batch 2026-10-10) ----------
+  // K.swap(img, src, t): the object or character changes state in place on a word (wallet closed -> open,
+  // M01 neutral -> pointing). Same position, size and rotation; its contact shadow and glow carry over.
+  K.swap = function (el, src, t, o = {}) {
+    const n = K.el("img", "obj", el.parentNode);
+    n.src = src;
+    gsap.set(n, { left: gsap.getProperty(el, "left"), top: gsap.getProperty(el, "top"), width: el.style.width || gsap.getProperty(el, "width"),
+      xPercent: gsap.getProperty(el, "xPercent"), yPercent: gsap.getProperty(el, "yPercent"), rotation: gsap.getProperty(el, "rotation"),
+      zIndex: el.style.zIndex || "auto" });
+    hide(n);
+    tl.set(el, { autoAlpha: 0 }, t);
+    tl.fromTo(n, { autoAlpha: 1, scale: o.pop === false ? 1 : 1.04 }, { autoAlpha: 1, scale: 1, duration: 0.25, ease: "power2.out", immediateRender: false }, t);
+    (el._swaps = el._swaps || []).push({ t, el: n });
+    if (o.sfx !== false) K.sfx(t, o.sfx || "pop", o.gain || 0.25);
+    if (o.out != null) tl.to(n, { autoAlpha: 0, duration: 0.3 }, o.out);
+    return n;
+  };
+  // the follower of an element reads whichever state is showing at time q
+  const showing = (e, q) => { let cur = e; (e._swaps || []).forEach((s) => { if (q >= s.t) cur = s.el; }); return cur; };
+
+  // K.walk(board, [frameA, frameB], {from: [x, y], to: [x, y], at, dur, w, rest, step, sfx}): a character walks
+  // between two board points with the two-frame walk cycle (frames face left; walking right mirrors them).
+  // `rest` (e.g. the neutral pose) shows before and after the walk. Returns the wrapper (tween it like any element).
+  K.walk = function (parent, frames, o) {
+    const w = o.w || 300, step = o.step || 0.25, t0 = o.at, t1 = o.at + o.dur;
+    const box = K.el("div", "abs", parent);
+    gsap.set(box, { left: o.from[0], top: o.from[1], width: w, height: w, xPercent: -50, yPercent: -50, zIndex: o.z || 4 });
+    if (K.lookOpts.shadow && o.shadow !== false) {
+      const s = K.el("div", "kshadow", box);
+      gsap.set(s, { left: w * 0.3, top: w * 0.935, width: w * 0.4, height: w * 0.07 });
+    }
+    const imgs = frames.concat(o.rest ? [o.rest] : []).map((src) => {
+      const i = K.el("img", "obj", box); i.src = src; gsap.set(i, { left: 0, top: 0, width: w }); return i;
+    });
+    const mirror = o.to[0] > o.from[0] ? -1 : 1;
+    gsap.set(imgs, { scaleX: mirror });
+    if (o.appear != null) { hide(box); tl.fromTo(box, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, immediateRender: false }, o.appear); }
+    tl.to(box, { left: o.to[0], top: o.to[1], duration: o.dur, ease: "none" }, t0);
+    followers.push((q) => {
+      const walking = q >= t0 && q < t1, k = Math.floor((q - t0) / step) % 2;
+      const pick = walking ? k : (o.rest ? 2 : 0);
+      imgs.forEach((im, j) => { im.style.visibility = j === pick ? "visible" : "hidden"; });
+      imgs[pick].style.translate = walking && k === 1 ? "0 -5px" : "0 0";
+    });
+    if (o.sfx) for (let t = t0; t < t1; t += step) K.sfx(t, o.sfx, o.gain || 0.15);
+    if (o.out != null) tl.to(box, { autoAlpha: 0, duration: 0.3 }, o.out);
+    return box;
   };
 
   // ---------- review overlay: red where platform UI covers the video ----------
