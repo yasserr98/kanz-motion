@@ -1,0 +1,52 @@
+{
+ "_why": "Known failure patterns of the 'Ahmed Shaaban Shorts' instant clone (UeQ9UTIKgN2rsbnqHH5w) on eleven_v4, found in real Reels. engine/tts.py applies 'replace' to what the voice reads (captions keep script.md); engine/voicecheck.py --pre flags 'watch' patterns before any credits are spent. Add a row whenever a new failure is confirmed by ear, with where it was found.",
+ "replace": [
+  {
+   "from": "كدة و بس",
+   "to": "كده وبس،",
+   "found": "real-estate-never-loses v1 0:29: separate 'و' read as a stretched 'وا…' and 'مش كدة' as a tag question"
+  },
+  {
+   "from": "إنت ",
+   "to": "إنتا ",
+   "found": "real-estate-never-loses v1 0:46: 'إنت' read as Standard Arabic 'anta'"
+  },
+  {
+   "from": "٣ مليون",
+   "to": "تلاتة مليون",
+   "found": "real-estate-never-loses v1 0:37: read 'تلاتة ملايين' (Standard Arabic plural)"
+  },
+  {
+   "from": "١٠٠ ألف",
+   "to": "مية ألف",
+   "found": "preventive: digits before ألف risk Standard Arabic forms (see ٢٠٠)"
+  },
+  {
+   "from": "٢٠٠ ألف",
+   "to": "ميتين ألف",
+   "found": "real-estate-never-loses v2 0:20.6: 'و٢٠٠ ألف' heard as Standard Arabic 'ومائتي'"
+  }
+ ],
+ "watch": [
+  {
+   "re": "(^|\\s)[وف](\\s|$)",
+   "why": "a lone 'و'/'ف' followed by a space is read as its own stretched syllable; join it to the next word"
+  },
+  {
+   "re": "[٠-٩0-9]+\\s*(مليون|ألف|مليار)",
+   "why": "digits before مليون/ألف/مليار may get Standard Arabic number agreement; write the Egyptian words out"
+  },
+  {
+   "re": "؟\\s*\\S",
+   "why": "a question followed by more text in the same paragraph is often read flat; end the paragraph after the question"
+  },
+  {
+   "re": "(^|\\s)(إنت|انت|إنتي)(\\s|$)",
+   "why": "may come out as Standard Arabic 'anta/anti'"
+  },
+  {
+   "re": "(^|\\s)(ما?ب\\S+ش)(\\s|$)",
+   "why": "Egyptian negation (مبيخسرش, مبتكسبش): listen that it is not read slowly as 'ما بي...'"
+  }
+ ]
+}
