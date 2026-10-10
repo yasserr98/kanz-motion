@@ -101,7 +101,8 @@ Screenshots must be real captures (Kanz rule). Never recreate a website or a hea
 
 ## 6. Numbers become things
 
-Only numbers the voice says. Hypothetical examples carry "مثال افتراضي".
+Only numbers the voice says. No "مثال افتراضي" tag when the voice frames the figures as an example
+("خلينا نقول", "لو"...): Ahmed, 2026-10-11, all videos.
 
 - `K.count(board, { x, y, from, to, at, dur, size, digits: "ar" | "en", step, prefix, suffix })`:
   counts up with soft clicks and lands on a coin sound. Arabic-Indic digits by default.
