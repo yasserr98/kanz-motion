@@ -35,6 +35,11 @@
    "from": "خسرته",
    "to": "خسرتو",
    "found": "emotional-trading v10 0:41: 'خسرته' read formally (khasirtahu); Ahmed picked 'خسرتو' (Egyptian -o) from test clips, 2026-10-11"
+  },
+  {
+   "from": "يوصلك",
+   "to": "يوصل لك",
+   "found": "us-dollar-decisions v2 1:14: 'قبل ما يوصلك' stretched to 'يوووصلك'; Ahmed picked 'يوصل لك' from four test clips (2026-10-11)"
   }
  ],
  "watch": [
