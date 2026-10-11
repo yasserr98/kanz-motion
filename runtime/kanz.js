@@ -41,7 +41,11 @@
     return e;
   };
   K.num = (s) => `<bdi class="num">${s}</bdi>`;
+  // K.cue(o.sfx, default): with K.mix = 2 (new videos), sfx: false really means silent; older scenes keep
+  // the old behaviour (false fell back to the default sound) so their re-renders are unchanged.
+  K.cue = (v, d) => (v === false && K.mix === 2 ? null : v || d);
   K.sfx = function (t, cat, gain = 0.45, pick) {
+    if (!cat) return;
     K.cues.push({ t: Math.max(0, t), cat, gain, pick: pick == null ? K.cues.length : pick });
   };
   function place(e, x, y) { gsap.set(e, { left: x, top: y, xPercent: -50, yPercent: -50 }); }
@@ -106,7 +110,7 @@
     if (o.at != null) {
       hide(e);
       tl.fromTo(e, { scale: 0.7, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.3, ease: "back.out(2.2)", immediateRender: false }, o.at);
-      K.sfx(o.at, o.sfx || "click", o.gain || 0.35);
+      K.sfx(o.at, K.cue(o.sfx, "click"), o.gain || 0.35);
     }
     if (o.out != null) tl.to(e, { autoAlpha: 0, duration: 0.25 }, o.out);
     return e;
@@ -122,7 +126,7 @@
     if (o.at != null) {
       hide(e);
       tl.fromTo(e, { y: 60, scale: 0.9, autoAlpha: 0 }, { y: 0, scale: 1, autoAlpha: 1, duration: 0.5, ease: "back.out(1.6)", immediateRender: false }, o.at);
-      K.sfx(o.at, o.sfx || "pop", o.gain || 0.35);
+      K.sfx(o.at, K.cue(o.sfx, "pop"), o.gain || 0.35);
     }
     if (o.out != null) tl.to(e, { autoAlpha: 0, y: 30, duration: 0.3, ease: "power2.in" }, o.out);
     return e;
@@ -171,7 +175,7 @@
         gsap.set(p, { strokeDasharray: L, strokeDashoffset: L });
         tl.to(p, { strokeDashoffset: 0, duration: o.dur || 0.55, ease: "power1.inOut" }, o.at);
       }
-      K.sfx(o.at, o.sfx || "marker", o.gain || 0.3);
+      K.sfx(o.at, K.cue(o.sfx, "marker"), o.gain || 0.3);
     }
     if (o.out != null) tl.to(s, { autoAlpha: 0, duration: 0.25 }, o.out);
     return s;
@@ -270,7 +274,7 @@
       border: o.outline ? "4px solid rgba(255,255,255,.55)" : "none", boxSizing: "border-box", transformOrigin: o.down ? "50% 0%" : "50% 100%" });
     hide(e);
     tl.fromTo(e, { scaleY: 0, autoAlpha: 1 }, { scaleY: 1, autoAlpha: 1, duration: o.dur || 0.7, ease: "power3.out", immediateRender: false }, o.at);
-    K.sfx(o.at, o.sfx || "pop", 0.3);
+    K.sfx(o.at, K.cue(o.sfx, "pop"), 0.3);
     e.kbar = o;
     return e;
   };
@@ -334,7 +338,7 @@
       hide(s);
       tl.set(s, { autoAlpha: 1 }, o.at);
       tl.fromTo(pr, { p: 0 }, { p: 1, duration: dur, ease: "none", immediateRender: false, onUpdate: () => render(pr.p) }, o.at);
-      K.sfx(o.at, o.sfx || "marker", o.gain || 0.25);
+      K.sfx(o.at, K.cue(o.sfx, "marker"), o.gain || 0.25);
       if (o.marker) {
         const mx = px(o.marker.i), mt = o.at + (dur * o.marker.i) / (n - 1);
         draw(parent, `M${mx} ${Y0 - o.h - 30} L${mx} ${Y0}`, { dash: "14 12", width: 4, at: mt, dur: 0.3, sfx: "click", gain: 0.15 });
