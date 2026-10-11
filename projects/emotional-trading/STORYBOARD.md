@@ -121,3 +121,16 @@ The comparison videos stay local in `out/hooks/`. Cover options: `out/cover.png`
 `out/cover-chart-down.png` (falling chart icon, still a candidate object).
 v9: the q1 board showed nothing for ~2 s before "اسأل نفسك" (v8 check, 0:59-1:01); it now shows "قبل ما تحط الاستراتيجية"
 with the written-plan paper until the question lands. `out/emotional-trading-v9.mp4` 75.4 s, 24 fps, -16.1 LUFS.
+
+## v10 (2026-10-11): no logo, no empty frames
+
+Ahmed: frames like the Emotional Trading page are empty ("something I hate"); the white logo sat on the white paper
+world; remove the logo, and consider contrast whenever a logo is added. Logo removed from this video and from
+`projects/_template/index.html`; `runtime/kanz-look.css` turns a logo dark on the paper world; AGENTS.md rule updated.
+Filled: definition page (title and the three drivers on the page from the first frame), 0:36-0:38 (the losing
+investor stands until the bigger bet), strategy (title, sheet, shield with the board), luck (both columns with the
+board), bigger question rows. Fixed a v5-v9 bug: 'قرار متهوّر' was anchored to 'متهوّر', which no longer matched the
+voice token 'مِت-هَوَّر', so it appeared early. `out/emotional-trading-v10.mp4` 75.4 s, -16.0 LUFS.
+Voice review (pending Ahmed): grouped lines are read with no pause at full stops (0:21.9, 0:24.0, 0:33.1, 0:36.3,
+0:39.6, 0:54.6, 1:02.5); 0:42 rushed, 0:50 slow; stretched endings; EAR 0:20.6 Emotional, 0:05.6 تابعوا, 0:37.5 فتحط.
+Proposed: one sentence per paragraph, re-voice, re-apply splice.py.

@@ -69,13 +69,16 @@ K.cam(tDef - 0.3, "define");
 K.world(tDef - 0.3, "paper");
 N("Emotional");
 K.text(B.define, "Emotional Trading", { x: 500, y: 90, size: 60, head: true, at: tDef + 0.4 });
-K.text(B.define, "التداول العاطفي", { x: 500, y: 220, size: 120, head: true, color: L, at: N("التداول") });
+K.text(B.define, "التداول العاطفي", { x: 500, y: 220, size: 120, head: true, color: L, at: tDef + 0.6 });
+N("التداول");
 K.underline(B.define, 170, 830, 300, { at: K.T("العاطفي", tDef) + 0.2, color: L });
 K.text(B.define, "قرارات البيع والشراء", { x: 500, y: 380, size: 46, cls: "muted", at: N("قرارات") });
 [["الخوف", "الخوف", "kanz-npc-m02-worried-v01.png", 790, 360], ["الطمع", "الطمع", "kanz-money-bag-spill-v01.png", 500, 320],
   ["تعوض", "إنك تعوّض", "kanz-poker-chips-v01.png", 220, 310]].forEach(([w, html, img, x, size]) => {
-  const t = N(w);
-  K.img(B.define, OBJ + img, { x, y: 590, w: size, at: t - 0.1 });
+  const t = N(w); // on the page from the start, dimmed; lights up on its word (Ahmed: no empty frames, 2026-10-11)
+  const e = K.img(B.define, OBJ + img, { x, y: 590, w: size, at: tDef + 0.1 });
+  gsap.set(e, { opacity: 0.22 });
+  K.tl.to(e, { opacity: 1, scale: 1.06, duration: 0.35, ease: "back.out(2)" }, t - 0.1);
   K.text(B.define, html, { x, y: 810, size: 52, head: true, at: t });
 });
 
@@ -92,8 +95,10 @@ const tNerv = N("اتوترت");
 K.dot(B.three, ch.x(10), ch.y(3.6), { at: tNerv, color: RED });
 K.tag(B.three, "تبيع", { x: ch.x(10) - 100, y: ch.y(3.6) + 70, size: 40, at: tNerv + 0.1, out: K.T("تخسر", tRush) - 0.3 });
 const tLose = N("تخسر");
-K.img(B.three, OBJ + "kanz-poker-chips-v01.png", { x: 760, y: 560, w: 260, at: N("صفقة") });
-K.text(B.three, "خسارة", { x: 760, y: 360, size: 60, head: true, color: RED, at: K.T("صفقة") + 0.1 });
+K.img(B.three, OBJ + "kanz-poker-chips-v01.png", { x: 760, y: 560, w: 300, at: K.T("تخسر", tRush) });
+// the loser stands where the bigger bet lands, until "أكتر" (fills 0:36-0:38, Ahmed 2026-10-11)
+K.img(B.three, OBJ + "kanz-npc-m01-worried-wallet-v01.png", { x: 300, y: 520, w: 440, at: K.T("تخسر", tRush) + 0.15, out: K.T("أكتر", tRush) - 0.35 });
+K.text(B.three, "خسارة", { x: 760, y: 360, size: 60, head: true, color: RED, at: N("صفقة") - 0.2 });
 const tMore = N("أكتر");
 K.arrow(B.three, 620, 520, 450, 520, { at: tMore - 0.2, bend: 40 });
 K.img(B.three, OBJ + "kanz-poker-chips-v01.png", { x: 280, y: 520, w: 460, at: tMore, glow: true, sfx: "coin" });
@@ -154,14 +159,15 @@ tiltTo(tSame + 0.5, 11);
 const tStrat = N("وهنا");
 K.cam(tStrat - 0.3, "plan");
 K.world(tStrat - 0.3, "paper");
-K.text(B.plan, "الاستراتيجية", { x: 500, y: 70, size: 110, head: true, color: L, at: N("الاستراتيجية") });
-K.card(B.plan, "", { x: 560, y: 510, w: 620, h: 620, rot: -1, at: N("خطة") - 0.1 });
+K.text(B.plan, "الاستراتيجية", { x: 500, y: 70, size: 96, head: true, color: L, at: tStrat + 0.1 });
+K.card(B.plan, "", { x: 560, y: 510, w: 620, h: 620, rot: -1, at: tStrat + 0.3 });
+K.img(B.plan, OBJ + "kanz-security-shield-v01.png", { x: 150, y: 640, w: 240, at: tStrat + 0.5, shadow: false });
+N("الاستراتيجية"); N("خطة");
 [["واضحة", "واضحة"], ["ومكتوبة", "مكتوبة"], ["بحث", "مبنية على بحث"], ["لهدفك", "مناسبة لهدفك"], ["المخاطرة", "قدرتك على المخاطرة"]].forEach(([w, html], i) => {
   const t = N(w), y = 290 + i * 110;
   K.text(B.plan, html, { x: 530, y, size: 50, head: true, color: K.INK, at: t });
   tick(B.plan, 800, y, t + 0.15);
 });
-K.img(B.plan, OBJ + "kanz-security-shield-v01.png", { x: 150, y: 640, w: 240, at: K.T("تحمّل", tStrat), shadow: false });
 
 // ---------- 16. before the strategy, ask yourself: why, what goal, how long ----------
 const tBefore = N("وقبل");
@@ -169,13 +175,13 @@ K.world(tBefore - 0.3, "charcoal");
 K.cam(tBefore - 0.3, "q1");
 const tAsk = N("اسأل");
 // fills the 2 s before "اسأل نفسك" (empty board in the v8 check at 0:59-1:01)
-K.text(B.q1, "قبل ما تحط الاستراتيجية", { x: 500, y: 300, size: 76, head: true, at: tBefore + 0.2, out: tAsk - 0.25 });
-K.img(B.q1, OBJ + "kanz-loan-agreement-v01.png", { x: 500, y: 580, w: 420, at: tBefore + 0.35, out: tAsk - 0.25, shadow: false });
+K.text(B.q1, "قبل ما تحط الاستراتيجية", { x: 500, y: 300, size: 76, head: true, at: tBefore - 0.25, out: tAsk - 0.25 });
+K.img(B.q1, OBJ + "kanz-loan-agreement-v01.png", { x: 500, y: 580, w: 420, at: tBefore - 0.1, out: tAsk - 0.25, shadow: false });
 K.text(B.q1, "اسأل نفسك", { x: 500, y: 70, size: 96, head: true, color: L, at: tAsk });
 const row = (b, w, html, img, i, o = {}) => {
   const t = o.t || N(w), y = 270 + i * 230;
-  K.img(b, OBJ + img, { x: 800, y, w: 250, at: t, shadow: false, glow: o.glow });
-  K.text(b, html, { x: 390, y, size: 72, head: true, at: t + 0.05 });
+  K.img(b, OBJ + img, { x: 790, y, w: 250, at: t, shadow: false, glow: o.glow });
+  K.text(b, html, { x: 380, y, size: 82, head: true, at: t + 0.05 });
 };
 row(B.q1, "ليه", "داخل ليه؟", "kanz-share-certificate-v01.png", 0);
 row(B.q1, "هدفي", "هدفي منه إيه؟", "kanz-savings-jar-v01.png", 1);
@@ -184,13 +190,15 @@ row(B.q1, "ولمدة", "لمدة قد إيه؟", "kanz-calendar-v01.png", 2, { 
 // ---------- 20. a studied decision can lose; a reckless one can win by luck ----------
 const tLuck = N("لأن");
 K.cam(tLuck - 0.3, "luck");
-K.text(B.luck, "قرار مدروس", { x: 750, y: 120, size: 72, head: true, at: N("مدروس") - 0.2 });
-K.img(B.luck, OBJ + "kanz-calculator-v01.png", { x: 750, y: 380, w: 300, at: K.T("مدروس") - 0.1 });
+K.text(B.luck, "قرار مدروس", { x: 750, y: 120, size: 72, head: true, at: tLuck + 0.1 });
+K.img(B.luck, OBJ + "kanz-calculator-v01.png", { x: 750, y: 380, w: 320, at: tLuck + 0.25 });
+K.text(B.luck, "قرار متهوّر", { x: 250, y: 120, size: 72, head: true, at: tLuck + 0.4 });
+K.img(B.luck, OBJ + "kanz-poker-chips-v01.png", { x: 250, y: 380, w: 360, at: tLuck + 0.55 });
+N("مدروس");
 K.text(B.luck, "وتخسر", { x: 750, y: 640, size: 96, head: true, color: RED, at: N("وتخسر"), from: "pop", sfx: "hit", gain: 0.3 });
-K.text(B.luck, "قرار متهوّر", { x: 250, y: 120, size: 72, head: true, at: N("متهوّر") - 0.2 });
-K.img(B.luck, OBJ + "kanz-poker-chips-v01.png", { x: 250, y: 380, w: 340, at: K.T("متهوّر") - 0.1 });
+N("مِت-هَوَّر");
 K.text(B.luck, "وتكسب بالحظ", { x: 290, y: 640, size: 64, head: true, color: L, at: N("وتكسب"), from: "pop", sfx: "coin", gain: 0.3 });
-K.dashed(B.luck, 500, 80, 500, 760, { at: K.T("وممكن", tLuck), color: "rgba(255,255,255,.3)" });
+K.dashed(B.luck, 500, 80, 500, 760, { at: tLuck + 0.2, color: "rgba(255,255,255,.3)" });
 
 // ---------- 21. ending (Ahmed 2026-10-11: last sentence removed): hold on the two decisions, slow push ----------
 K.push(K.T("بالحظ", tLuck) + 0.4, "luck", 1.08, 2.4);
