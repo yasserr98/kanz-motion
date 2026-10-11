@@ -196,7 +196,7 @@ K.text(B.luck, "قرار متهوّر", { x: 250, y: 120, size: 72, head: true, 
 K.img(B.luck, OBJ + "kanz-poker-chips-v01.png", { x: 250, y: 380, w: 360, at: tLuck + 0.55 });
 N("مدروس");
 K.text(B.luck, "وتخسر", { x: 750, y: 640, size: 96, head: true, color: RED, at: N("وتخسر"), from: "pop", sfx: "hit", gain: 0.3 });
-N("مِت-هَوَّر");
+N("متهوّر"); // caption tokens keep the script spelling (the voice reads مِت-هَوَّر)
 K.text(B.luck, "وتكسب بالحظ", { x: 290, y: 640, size: 64, head: true, color: L, at: N("وتكسب"), from: "pop", sfx: "coin", gain: 0.3 });
 K.dashed(B.luck, 500, 80, 500, 760, { at: tLuck + 0.2, color: "rgba(255,255,255,.3)" });
 

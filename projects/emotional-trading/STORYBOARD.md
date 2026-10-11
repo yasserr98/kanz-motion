@@ -129,8 +129,17 @@ world; remove the logo, and consider contrast whenever a logo is added. Logo rem
 `projects/_template/index.html`; `runtime/kanz-look.css` turns a logo dark on the paper world; AGENTS.md rule updated.
 Filled: definition page (title and the three drivers on the page from the first frame), 0:36-0:38 (the losing
 investor stands until the bigger bet), strategy (title, sheet, shield with the board), luck (both columns with the
-board), bigger question rows. Fixed a v5-v9 bug: 'قرار متهوّر' was anchored to 'متهوّر', which no longer matched the
-voice token 'مِت-هَوَّر', so it appeared early. `out/emotional-trading-v10.mp4` 75.4 s, -16.0 LUFS.
+board), bigger question rows. (Correction in v11: an earlier note here said 'قرار متهوّر' was mis-anchored in v5-v9. Wrong: caption tokens keep
+the script spelling 'متهوّر', so that anchor was right; the v10 change to 'مِت-هَوَّر' was the error, harmless because
+the text now appears with the board.) `out/emotional-trading-v10.mp4` 75.4 s, -16.0 LUFS.
 Voice review (pending Ahmed): grouped lines are read with no pause at full stops (0:21.9, 0:24.0, 0:33.1, 0:36.3,
 0:39.6, 0:54.6, 1:02.5); 0:42 rushed, 0:50 slow; stretched endings; EAR 0:20.6 Emotional, 0:05.6 تابعوا, 0:37.5 فتحط.
 Proposed: one sentence per paragraph, re-voice, re-apply splice.py.
+
+## v11 (2026-10-11): 'خسرتو' and real pauses
+
+Ahmed named 'ترجع اللي خسرته' and picked test clip k-4 ('...ترجع اللي خسرتو.'); it replaces that whole sentence
+(`voice_edits.py`, run after `splice.py`). Voice-only spelling added to say.json and the lexicon ('خسرته' -> 'خسرتو').
+The same script adds silence where the voice read through punctuation (16 places, 0.10-0.28 s; the quick list
+'الخوف، أو الطمع' left alone), so no approved take was re-generated. Voice 76.1 s.
+`out/emotional-trading-v11.mp4` 78.1 s, -16.0 LUFS. Not yet re-voiced: 0:42 rushed line, 0:50 slow line.
