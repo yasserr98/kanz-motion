@@ -110,6 +110,20 @@ Only numbers the voice says. No "مثال افتراضي" tag when the voice fra
 - `K.stack(board, src, { x, y, n, w, at })`: a bar built from objects (banknotes, coins), growing upward.
   Use two stacks of different n for a comparison at true relative scale.
 
+### Bars drawn to scale (2026-10-11)
+
+Bars that compare numbers get their height from the value, on one shared zero baseline. Hand-entered
+heights drift: real-estate-never-loses v4 drew 1.1M and 1.2M at 300 and 390 px, which shows a 9% gap as
+about 30%. Small true differences get a bracket, never a stretched bar.
+
+- `const S = K.scale(maxValue, maxPx)`: one scale per comparison (the largest value maps to maxPx).
+- `K.bar(board, { x, y, w, value, scale: S, at, ... })`: height = value / maxValue × maxPx. `h` still works
+  for old scenes, which render unchanged.
+- `K.delta(board, barA, barB, { x, label, at })`: a bracket between the two bar tops with an optional tag.
+- `illustrative: true` on a bar that stands for no spoken number (a "small part" gauge), so lint skips it.
+- `engine/lint.py` reports `bars` when two or more bars on one board use hand-entered heights or
+  different scales. Worked example: `projects/_bar-scale-demo/` (not for posting).
+
 ## 7. The first two seconds
 
 Open on the most dramatic image of the story, then rewind into it. The first visual must land by 1.0 s
