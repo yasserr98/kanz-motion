@@ -26,7 +26,7 @@ K.cam(0, "hook");
 // ---------- 1. hook: the house, big and lit, from the first frame ----------
 const tQ = N("هل");
 N("مبيخسرش");
-K.headline([{ html: "هل فعلًا العقار", at: 0 }, { html: "مبيخسرش؟", kw: true, at: 0 }], { out: K.T("خلينا") - 0.25 });
+K.headline([{ html: "هل فعلًا العقار" }, { html: "مبيخسرش؟", kw: true }], { out: K.T("خلينا") - 0.25 });
 K.bgObj(B.hook, OBJ + "kanz-house-v01.png", { x: 840, y: 300, w: 280 });
 K.img(B.hook, OBJ + "kanz-house-v01.png", { x: 500, y: 500, w: 600, glow: true, float: true });
 K.fg(B.hook, OBJ + "kanz-egp-banknote-stack-v01.png", { x: 70, y: 800, w: 420 });

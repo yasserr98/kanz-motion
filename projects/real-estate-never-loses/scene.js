@@ -4,6 +4,9 @@
  * example ("خلينا نقول" / "لو"). Sequential anchors: K.N finds each word after the previous one.
  * No logo and no closing wipe (Ahmed, 2026-10-06/07).
  */
+/* v5 (2026-10-11, delivered at Ahmed's request: "replace the file on the drive with the new improved one"):
+ * the style-review updates from projects/_sample-real-estate-v3: complete first frame, fill the frame, charts with
+ * weight (K.area), bars to scale (K.scale/K.delta), takeaway ending back on the opening house. Voice as v2/v4. */
 const { N, num } = K;
 const OBJ = "../../library/objects/";
 const card = (html, size = 56) => `<div style="height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 40px">
@@ -22,17 +25,18 @@ K.cam(0, "hook");
 
 // ---------- 1. hook: the house, big and lit, from the first frame ----------
 const tQ = N("هل");
-K.headline([{ html: "هل فعلًا العقار", at: tQ }, { html: "مبيخسرش؟", kw: true, at: N("مبيخسرش") }], { out: K.T("خلينا") - 0.25 });
-K.bgObj(B.hook, OBJ + "kanz-house-v01.png", { x: 840, y: 300, w: 280, at: 0.1 });
-K.img(B.hook, OBJ + "kanz-house-v01.png", { x: 500, y: 500, w: 580, at: 0.1, sfx: "pop", glow: true, float: true });
-K.fg(B.hook, OBJ + "kanz-egp-banknote-stack-v01.png", { x: 70, y: 800, w: 420, at: 0.5 });
+N("مبيخسرش");
+K.headline([{ html: "هل فعلًا العقار" }, { html: "مبيخسرش؟", kw: true }], { out: K.T("خلينا") - 0.25 });
+K.bgObj(B.hook, OBJ + "kanz-house-v01.png", { x: 840, y: 300, w: 280 });
+K.img(B.hook, OBJ + "kanz-house-v01.png", { x: 500, y: 500, w: 600, glow: true, float: true });
+K.fg(B.hook, OBJ + "kanz-egp-banknote-stack-v01.png", { x: 70, y: 800, w: 420 });
 K.oval(B.hook, 500, 500, 340, 300, { at: K.T("مبيخسرش") + 0.1 });
 K.push(0.4, "hook", 1.12, 2.0);
 
 // ---------- 2. bought for a million; a year later 1.1 million; "+100 thousand… right?" ----------
 const tLet = N("خلينا");
 K.cam(tLet - 0.3, "price");
-const house2 = K.img(B.price, OBJ + "kanz-house-v01.png", { x: 500, y: 250, w: 380, at: tLet + 0.3, glow: true });
+const house2 = K.img(B.price, OBJ + "kanz-house-v01.png", { x: 500, y: 230, w: 520, at: tLet + 0.3, glow: true });
 K.push(N("شقة") - 0.2, "price", 1.1, 1.6);
 const t1m = N("بمليون");
 K.count(B.price, { x: 500, y: 540, from: 0, to: 1000000, at: t1m, dur: 0.8, size: 104, step: 1000,
@@ -45,49 +49,56 @@ K.count(B.price, { x: 500, y: 540, from: 1000000, to: 1100000, at: t11, dur: 1.0
 const tWin = N("كسبت");
 K.fadeTo(house2, tWin - 0.15, 0, { scale: 0.9, dur: 0.25 });
 K.text(B.price, num("+١٠٠") + " ألف", { x: 500, y: 240, size: 120, head: true, color: L, at: tWin, from: "pop", sfx: "coin", gain: 0.45 });
-K.pile(B.price, OBJ + "kanz-coins-v01.png", { x: 500, y: 810, n: 6, w: 150, at: tWin + 0.15 });
+K.pile(B.price, OBJ + "kanz-coins-v01.png", { x: 500, y: 790, n: 8, w: 190, at: tWin + 0.15 });
 K.oval(B.price, 500, 245, 260, 100, { at: N("صح") });
 
 // ---------- 3. in pounds, yes. But what does that money buy? ----------
 const tEgp = N("بالجنيه");
 K.cam(tEgp - 0.3, "buy");
-K.img(B.buy, OBJ + "kanz-egp-banknote-stack-v01.png", { x: 680, y: 470, w: 430, at: tEgp, sfx: "coin", glow: true });
+K.img(B.buy, OBJ + "kanz-egp-banknote-stack-v01.png", { x: 700, y: 480, w: 520, at: tEgp, sfx: "coin", glow: true });
 const tBuy = N("تشتري");
 K.arrow(B.buy, 520, 470, 430, 470, { at: tBuy - 0.25, bend: 30 });
-K.img(B.buy, OBJ + "kanz-grocery-basket-v01.png", { x: 260, y: 480, w: 400, at: tBuy });
+K.img(B.buy, OBJ + "kanz-grocery-basket-v01.png", { x: 250, y: 490, w: 480, at: tBuy });
 K.text(B.buy, "؟", { x: 260, y: 150, size: 220, head: true, color: L, at: N("إيه"), from: "pop", sfx: "hit", gain: 0.3 });
 K.push(tBuy + 0.2, "buy", 1.1, 1.6, { dx: -120 });
 
 // ---------- 4. prices up 20%: the flat needed 1.2 million to keep its purchasing power ----------
 const tIf = N("لو");
 K.cam(tIf - 0.3, "infl", { via: 0.42, dur: 1.0 });
-K.axis(B.infl, 140, 860, 720, { at: tIf + 0.5 });
-const tPct = N("٢٠٪");
+const tPct = K.T("٢٠٪", tIf);
+const tFlat0 = K.T("شقتك", tPct);
+// prices over the year (the script's hypothetical +20%): a line with weight, ending at the +20% label
+K.area(B.infl, { x: 470, y: 470, w: 660, h: 360, data: [100, 101.2, 102.8, 104.1, 105.9, 107.2, 109.4, 111, 112.9, 115.1, 117.4, 120],
+  min: 96, max: 121, at: tIf + 0.3, dur: Math.max(1.2, tPct - tIf), out: tFlat0 - 0.25 });
+K.text(B.infl, "خلال نفس السنة", { x: 470, y: 690, size: 36, cls: "muted", at: K.T("السنة", tIf), out: tFlat0 - 0.25 });
+K.axis(B.infl, 140, 860, 720, { at: tFlat0 - 0.2 });
+N("٢٠٪");
 K.text(B.infl, "الأسعار", { x: 800, y: 150, size: 40, cls: "muted", at: tPct - 0.1 });
 K.text(B.infl, num("+٢٠٪"), { x: 800, y: 240, size: 96, head: true, color: L, at: tPct, from: "pop", sfx: "pop" });
 // the v1/v2 bar chart, restored at Ahmed's request (2026-10-10): price vs what it needed to keep its value
 const tFlat = N("شقتك");
-K.bar(B.infl, { x: 560, y: 720, w: 190, h: 300, at: tFlat, color: "#c7c2cc" });
+const S = K.scale(1200000, 390);
+const have = K.bar(B.infl, { x: 560, y: 720, w: 190, value: 1100000, scale: S, at: tFlat, color: "#c7c2cc" });
 K.text(B.infl, "سعرها<br>مليون و١٠٠ ألف", { x: 560, y: 790, size: 34, w: 300, at: tFlat + 0.1 });
 const tNeed = N("لمليون");
-K.bar(B.infl, { x: 300, y: 720, w: 190, h: 390, at: tNeed, color: "rgba(255,255,255,0)", outline: true });
+const need = K.bar(B.infl, { x: 300, y: 720, w: 190, value: 1200000, scale: S, at: tNeed, color: "rgba(255,255,255,0)", outline: true });
 K.text(B.infl, "المطلوب<br>مليون و٢٠٠ ألف", { x: 300, y: 790, size: 34, w: 300, cls: "muted", at: tNeed + 0.1 });
-K.dashed(B.infl, 430, 330, 430, 420, { at: N("تحافظ"), color: L, dur: 0.3 });
+K.delta(B.infl, have, need, { x: 690, label: "الفرق", at: N("تحافظ") });
 const tPower = N("قوتها");
 K.tag(B.infl, "نفس القوة الشرائية", { x: 300, y: 285, lav: true, at: tPower });
 K.push(tPower - 1.0, "infl", 1.12, 3.0);
-K.tag(B.infl, "على الورق: زاد", { x: 560, y: 370, at: N("الورق") });
+K.tag(B.infl, "على الورق: زاد", { x: 560, y: 470, at: N("الورق") });
 const tReal = N("الحقيقية");
 K.text(B.infl, "قيمتها الحقيقية قلت", { x: 330, y: 165, size: 44, head: true, w: 340, color: L, at: tReal });
 
 // ---------- 5. ...and that's before costs and any rental income ----------
 const tCost = N("المصاريف");
 K.cam(tCost - 0.45, "costs");
-K.img(B.costs, OBJ + "kanz-receipt-v01.png", { x: 300, y: 380, w: 360, at: tCost - 0.1, sfx: "paper", glow: true });
-K.tag(B.costs, "مصاريف", { x: 300, y: 630, at: tCost + 0.15, size: 44 });
+K.img(B.costs, OBJ + "kanz-receipt-v01.png", { x: 250, y: 370, w: 480, at: tCost - 0.1, sfx: "paper", glow: true });
+K.tag(B.costs, "مصاريف", { x: 260, y: 660, at: tCost + 0.15, size: 44 });
 const tRentIn = N("الإيجار");
-K.img(B.costs, OBJ + "kanz-house-v01.png", { x: 670, y: 400, w: 330, at: tRentIn - 0.2 });
-K.tag(B.costs, "دخل الإيجار؟", { x: 670, y: 630, lav: true, at: tRentIn, size: 44 });
+K.img(B.costs, OBJ + "kanz-house-v01.png", { x: 580, y: 390, w: 420, at: tRentIn - 0.2 });
+K.tag(B.costs, "دخل الإيجار؟", { x: 570, y: 660, lav: true, at: tRentIn, size: 44 });
 
 // ---------- 6. "the price went up" doesn't mean the money is in your pocket ----------
 const tPocket = N("كدة") - 0.3;
@@ -124,14 +135,14 @@ K.punch("ولو لسه تحت الإنشاء؟", tCon, tYou - 0.05, { size: 92 }
 // ---------- 9. pay now, receive later; delays mean instalments + rent, no use, no income ----------
 K.cam(tYou - 0.35, "build", { sfx: false, dur: 0.3 });
 K.axis(B.build, 140, 860, 430, { at: tYou });
-K.img(B.build, OBJ + "kanz-loan-agreement-v01.png", { x: 780, y: 220, w: 280, at: N("بتدفع"), sfx: "paper" });
+K.img(B.build, OBJ + "kanz-loan-agreement-v01.png", { x: 780, y: 210, w: 340, at: N("بتدفع"), sfx: "paper" });
 const tNow = N("دلوقتي");
 K.dot(B.build, 780, 430, { at: tNow });
 K.tag(B.build, "دلوقتي", { x: 780, y: 495, at: tNow + 0.1 });
 const tLater = N("هتستلمها");
 K.dot(B.build, 450, 430, { at: tLater, color: "#fff" });
 K.tag(B.build, "التسليم المتوقع", { x: 450, y: 495, at: tLater + 0.1 });
-const houseB = K.img(B.build, OBJ + "kanz-house-v01.png", { x: 450, y: 250, w: 320, at: tLater, glow: true });
+const houseB = K.img(B.build, OBJ + "kanz-house-v01.png", { x: 450, y: 230, w: 380, at: tLater, glow: true });
 const tLate = N("اتأخر");
 K.dashed(B.build, 430, 430, 170, 430, { at: tLate, color: L, dur: 0.6 });
 K.tl.to(houseB, { left: 190, duration: 0.7, ease: "power3.inOut" }, tLate);
@@ -168,7 +179,7 @@ K.oval(B.ways, 420, 700, 340, 120, { at: N("وتأخير"), seed: 3 });
 K.text(B.ways, num("−") + " المكسب", { x: 500, y: 860, size: 52, head: true, color: L, at: N("مكسبه"), from: "pop", sfx: "hit", gain: 0.3 });
 K.cam(N("العقار") - 0.3, "guar");
 const tInv = N("استثمار");
-K.img(B.guar, OBJ + "kanz-house-v01.png", { x: 500, y: 200, w: 300, at: K.T("العقار", tInv - 3) });
+K.img(B.guar, OBJ + "kanz-house-v01.png", { x: 500, y: 170, w: 380, at: K.T("العقار", tInv - 3), glow: true });
 K.tag(B.guar, "ممكن يكون استثمار كويس", { x: 500, y: 390, at: tInv, size: 44 });
 const tMyth = N("مبيخسرش");
 K.card(B.guar, card("«العقار مبيخسرش»", 80), { x: 500, y: 600, w: 760, h: 240, at: tMyth - 0.15 });
@@ -185,9 +196,14 @@ const qs = [["بكام", "اشتريت بكام؟", "kanz-price-tag-v01.png"], [
   ["كام", "صافي مكسبك كام؟", "kanz-coins-v01.png"]];
 qs.forEach(([w, html, img], i) => {
   const t = N(w), y = 330 + i * 235;
-  K.img(B.ask, OBJ + img, { x: 800, y, w: 210, at: t, gain: 0.25, glow: i === 2 });
-  K.text(B.ask, html, { x: 420, y, size: 72, head: true, at: t + 0.05, color: i === 2 ? L : "#fff" });
+  K.img(B.ask, OBJ + img, { x: 810, y, w: 250, at: t, gain: 0.25, glow: i === 2 });
+  K.text(B.ask, html, { x: 400, y, size: 80, head: true, at: t + 0.05, color: i === 2 ? L : "#fff" });
 });
 
+// ---------- 13. ending (approved 2026-10-11): back to the opening house; the spoken question, big ----------
+const tEnd = K.T("تبيع", tAsk) + 0.5;
+K.cam(tEnd, "hook", { via: 0.42, dur: 0.9 });
+K.takeaway(B.hook, "صافي مكسبك <span class='kw'>كام؟</span>", { x: 500, y: 40, size: 112, at: tEnd + 0.6, glow: false });
+
 // ---------- end: no closing logo or wipe, no top-left logo (Ahmed, 2026-10-06/07, as on the recent Reels) ----------
-K.duration = window.DURATION + 1.0;
+K.duration = window.DURATION + 2.4;

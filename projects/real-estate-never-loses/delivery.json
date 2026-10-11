@@ -1,6 +1,6 @@
 {
-  "delivered": "2026-10-10 (v2); replaced with v4 2026-10-11",
-  "version": "real-estate-never-loses-v4 (look v2, no \"مثال افتراضي\", old bar chart restored at 0:16-0:29; voice as v2)",
+  "delivered": "2026-10-10 (v2); replaced with v4 2026-10-11; replaced with v5 2026-10-11",
+  "version": "real-estate-never-loses-v5 (style-review updates: complete first frame, fill, K.area price chart, bars to scale, takeaway ending; first-frame seek fix; voice as v2)",
   "requested_by": "Ahmed: send it to the Drive and update Airtable with the link",
   "drive": {
     "account": "yasser@kanzms.com",
@@ -13,10 +13,10 @@
       {
         "name": "01.mp4",
         "id": "1cpaheGoG37DUlIfGe_JtC7Lc5QSCtB3g",
-        "bytes": 91695719,
-        "md5": "052184aa795a52dbf44ae6e198bdad00",
+        "bytes": 93831593,
+        "md5": "97c926d3b183085370657b920c494474",
         "readback_size_md5_match": true,
-        "history": "v2 (93355422 bytes, md5 7cdbc343d7b705681aa6c8d8c99586d8) replaced in place by v4 at Ahmed's request 2026-10-11; same file id and folder link"
+        "history": "v2 (93355422 bytes, md5 7cdbc343d7b705681aa6c8d8c99586d8) replaced in place by v4 at Ahmed's request 2026-10-11; same file id and folder link; v4 (91695719 bytes, md5 052184aa795a52dbf44ae6e198bdad00) replaced in place by v5 at Ahmed's request 2026-10-11; same file id and folder link"
       }
     ]
   },
@@ -30,7 +30,8 @@
     },
     "unchanged": "Brief (still says 'بسعر بأقل'; the video says 'بسعر أقل', user approved), Status (In Review) and all other fields",
     "verified_from_write_response": true,
-    "note_2026_10_11": "Drive link (folder) unchanged by the v4 replacement, so no Airtable write was needed"
+    "note_2026_10_11": "Drive link (folder) unchanged by the v4 replacement, so no Airtable write was needed",
+    "note_2026_10_11_v5": "Drive link (folder) unchanged by the v5 replacement; no Airtable write needed. Status In Review unchanged."
   },
   "not_done": "No publication or scheduling."
 }

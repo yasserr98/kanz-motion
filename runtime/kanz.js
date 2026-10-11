@@ -426,6 +426,7 @@
     const box = K.el("div", "", h);
     parts.forEach((p) => {
       const s = K.el("span", "w " + (p.kw ? "kw" : ""), box, p.html);
+      if (p.at == null) return; // no `at`: on screen from frame 1 (complete first frame, 2026-10-11)
       hide(s);
       tl.fromTo(s, { y: 30, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.35, immediateRender: false }, p.at);
     });
