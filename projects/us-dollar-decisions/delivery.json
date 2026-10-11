@@ -1,0 +1,32 @@
+{
+  "delivered": "2026-10-11 (v4)",
+  "version": "us-dollar-decisions-v4 (simple hook, US map, company icons, country landmarks; instant-clone voice with Ahmed's 'يوصل لك' take spliced in)",
+  "requested_by": "Ahmed: drive and airtable and make it ready to be posted (the old voice, yes)",
+  "drive": {
+    "account": "yasser@kanzms.com",
+    "method": "scripts/kanz_drive_upload.py in the Kanz repo (resumable upload, readback)",
+    "parent": "Kanz Content 1vMk8CG7fRj15FqGpQ0mMbz-vV_MLUhlA",
+    "folder_id": "1gWR91904V3hGWK8uyeR3ZRoRls1d5fW-",
+    "folder_name": "How US Dollar Decisions Affect Your Money",
+    "folder_url": "https://drive.google.com/drive/folders/1gWR91904V3hGWK8uyeR3ZRoRls1d5fW-",
+    "files": [
+      {"name": "01.mp4", "id": "1_4RczBhsSmuBwVKM4q4SDT2_-Ucq4GEB", "bytes": 82671861, "md5": "c17d40ce5d1c2678ac25368087ecc99b", "readback_size_md5_match": true},
+      {"name": "cover.png", "id": "19a1oBTXBqawYTZn3hdRPwL3LvVF52AJK", "bytes": 2088388, "md5": "a28f247bb9486b37a684f5ef0293728d", "readback_size_md5_match": true,
+       "note": "Reel cover (style A), 1080x1920, for the post; first upload attempt dropped the connection before completing, the retry verified"}
+    ]
+  },
+  "airtable": {
+    "base": "appjVgbUZdgzOs9DX",
+    "table": "tbl9irDbqdU1zwBGO",
+    "record": "recuuRJ8eXF5mSCD4",
+    "name": "How US Dollar Decisions Affect Your Money",
+    "method": "Airtable REST API PATCH with the repo's local PAT (.env.airtable.headers); the Airtable MCP connector timed out at startup",
+    "changed": {
+      "Drive link": "https://drive.google.com/drive/folders/1gWR91904V3hGWK8uyeR3ZRoRls1d5fW-",
+      "Status": "Approved -> Ready to be posted (Ahmed's explicit instruction)",
+      "Brief": "replaced with the copy spoken and captioned in v4 (script.md captions block: Brief typos fixed, 'طبعا' -> 'غالبًا'); first line is the hook"
+    },
+    "verified": "write response: Status, Drive link and Name as sent; Brief identical after Airtable's trailing newline (one readback)"
+  },
+  "not_done": "No publication or scheduling. The six new Codex icons are still candidates awaiting Ahmed's approval."
+}
