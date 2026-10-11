@@ -22,19 +22,17 @@ const B = {
 };
 K.cam(0, "hook");
 
-// ---------- 1. hook: lost money in the market? Complete first frame ----------
+// ---------- 1. hook (Ahmed 2026-10-11): why do so many people lose money in the market? Complete first frame ----------
 N("البورصة");
-K.headline([{ html: "خسرت فلوس في" }, { html: "البورصة؟", kw: true }], { out: K.T("طيب") - 0.25 });
+K.headline([{ html: "تفتكر ليه ناس كتير" }, { html: "بتخسر فلوسها في" }, { html: "البورصة؟", kw: true }], { out: K.T("دراسة") - 0.3 });
 const crash = [[120, 330], [240, 370], [340, 345], [450, 450], [550, 425], [660, 590], [770, 560], [890, 780]];
 K.line(B.hook, crash, { at: 0, dur: 1.6, color: RED, width: 10 });
 K.img(B.hook, OBJ + "kanz-share-certificate-v01.png", { x: 600, y: 520, w: 540, glow: true, rot: -6 });
 K.img(B.hook, OBJ + "kanz-npc-m02-worried-v01.png", { x: 210, y: 560, w: 400 });
+K.bgObj(B.hook, OBJ + "kanz-npc-f01-worried-v01.png", { x: 70, y: 470, w: 300, opacity: 0.3 });
+K.bgObj(B.hook, OBJ + "kanz-npc-m01-worried-wallet-v01.png", { x: 360, y: 430, w: 280, opacity: 0.25 });
 K.fg(B.hook, OBJ + "kanz-egp-banknote-stack-v01.png", { x: 980, y: 830, w: 380 });
 K.push(0.4, "hook", 1.1, 1.6);
-
-// ---------- 3. so why did that happen? ----------
-const tWhy = N("طيب");
-K.punch("طيب ليه ده حصل؟", tWhy, K.T("دراسة") - 0.45, { size: 110 });
 
 // ---------- 5. the 2005 study (genuine screenshot, NBER w11243) ----------
 const tStudy = N("دراسة");

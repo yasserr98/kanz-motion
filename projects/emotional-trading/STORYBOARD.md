@@ -90,3 +90,13 @@ out as 'motaaahawer'); added to `library/voice/lexicon.json`. Ahmed: "make sure 
 with the sound mixing": scene now sets `K.camSmooth = true` (24 fps capture) and `K.mix = 2` (levelled, ducked SFX,
 -16 LUFS with limiter). `out/emotional-trading-v5.mp4` 75.7 s, 24 fps, -16.0 LUFS. Ending stays the hold on the
 careful/reckless split (no takeaway card: Ahmed removed the closing sentence). Airtable Brief already matches.
+
+## v6 (2026-10-11): new hook
+
+Ahmed proposed 'تفتكر ايه اكبر سبب بيخلي الناس تخسر في البورصة؟' and asked if it is true. Answer: emotions/behaviour
+are a well-documented major cause (Lo et al. 2005; Barber & Odean 2000; Odean 1998) but no study ranks them as
+*the* biggest, so 'أكبر سبب' overclaims once the video answers it with emotional trading. Ahmed chose
+'تفتكر ليه ناس كتير بتخسر فلوسها في البورصة؟', which replaces both 'خسرت فلوس في البورصة؟' and 'طيب ليه ده حصل؟'
+(the punch card went with it). Only the hook paragraph was re-voiced (not flagged flat). Hook board: three-line
+headline from frame 1, two faint worried figures behind for "many people". Cover headline updated (crop-safe ok).
+Airtable Brief updated to the v6 copy (write response verified). Voice 73.3 s.

@@ -5,7 +5,7 @@ Type Video), Brief read 2026-10-11. Voice: ElevenLabs (`engine/make.py tts`). Th
 spoken exactly as written and is also the caption source; `*word*` marks the caption keyword (stripped
 before TTS). Blank lines are paragraph pauses; single line breaks keep lines of one beat together.
 
-Last sentence 'نتيجة صفقة واحدة…' removed 2026-10-11 (Ahmed). Cut to ~1:19 2026-10-11 (Ahmed: 1:20 max; approved the proposed whole-sentence cut, "aMAZING render it"): removed 'متابع الأخبار…', 'جزء من الإجابة…', 'وكل ده… منطقية', 'فممكن تتمسك…', 'والمكسب كمان…', 'المشاعر دي طبيعية…', 'قبل ما تحط فلوسك…', 'وإيه اللي لو اتغيّر…'. Earlier cut (Ahmed's shorter version, pasted in chat): removed 'حدّد كمان…', 'الإجابات دي…', 'ولما تتوتر…' and 'ولو المعلومات…'; all other lines unchanged.
+New hook 2026-10-11 (Ahmed): 'تفتكر ليه ناس كتير بتخسر فلوسها في البورصة؟' replaces 'خسرت فلوس في البورصة؟' and 'طيب ليه ده حصل؟' (chosen after the fact check: 'أكبر سبب' was not supportable). Last sentence 'نتيجة صفقة واحدة…' removed 2026-10-11 (Ahmed). Cut to ~1:19 2026-10-11 (Ahmed: 1:20 max; approved the proposed whole-sentence cut, "aMAZING render it"): removed 'متابع الأخبار…', 'جزء من الإجابة…', 'وكل ده… منطقية', 'فممكن تتمسك…', 'والمكسب كمان…', 'المشاعر دي طبيعية…', 'قبل ما تحط فلوسك…', 'وإيه اللي لو اتغيّر…'. Earlier cut (Ahmed's shorter version, pasted in chat): removed 'حدّد كمان…', 'الإجابات دي…', 'ولما تتوتر…' and 'ولو المعلومات…'; all other lines unchanged.
 
 Pauses: paragraphs split after 'أخرج؟' and 'فعلًا؟' (voice check 2026-10-11: questions read flat mid-paragraph). Words unchanged.
 
@@ -16,9 +16,7 @@ Copy doubts (flagged, not changed):
   (NBER w11243). To be confirmed and screenshotted before the scene is built.
 
 <!-- captions:start -->
-خسرت فلوس في *البورصة*؟
-
-طيب *ليه* ده حصل؟
+تفتكر ليه ناس كتير بتخسر فلوسها في *البورصة*؟
 
 في *دراسة* اتعملت في 2005 تابعوا فيها مجموعة من المتداولين اليوميين لمدة خمس أسابيع، وقارنوا مشاعرهم بنتايج التداول.
 ولقوا إن التأثر العاطفي الأقوى بالمكسب والخسارة كان مرتبط بأداء *أسوأ*.
