@@ -330,7 +330,7 @@
         gsap.set(e, { rotation: r, zIndex: 2 + row });
         hide(e);
         tl.fromTo(e, { y: -280 - row * 40, autoAlpha: 0, rotation: r + 25 }, { y: 0, autoAlpha: 1, rotation: r, duration: 0.42, ease: "power2.in", immediateRender: false }, o.at + i * st);
-        if (i % 3 === 0) K.sfx(o.at + i * st + 0.4, o.sfx || "coin", 0.22);
+        if (i % 3 === 0) K.sfx(o.at + i * st + 0.4, K.cue(o.sfx, "coin"), 0.22);
         items.push(e);
       }
     }
@@ -347,7 +347,7 @@
       gsap.set(e, { zIndex: 2 + i, rotation: rnd(i, 13) * 6 });
       hide(e);
       tl.fromTo(e, { y: -160, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.3, ease: "power2.in", immediateRender: false }, o.at + i * st);
-      if (i % 2 === 0) K.sfx(o.at + i * st + 0.28, o.sfx || "coin", 0.18);
+      if (i % 2 === 0) K.sfx(o.at + i * st + 0.28, K.cue(o.sfx, "coin"), 0.18);
       items.push(e);
     }
     if (o.out != null) tl.to(items, { autoAlpha: 0, duration: 0.3 }, o.out);
@@ -367,7 +367,7 @@
     tl.set(el, { autoAlpha: 0 }, t);
     tl.fromTo(n, { autoAlpha: 1, scale: o.pop === false ? 1 : 1.04 }, { autoAlpha: 1, scale: 1, duration: 0.25, ease: "power2.out", immediateRender: false }, t);
     (el._swaps = el._swaps || []).push({ t, el: n });
-    if (o.sfx !== false) K.sfx(t, o.sfx || "pop", o.gain || 0.25);
+    if (o.sfx !== false) K.sfx(t, K.cue(o.sfx, "pop"), o.gain || 0.25);
     if (o.out != null) tl.to(n, { autoAlpha: 0, duration: 0.3 }, o.out);
     return n;
   };
@@ -421,7 +421,7 @@
       tl.fromTo(bg, { clipPath: "inset(0 0% 0 0)" }, { clipPath: "inset(0 100% 0 0)", duration: dur, ease: "power3.inOut", immediateRender: false }, t);
     }
     tl.set(stage, { attr: { "data-world": name } }, t + dur / 2);
-    if (o.sfx !== false) K.sfx(t, o.sfx || "paper", o.gain || 0.4);
+    if (o.sfx !== false) K.sfx(t, K.cue(o.sfx, "paper"), o.gain || 0.4);
   };
 
   // ---------- ending: the video's thesis, big, held after the last word (approved 2026-10-11) ----------

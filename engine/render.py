@@ -27,7 +27,85 @@ def decode(path):
     return np.frombuffer(pcm, dtype=np.int16).astype(np.float32).reshape(-1, 2) / 32768
 
 
-def mix_audio(proj, cues, duration, out, t0=0.0):
+def env_db(x, win):
+    """Running RMS level in dBFS over `win` samples (mono)."""
+    sq = np.convolve(x * x, np.ones(win, np.float32) / win, "same")
+    return 10 * np.log10(sq + 1e-10)
+
+
+def smooth_gain(g_db, attack, release):
+    """One-pole smoothing of a gain curve in dB: fast when it drops, slow when it recovers."""
+    out = np.empty_like(g_db)
+    a, r, cur = np.exp(-1 / attack), np.exp(-1 / release), 0.0
+    for i, g in enumerate(g_db):
+        k = a if g < cur else r
+        cur = k * cur + (1 - k) * g
+        out[i] = cur
+    return out
+
+
+SFX_TARGET = -18.0  # loudest-50 ms RMS every SFX file is levelled to before its scene gain (mix 2)
+
+
+def mix_audio_v2(proj, cues, duration, out, t0=0.0):
+    """Mix 2 (Ahmed 2026-10-11: "sometimes the sound effects are too loud"). Library files differ by up to
+    20 dB inside one category, so every file is levelled first; the SFX bus ducks ~5 dB under speech and
+    can never rise above the voice; then the whole mix goes to -16 LUFS with a -1 dBFS peak limit."""
+    voice = decode(proj / "audio" / "voice.wav")
+    n = int((duration - t0) * SR) + SR
+    vbus = np.zeros((n, 2), np.float32)
+    v = voice[int(t0 * SR):][:n]
+    vbus[: len(v)] += v
+    sbus = np.zeros((n, 2), np.float32)
+    lib = json.loads((ROOT / "library" / "sfx" / "manifest.json").read_text(encoding="utf-8"))
+    by_cat = {}
+    for m in lib:
+        by_cat.setdefault(m["category"], []).append(m["file"])
+    cache, rng, used = {}, random.Random(7), set()
+    w50 = int(0.05 * SR)
+    for c in sorted(cues, key=lambda c: c["t"]):
+        files = by_cat.get(c["cat"])
+        if not files or c["t"] < t0:
+            continue
+        f = files[(c["pick"] * 7 + rng.randrange(3)) % len(files)]
+        used.add(f)
+        if f not in cache:
+            a = decode(ROOT / "library" / "sfx" / f)
+            loud = env_db(a.mean(axis=1), w50).max() if len(a) else SFX_TARGET
+            cache[f] = a * np.float32(10 ** (min(SFX_TARGET - loud, 6.0) / 20))  # level it; boost at most +6 dB
+        s = cache[f] * float(c["gain"]) * 0.55
+        i = int((c["t"] - t0) * SR)
+        j = min(n, i + len(s))
+        if i < n:
+            sbus[i:j] += s[: j - i]
+    # duck under speech and keep the SFX bus at least 4 dB under the voice's typical speech level
+    hop = int(0.01 * SR)
+    vdb = env_db(vbus.mean(axis=1), int(0.03 * SR))[::hop]
+    speech = vdb > -42
+    vref = np.median(vdb[speech]) if speech.any() else -20.0
+    sdb = env_db(sbus.mean(axis=1), w50)[::hop]
+    g = np.where(speech, -5.0, 0.0)
+    g = np.minimum(g, (vref - 4.0) - sdb)  # ceiling: never louder than the voice
+    g = smooth_gain(np.minimum(g, 0.0), attack=2, release=25)  # 10 ms steps: 20 ms attack, 250 ms release
+    gain = np.repeat(10 ** (g / 20), hop)[:n].astype(np.float32)
+    if len(gain) < n:
+        gain = np.pad(gain, (0, n - len(gain)), constant_values=gain[-1] if len(gain) else 1.0)
+    bus = vbus + sbus * gain[:, None]
+    raw = out.with_name(out.stem + "-raw.wav")
+    pcm = (np.clip(bus, -1, 1) * 32767).astype(np.int16).tobytes()
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "s16le", "-ar", str(SR), "-ac", "2", "-i", "-", str(raw)],
+                   input=pcm, check=True)
+    meas = subprocess.run(["ffmpeg", "-i", str(raw), "-af", "ebur128", "-f", "null", "-"], capture_output=True, text=True).stderr
+    lufs = float(meas.rsplit("I:", 1)[1].split("LUFS")[0])
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(raw), "-af",
+                    f"volume={-16.0 - lufs:.2f}dB,alimiter=limit=0.891:level=false:latency=true", str(out)], check=True)
+    raw.unlink()
+    return sorted(used)
+
+
+def mix_audio(proj, cues, duration, out, t0=0.0, mix=1):
+    if mix == 2:
+        return mix_audio_v2(proj, cues, duration, out, t0)
     voice = decode(proj / "audio" / "voice.wav")
     n = int((duration - t0) * SR) + SR
     bus = np.zeros((n, 2), np.float32)
@@ -120,9 +198,10 @@ def main():
         ff.stdin.close()
         ff.wait()
         cues = page.evaluate("K.cues")
+        mix = page.evaluate("K.mix || 1")
         browser.close()
     audio = out_dir / f"_{name}-audio.wav"
-    used = mix_audio(proj, cues, t1, audio, a.t0)
+    used = mix_audio(proj, cues, t1, audio, a.t0, mix)
     final = out_dir / f"{name}.mp4"
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(silent), "-i", str(audio), "-c:v", "copy", "-c:a", "aac",
                     "-b:a", "192k", "-shortest", "-movflags", "+faststart", str(final)], check=True)

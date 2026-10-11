@@ -183,6 +183,12 @@ these applied; not for posting).
   (the template has it). The camera follows the exact time while objects, text and charts stay on twos, so pans
   and pushes glide without losing the hand-made feel. `engine/render.py` sees the flag and captures every frame
   at 24 fps (about twice the render time). Trial clip: `projects/_sample-real-estate-v3/out/camera-sample.mp4`.
+- **Sound mix 2** (Ahmed 2026-10-11: "sometimes the sound effects are too loud"): `K.mix = 2` (the template has it).
+  Library files differ by up to 20 dB inside one category and the engine picks one at random, so `engine/render.py`
+  levels every file to the same loudness first, ducks the SFX about 5 dB under speech, caps them below the voice,
+  then brings the whole mix to -16 LUFS with a -1 dBFS limiter. `sfx: false` is silent (older scenes fell back to the
+  default sound). Measured on real-estate v5: loudest effects went from 4 dB under the voice to 9 dB under it.
+  Listening test: `projects/_sample-real-estate-v3/out/sound-ab.mp4`.
 - **Cover, style A ("the idea in an object").** `projects/<slug>/cover.json` -> `python engine/cover.py projects/<slug>`
   writes `out/cover.png` (1080x1920, the upload) and `out/cover-review.jpg` (3:4 / 4:5 / 1:1 crop lines and the
   3:4 profile-grid crop). Headline and object must stay inside x 150-930, y 440-1380; the script measures and warns.
