@@ -18,6 +18,9 @@ repo or a Kanz worktree (worktrees do not contain this folder; use the absolute 
 3. **Voice.**
    - Voice note: write `audio/edl.json` (keep the last clean take of each retake, reasons in `_why`),
      then `make.py audio <slug>`; read the new transcript through.
+   - **Voice (Ahmed 2026-10-11, every script video):** the instant clone "Ahmed Shaaban Shorts" `UeQ9UTIKgN2rsbnqHH5w`
+     (the `.env` default). Never use the professional clone "Ahmed Shaaban" `zb1ukG6KkE2RYSjMU6b3`: compared on
+     us-dollar-decisions, Ahmed said the old one "was way better".
    - Script: paste the copy verbatim into `script.md` (never rewrite; flag doubts), mark `*keywords*`,
      `make.py sample <slug> 1.0` and `1.15` for Ahmed to pick, then `make.py tts <slug> <speed>`.
      `tts` runs the voice checks itself: before generating, `voicecheck.py --pre` lists script patterns
