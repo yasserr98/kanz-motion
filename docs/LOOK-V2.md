@@ -150,3 +150,30 @@ checks are in `library/objects/PROVENANCE-2026-10-10.md`. They are candidates un
   walking right mirrors them.
 
 Any further requests go in `docs/CODEX-ASSET-REQUESTS.md`.
+
+## 9. Style review updates (Ahmed, 2026-10-11)
+
+From the marked style review of the five voiceover Reels. Ahmed approved: complete first frame, fill the frame,
+charts with weight, bars to scale (section 6), takeaway ending, cover style A. He rejected: on-screen source
+documents as a default device (section 5 stays available, not required) and bigger characters with object stacks.
+New videos only. Worked example: `projects/_sample-real-estate-v3/` (a copy of the delivered real-estate v4 with
+these applied; not for posting).
+
+- **First frame is complete.** The question headline and the hero object are on screen from frame 1: no `at` on the
+  hero `K.img`, headline parts at `at: 0`. Movement (push, float) starts after. `engine/lint.py` now flags a first
+  visual after 0.3 s (`--hook`) and a first frame under the fill threshold.
+- **Fill the frame when the voice names a thing.** Hero objects 500-600 board px, a second object for the
+  consequence, one blurred `K.fg` for depth, no placeholder tags. Lint prints thin frames as MUST FIX: fix them or
+  say why they stay (a board building up for under ~2 s, or a chart frame, is a fair reason).
+- **Charts with weight**, value-based, time left -> right:
+  - `K.area(board, { x, y, w, h, data, min, max, at, dur, grid, marker: { i, label }, end: { html }, out })`: a line
+    that draws itself with a lavender area under it, a glow and a dot riding its head. Use for "prices rose 20% in
+    a year". A non-zero `min` is fine for a time series; label the values that matter.
+  - `K.candles(board, { x, y, w, h, data: [[open, high, low, close], ...], at, dur })`: candles appear left -> right.
+    Returns `x(i)` / `y(v)` so `K.oval` / `K.arrow` / `K.text` can mark the swing being spoken about.
+- **Takeaway ending.** After the last word, `K.cam(t, <hook board>, { via: 0.42 })` returns to the opening
+  composition and `K.takeaway(board, html, { x, y, size, at })` shows the video's question or thesis in big type,
+  in words the voice actually said. Extend `K.duration` by about 2 s for the hold.
+- **Cover, style A ("the idea in an object").** `projects/<slug>/cover.json` -> `python engine/cover.py projects/<slug>`
+  writes `out/cover.png` (1080x1920, the upload) and `out/cover-review.jpg` (3:4 / 4:5 / 1:1 crop lines and the
+  3:4 profile-grid crop). Headline and object must stay inside x 150-930, y 440-1380; the script measures and warns.

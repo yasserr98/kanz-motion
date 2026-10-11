@@ -403,6 +403,13 @@
     return box;
   };
 
+  // ---------- ending: the video's thesis, big, held after the last word (approved 2026-10-11) ----------
+  // Use words the voice actually says. Pair it with K.cam(t, <hook board>) so the last frame mirrors the first.
+  K.takeaway = function (parent, html, o = {}) {
+    if (o.glow !== false) K.glow(parent, o.x, o.y, o.glow || 760, { at: o.at });
+    return K.text(parent, html, { head: true, size: 120, w: 860, from: "pop", sfx: "hit", gain: 0.3, ...o });
+  };
+
   // ---------- review overlay: red where platform UI covers the video ----------
   K.safeGuide = function (on = true) {
     let g = document.getElementById("safeguide");

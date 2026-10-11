@@ -3,8 +3,9 @@
 Reads the live page (no video render) and reports:
   safe   text outside the platform safe zones (K.SAFE, docs/LOOK-V2.md); objects whose centre is outside
   dead   stretches longer than --dead seconds where nothing new appears and the camera holds
-  fill   stretches longer than 1.5 s where visible content covers less than --fill of the safe area
-  hook   the first visual arriving later than 1.0 s
+  fill   stretches longer than 1.5 s where visible content covers less than --fill of the safe area (MUST FIX
+         since 2026-10-11: fill the frame when the voice names a thing, or justify it)
+  hook   the first visual arriving later than --hook (0.3 s since 2026-10-11) and a first frame below --fill
   bars   boards where two or more bars use hand-entered heights or different scales (K.scale, docs/LOOK-V2.md)
 Writes out/lint.json and, when there are findings, out/lint.jpg: one frame per finding with the
 unsafe zones shaded red. Exit code is 0 either way: these are review flags, not hard failures.
@@ -22,7 +23,7 @@ from contact import sheet  # noqa: E402
 
 SAFE = {"top": 270, "bottom": 1440, "left": 120, "right": 960, "upperLeft": 65, "upperRight": 1015, "upperBottom": 1000}
 TEXT = "#world .t, #world .tag, #world .card, #world .kcount, #world .ksrc, #headline .w, #overlay .t"
-OBJS = "#world img.obj, #world .kdoc, #world .kphoto, #world img.kmap, #world svg.mk path, #world .kpin, #world .kmark, #world .kframe, #world .abs"
+OBJS = "#world img.obj, #world .kdoc, #world .kphoto, #world img.kmap, #world svg.mk path, #world svg.mk polyline, #world svg.mk rect, #world .kpin, #world .kmark, #world .kframe, #world .abs"
 
 PROBE = """(t) => {
   K.seek(t);
@@ -134,6 +135,7 @@ def main():
     ap.add_argument("--every", type=float, default=0.25)
     ap.add_argument("--dead", type=float, default=2.5)
     ap.add_argument("--fill", type=float, default=0.30)
+    ap.add_argument("--hook", type=float, default=0.3)
     ap.add_argument("--no-sheet", action="store_true")
     a = ap.parse_args()
     proj = Path(a.project).resolve()
@@ -209,13 +211,14 @@ def main():
 
         # 4. hook
         first = next((t for t, f in frames if any(it["kind"] != "caption" for it in f["items"])), None)
-        hook = None if first is not None and first <= 1.0 else first
+        hook = None if first is not None and first <= a.hook else first
+        first_fill = cov[0] if cov else 0
 
         # 5. bars drawn to scale
         bars = bar_findings(page.evaluate("(K.bars || []).map(b => ({...b}))"))
 
         report = {"project": proj.name, "look2": look2, "every": a.every, "voice_end": voice_end,
-                  "safe": safe, "dead": dead, "thin": thin, "hook_late": hook, "bars": bars,
+                  "safe": safe, "dead": dead, "thin": thin, "hook_late": hook, "first_fill": first_fill, "bars": bars,
                   "fill_median": sorted(cov)[len(cov) // 2] if cov else 0}
         (out_dir / "lint.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
 
@@ -225,8 +228,11 @@ def main():
             what = f"captions in {h['frames']} sampled frames" if h["kind"] == "caption" else h["what"]
             print(f"    {h['from']:6.2f}-{h['to']:6.2f}s  {h['kind']:7} {h['why']:20} {what}")
         print(f"  dead stretches > {a.dead}s: {dead or 'none'}")
-        print(f"  thin frames (< {a.fill:.0%} of safe area for 1.5 s+): {thin or 'none'}")
-        print(f"  hook: {'first visual at %.2fs (later than 1.0 s)' % hook if hook is not None else 'ok'}")
+        print(f"  thin frames (< {a.fill:.0%} of safe area for 1.5 s+): {('MUST FIX ' + str(thin)) if thin else 'none'}")
+        hook_msg = 'first visual at %.2fs (later than %.1f s)' % (hook, a.hook) if hook is not None else 'ok'
+        if first_fill < a.fill:
+            hook_msg += f'; first frame only {first_fill:.0%} filled (want a complete composition: question + hero object)'
+        print(f"  hook: {hook_msg}")
         print(f"  bars to scale: {len(bars) or 'ok'}{' finding(s)' if bars else ''}")
         for b in bars:
             at = f"{b['at']:6.2f}s" if isinstance(b["at"], (int, float)) else "     -"
