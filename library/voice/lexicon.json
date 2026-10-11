@@ -25,6 +25,11 @@
    "from": "٢٠٠ ألف",
    "to": "ميتين ألف",
    "found": "real-estate-never-loses v2 0:20.6: 'و٢٠٠ ألف' heard as Standard Arabic 'ومائتي'"
+  },
+  {
+   "from": "متهوّر",
+   "to": "مِت-هَوَّر",
+   "found": "emotional-trading v3/v4 1:11: read stretched 'motaaahawer' (plain and 'مِتْهَوَّر'); Ahmed picked the hyphenated spelling from test clips, 2026-10-11"
   }
  ],
  "watch": [
