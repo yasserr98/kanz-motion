@@ -100,3 +100,12 @@ are a well-documented major cause (Lo et al. 2005; Barber & Odean 2000; Odean 19
 (the punch card went with it). Only the hook paragraph was re-voiced (not flagged flat). Hook board: three-line
 headline from frame 1, two faint worried figures behind for "many people". Cover headline updated (crop-safe ok).
 Airtable Brief updated to the v6 copy (write response verified). Voice 73.3 s.
+
+## v7 (2026-10-11): Ahmed's exact clip spliced in
+
+Ahmed wanted the exact test clip (round 2 #2), not a re-generation with the same spelling. The voice now switches at
+70.2 s (between 'وتخسر،' and 'وممكن') to `out/pron/r2-2.mp3` ("وممكن تاخد قرار مِت-هَوَّر وتكسب بالحظ."), gain-matched
+(x1.19 on speech RMS); the six words are re-timed by ElevenLabs forced alignment on the clip. `transcript.json` has a
+`splice` note. **Do not re-run `make.py tts` without re-applying this splice** (it would overwrite voice.wav); the
+generated v6 voice is kept locally as `audio/voice-v6-generated.wav`. Script: `splice.py` in this folder
+(logic: cut at the word gap, trim the clip to its first/last word ±, RMS-match, append, offset word times).
