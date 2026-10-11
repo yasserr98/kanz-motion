@@ -109,3 +109,15 @@ Ahmed wanted the exact test clip (round 2 #2), not a re-generation with the same
 `splice` note. **Do not re-run `make.py tts` without re-applying this splice** (it would overwrite voice.wav); the
 generated v6 voice is kept locally as `audio/voice-v6-generated.wav`. Script: `splice.py` in this folder
 (logic: cut at the word gap, trim the clip to its first/last word ±, RMS-match, append, offset word times).
+
+## v8 (2026-10-11): new visual hook "F"
+
+Ahmed disliked the visual hook. Shown side by side: A (worried crowd, red arrows), B (falling candles + money bag),
+C (savings jar empties), D (burning share certificate); Ahmed liked B and allowed new icons ("we can do something
+better"). Codex made three objects in the approved style (`library/objects/PROVENANCE-2026-10-11.md`): trading screen
+with a blank display, M01/F01/M02 seen from behind, falling chart icon. Second comparison: B, E (crowd watching the
+market fall on the screen), F (same, opening close on the chart and pulling back on "ناس كتير"). Ahmed picked F.
+The comparison videos stay local in `out/hooks/`. Cover options: `out/cover.png` (certificate) and
+`out/cover-chart-down.png` (falling chart icon, still a candidate object).
+v9: the q1 board showed nothing for ~2 s before "اسأل نفسك" (v8 check, 0:59-1:01); it now shows "قبل ما تحط الاستراتيجية"
+with the written-plan paper until the question lands. `out/emotional-trading-v9.mp4` 75.4 s, 24 fps, -16.1 LUFS.

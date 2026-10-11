@@ -25,14 +25,26 @@ K.cam(0, "hook");
 // ---------- 1. hook (Ahmed 2026-10-11): why do so many people lose money in the market? Complete first frame ----------
 N("البورصة");
 K.headline([{ html: "تفتكر ليه ناس كتير" }, { html: "بتخسر فلوسها في" }, { html: "البورصة؟", kw: true }], { out: K.T("دراسة") - 0.3 });
-const crash = [[120, 330], [240, 370], [340, 345], [450, 450], [550, 425], [660, 590], [770, 560], [890, 780]];
-K.line(B.hook, crash, { at: 0, dur: 1.6, color: RED, width: 10 });
-K.img(B.hook, OBJ + "kanz-share-certificate-v01.png", { x: 600, y: 520, w: 540, glow: true, rot: -6 });
-K.img(B.hook, OBJ + "kanz-npc-m02-worried-v01.png", { x: 210, y: 560, w: 400 });
-K.bgObj(B.hook, OBJ + "kanz-npc-f01-worried-v01.png", { x: 70, y: 470, w: 300, opacity: 0.3 });
-K.bgObj(B.hook, OBJ + "kanz-npc-m01-worried-wallet-v01.png", { x: 360, y: 430, w: 280, opacity: 0.25 });
-K.fg(B.hook, OBJ + "kanz-egp-banknote-stack-v01.png", { x: 980, y: 830, w: 380 });
-K.push(0.4, "hook", 1.1, 1.6);
+// Hook visual (Ahmed picked "F" from a side-by-side of six on 2026-10-11): a crowd watches the market fall on a trading
+// screen; the shot opens close on the chart and pulls back on "ناس كتير". Screen and crowd: Codex objects 2026-10-11.
+const tPeople = K.T("ناس"), tLoseH = K.T("بتخسر");
+const SW = 800, SX = 500, SY = 600, k = SW / 1254;
+K.img(B.hook, OBJ + "kanz-trading-screen-blank-v01.png", { x: SX, y: SY, w: SW, shadow: false });
+const iw = 1000 * k, ih = 470 * k, icy = SY - 67 * k, left = SX - iw / 2, step = iw / 10;
+const fallE = [[8, 8.4, 7.6, 8.2], [8.2, 8.5, 7.4, 7.6], [7.6, 7.9, 6.8, 7.0], [7.0, 7.6, 6.9, 7.4], [7.4, 7.5, 6.2, 6.4],
+  [6.4, 6.6, 5.3, 5.5], [5.5, 6.0, 5.2, 5.8], [5.8, 5.9, 4.4, 4.6], [4.6, 4.8, 3.5, 3.7], [3.7, 3.9, 2.6, 2.8]];
+const mm = { min: 2.4, max: 8.6 };
+const c1 = K.candles(B.hook, { x: left + step * 3, y: icy, w: step * 6, h: ih, data: fallE.slice(0, 6), ...mm });
+const c2 = K.candles(B.hook, { x: left + step * 8, y: icy, w: step * 4, h: ih, data: fallE.slice(6), ...mm, at: tLoseH - 0.5, dur: 1.0 });
+gsap.set([c1.svg, c2.svg], { filter: "brightness(1.9)" }); // dark falling candles read on the dark screen
+K.arrow(B.hook, left + step * 4.5, icy - ih * 0.25, c2.x(3) + 6, c2.y(2.6) - 20, { at: tLoseH + 0.4, bend: -20, color: RED, width: 9 });
+const crowd = K.img(B.hook, OBJ + "kanz-npc-crowd-back-v01.png", { x: 470, y: 860, w: 420, shadow: false });
+gsap.set(crowd, { zIndex: 6 });
+K.glow(B.hook, SX, icy, 820, { at: 0 });
+// start close on the screen, pull back on "ناس كتير" to reveal the people watching
+K.cam(0, "hook", { scale: 1.6, dy: icy - 430 });
+K.cam(tPeople - 0.1, "hook", { dur: 1.3 });
+
 
 // ---------- 5. the 2005 study (genuine screenshot, NBER w11243) ----------
 const tStudy = N("دراسة");
@@ -156,6 +168,9 @@ const tBefore = N("وقبل");
 K.world(tBefore - 0.3, "charcoal");
 K.cam(tBefore - 0.3, "q1");
 const tAsk = N("اسأل");
+// fills the 2 s before "اسأل نفسك" (empty board in the v8 check at 0:59-1:01)
+K.text(B.q1, "قبل ما تحط الاستراتيجية", { x: 500, y: 300, size: 76, head: true, at: tBefore + 0.2, out: tAsk - 0.25 });
+K.img(B.q1, OBJ + "kanz-loan-agreement-v01.png", { x: 500, y: 580, w: 420, at: tBefore + 0.35, out: tAsk - 0.25, shadow: false });
 K.text(B.q1, "اسأل نفسك", { x: 500, y: 70, size: 96, head: true, color: L, at: tAsk });
 const row = (b, w, html, img, i, o = {}) => {
   const t = o.t || N(w), y = 270 + i * 230;
