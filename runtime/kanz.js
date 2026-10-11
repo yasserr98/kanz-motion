@@ -476,7 +476,15 @@
     const q = Math.floor(t * K.fps + 1e-6) / K.fps;
     // a seek to exactly 0 skips the zero-duration sets placed at 0 (hide/initial states), so the first two
     // frames showed later scenes (found 2026-10-11 in every delivered Reel); start a hair past 0 instead
+    // K.camSmooth (Ahmed 2026-10-11, new videos via the template): the camera follows the exact time while
+    // everything else stays on twos, so pans and pushes glide; engine/render.py then captures at 24 fps.
+    let cam = null;
+    if (K.camSmooth) {
+      tl.seek(Math.max(t, 1e-4), false);
+      cam = { x: gsap.getProperty(world, "x"), y: gsap.getProperty(world, "y"), scale: gsap.getProperty(world, "scaleX") };
+    }
     tl.seek(Math.max(q, 1e-4), false);
+    if (cam) gsap.set(world, cam);
     const step = Math.floor(q * K.fps);
     turb.forEach((f) => f.setAttribute("seed", String((Math.floor(q * 8) % 40) + 1)));
     if (grain) grain.style.transform = `translate(${(step * 37) % 40 - 20}px, ${(step * 53) % 40 - 20}px)`;
