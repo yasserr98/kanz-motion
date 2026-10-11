@@ -3,6 +3,7 @@
  * 2026-10-11 defaults (LOOK-V2 section 9): complete first frame, paper world for the key idea, takeaway ending,
  * smooth camera, sound mix 2, no logo. The voice says no figures, so nothing on screen carries a number: the
  * demand line is a shape with no axis values. USD objects copied from the approved Kanz explainer library.
+ * v3 (Ahmed 2026-10-11): simple hook, US map (border + 'هناك'), company icons, country landmarks, 'يوصلك' re-voiced.
  * Sequential anchors: K.N finds each word after the previous one.
  */
 const { N, T } = K;
@@ -22,18 +23,10 @@ const B = {
 };
 K.cam(0, "hook");
 
-// ---------- 1. hook: the Fed raises rates -> your wallet. Complete first frame ----------
+// ---------- 1. hook (Ahmed 2026-10-11: simple hooks, now the rule): question headline + one hero object, nothing else ----------
 K.headline([{ html: "ليه رفع سعر الفايدة" }, { html: "في أمريكا ممكن يأثّر" }, { html: "على فلوسك؟", kw: true }], { out: T("إنت") - 0.3 });
-K.img(B.hook, OBJ + "kanz-usd-banknote-v01.png", { x: 640, y: 470, w: 560, glow: true, float: true, rot: -5 });
-K.img(B.hook, OBJ + "kanz-wallet-v01.png", { x: 230, y: 640, w: 330 });
-const upA = K.arrow(B.hook, 330, 470, 330, 340, { bend: 0.001, width: 10 }); // the rate goes up (no `at`: frame 1)
-const upT = K.tag(B.hook, "الفايدة", { x: 190, y: 400, lav: true, size: 44 });
-K.tl.fromTo(upT, { scale: 1 }, { scale: 1.18, duration: 0.25, yoyo: true, repeat: 1, ease: "power2.out", immediateRender: false }, T("الفايدة"));
-K.glow(B.hook, 640, 470, 700, { at: T("أمريكا") });
-K.arrow(B.hook, 470, 700, 330, 760, { at: T("يأثّر") - 0.1, bend: -30 });
-K.tag(B.hook, "فلوسك", { x: 420, y: 830, size: 42, at: T("فلوسك") });
-K.fg(B.hook, OBJ + "kanz-egp-banknote-stack-v01.png", { x: 40, y: 850, w: 360 });
-K.push(0.4, "hook", 1.1, 3.6);
+K.img(B.hook, OBJ + "kanz-usd-banknote-v01.png", { x: 500, y: 500, w: 600, glow: true, float: true, rot: -5 });
+K.push(0.4, "hook", 1.12, 3.8);
 
 // ---------- 2. you earn and spend in pounds; maybe you never bought a dollar ----------
 const tYou = N("إنت");
@@ -53,33 +46,38 @@ K.fg(B.egp, OBJ + "kanz-egp-banknote-stack-v01.png", { x: 980, y: 860, w: 360, a
 // ---------- 3. the dollar does not stop at America's border ----------
 const tWhy = N("عشان");
 K.cam(tWhy - 0.3, "border");
-K.rect(B.border, 560, 220, 330, 330, { at: tWhy, dash: "14 12", color: WHITE, width: 5 });
-K.text(B.border, "أمريكا", { x: 725, y: 170, size: 54, head: true, at: N("استخدام") - 0.2 });
-const dollar = K.img(B.border, OBJ + "kanz-usd-banknote-v01.png", { x: 725, y: 385, w: 260, at: tWhy + 0.2, shadow: false, glow: 420 });
+// Ahmed 2026-10-11: the map of America instead of a box; the dollar leaves it
+K.img(B.border, OBJ + "kanz-map-usa-v01.png", { x: 660, y: 360, w: 640, at: tWhy, shadow: false });
+const dollar = K.img(B.border, OBJ + "kanz-usd-banknote-v01.png", { x: 640, y: 370, w: 240, at: tWhy + 0.3, shadow: false, glow: 420 });
 N("الدولار");
+K.push(tWhy + 0.6, "border", 1.1, 2.0); // slow push on the map until the dollar leaves (lint: dead 10.75-13.5)
 const tOut = N("واقف");
-K.tl.to(dollar, { left: 280, top: 420, rotation: -8, duration: 0.8, ease: "power2.inOut" }, tOut);
+K.cam(tOut - 0.1, "border", { dur: 0.8, sfx: false });
+K.tl.to(dollar, { left: 230, top: 420, rotation: -8, duration: 0.8, ease: "power2.inOut" }, tOut);
 K.sfx(tOut, "whoosh", 0.3);
-[[180, 210], [150, 640], [420, 720]].forEach(([x, y], i) =>
+[[170, 190], [150, 640], [430, 720]].forEach(([x, y], i) =>
   K.img(B.border, OBJ + "kanz-usd-banknote-v01.png", { x, y, w: 200, at: tOut + 0.5 + i * 0.25, shadow: false, rot: -10 + i * 8 }));
 K.text(B.border, "مش واقف عند حدود أمريكا", { x: 500, y: 830, size: 50, head: true, color: L, at: N("حدود") });
 
 // ---------- 4. the Fed raises rates; investors buy dollars and put their money there ----------
 const tFed = N("لما");
 K.cam(tFed - 0.3, "fed");
-K.img(B.fed, OBJ + "kanz-bank-v01.png", { x: 700, y: 380, w: 520, at: N("البنك") - 0.1, glow: true });
-K.text(B.fed, "البنك المركزي الأمريكي", { x: 600, y: 80, size: 56, head: true, at: N("الأمريكي") - 0.3 });
+const fedBank = K.img(B.fed, OBJ + "kanz-bank-v01.png", { x: 700, y: 380, w: 520, at: N("البنك") - 0.1, glow: true });
+const fedTitle = K.text(B.fed, "البنك المركزي الأمريكي", { x: 600, y: 80, size: 56, head: true, at: N("الأمريكي") - 0.3 });
 const tRaise = N("يرفع");
-K.arrow(B.fed, 860, 520, 860, 330, { at: tRaise, bend: 0.001, width: 11 });
-K.tag(B.fed, "الفايدة", { x: 840, y: 590, lav: true, size: 44, at: N("الفايدة") });
+const rateUp = K.arrow(B.fed, 860, 520, 860, 330, { at: tRaise, bend: 0.001, width: 11 });
+const rateTag = K.tag(B.fed, "الفايدة", { x: 840, y: 590, lav: true, size: 44, at: N("الفايدة") });
 const tInv = N("مستثمرين");
 K.img(B.fed, OBJ + "kanz-npc-m01-counting-money-v01.png", { x: 210, y: 560, w: 380, at: tInv - 0.1 });
 K.bgObj(B.fed, OBJ + "kanz-npc-f01-neutral-v01.png", { x: 70, y: 470, w: 280, opacity: 0.28, at: tInv + 0.2 });
 const buy = K.img(B.fed, OBJ + "kanz-usd-banknote-stack-v01.png", { x: 260, y: 300, w: 260, at: N("دولارات"), shadow: false });
 const tPut = N("ويحطّوا");
-K.tl.to(buy, { left: 640, top: 520, scale: 0.8, duration: 0.9, ease: "power2.inOut" }, tPut);
-K.arrow(B.fed, 360, 330, 520, 470, { at: tPut, bend: 40 });
-K.tag(B.fed, "فلوسهم هناك", { x: 470, y: 820, size: 44, at: N("هناك") });
+// Ahmed 2026-10-11: "هناك" means in America (US assets), not inside the Fed: the bank gives way to the map
+[fedBank, fedTitle, rateUp, rateTag].forEach((e) => K.out(e, tPut - 0.35));
+K.img(B.fed, OBJ + "kanz-map-usa-v01.png", { x: 680, y: 400, w: 620, at: tPut - 0.2, shadow: false, glow: 600 });
+K.tl.to(buy, { left: 680, top: 400, scale: 0.85, duration: 0.9, ease: "power2.inOut" }, tPut + 0.2);
+K.arrow(B.fed, 360, 300, 520, 380, { at: tPut + 0.2, bend: 40 });
+K.text(B.fed, "فلوسهم في أمريكا", { x: 640, y: 120, size: 60, head: true, color: L, at: N("هناك") });
 
 // ---------- 5. demand for dollars rises; the dollar gets stronger ----------
 const tDem = N("فالطلب");
@@ -96,10 +94,10 @@ K.push(tStrong + 0.3, "demand", 1.08, 2.0);
 // ---------- 6. an Egyptian company buys from another country: both pay in dollars, America is not in the deal ----------
 const tCo = N("ولما");
 K.cam(tCo - 0.3, "trade");
-K.img(B.trade, OBJ + "kanz-factory-v01.png", { x: 780, y: 320, w: 400, at: N("شركة") });
+K.img(B.trade, OBJ + "kanz-company-trading-v01.png", { x: 780, y: 320, w: 420, at: N("شركة") });
 K.tag(B.trade, "شركة مصرية", { x: 790, y: 560, size: 44, at: N("مصرية") });
 const goods = K.img(B.trade, OBJ + "kanz-raw-material-sack-v01.png", { x: 210, y: 380, w: 230, at: N("بضاعة") });
-K.img(B.trade, OBJ + "kanz-factory-v01.png", { x: 220, y: 300, w: 400, at: N("شركة"), });
+K.img(B.trade, OBJ + "kanz-company-office-v01.png", { x: 220, y: 290, w: 380, at: N("شركة") });
 gsap.set(goods, { zIndex: 4 });
 K.tag(B.trade, "بلد تانية", { x: 210, y: 560, size: 44, at: N("تانية") - 0.1 });
 K.arrow(B.trade, 330, 220, 660, 220, { at: K.T("بضاعة", tCo) + 0.4, bend: 50, color: WHITE });
@@ -113,7 +111,7 @@ K.push(tPay + 0.3, "trade", 1.06, 3.0);
 // ---------- 7. companies and governments borrow in dollars but earn in another currency ----------
 const tDebt = N("غير");
 K.cam(tDebt - 0.3, "debt");
-K.img(B.debt, OBJ + "kanz-factory-v01.png", { x: 800, y: 250, w: 280, at: N("الشركات") });
+K.img(B.debt, OBJ + "kanz-company-office-v01.png", { x: 800, y: 250, w: 280, at: N("الشركات") });
 K.tag(B.debt, "شركات", { x: 800, y: 430, size: 42, at: K.T("الشركات", tDebt) + 0.1 });
 K.img(B.debt, OBJ + "kanz-bank-v01.png", { x: 800, y: 620, w: 280, at: N("والحكومات") });
 K.tag(B.debt, "حكومات", { x: 800, y: 800, size: 42, at: K.T("والحكومات", tDebt) + 0.1 });
@@ -176,9 +174,10 @@ K.cam(tFac - 0.3, "factor");
 K.img(B.factor, OBJ + "kanz-bank-v01.png", { x: 500, y: 260, w: 340, at: tFac, glow: true });
 K.text(B.factor, "عامل مؤثّر", { x: 500, y: 70, size: 76, head: true, color: L, at: N("عامل") });
 const tDiff = N("بيختلف");
-[["kanz-npc-m01-neutral-v01.png", 790], ["kanz-npc-f01-thinking-v01.png", 500], ["kanz-npc-m02-shrug-v01.png", 210]].forEach(([img, x], i) => {
+// Ahmed 2026-10-11: different countries, shown by their landmarks
+[["kanz-landmark-egypt-v01.png", 790], ["kanz-landmark-uk-v01.png", 500], ["kanz-landmark-japan-v01.png", 210]].forEach(([img, x], i) => {
   K.arrow(B.factor, 500, 550, x, 640, { at: tDiff + i * 0.25, bend: i === 1 ? 0.001 : (x > 500 ? 30 : -30), width: [10, 6, 3][i] });
-  K.img(B.factor, OBJ + img, { x, y: 770, w: 240, at: tDiff + 0.15 + i * 0.25 });
+  K.img(B.factor, OBJ + img, { x, y: 770, w: 270, at: tDiff + 0.15 + i * 0.25 });
 });
 K.text(B.factor, "حسب ظروف كل بلد", { x: 500, y: 485, size: 50, head: true, at: N("ظروف") - 0.2 });
 
@@ -204,6 +203,5 @@ K.tl.to(wal, { left: 800, top: 330, scale: 0.72, opacity: 0.5, duration: 0.6, ea
 // ---------- ending: back to the hook, the spoken thesis big, held ~2.4 s ----------
 const tEnd = K.T("بالجنيه", tEgp) + 0.6;
 K.cam(tEnd, "hook", { via: 0.42, dur: 0.9 });
-K.out(upA, tEnd); K.out(upT, tEnd);
 K.takeaway(B.hook, "جزء من <span class='kw'>فاتورتك</span> بيتحسب بالدولار", { x: 500, y: 90, size: 96, at: tEnd + 0.6 });
 K.duration = (window.DURATION || 75) + 2.4;

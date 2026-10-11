@@ -1,0 +1,6 @@
+{
+ "_why": "Voice-only spelling; captions keep script.md. 'يوصلك' came out stretched ('يوووصلك') at 1:14 in v2 (Ahmed, 2026-10-11); the kasra marks the short 'yi' so the clone does not hold the 'و'.",
+ "replace": [
+  ["يوصلك", "يِوصَلَك"]
+ ]
+}
