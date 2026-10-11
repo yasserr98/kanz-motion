@@ -246,14 +246,43 @@
   K.axis = function (parent, x1, x2, y, o = {}) {
     return draw(parent, `M${x2} ${y} L${x1} ${y}`, { color: "rgba(255,255,255,.45)", width: 3, dur: 0.5, sfx: "click", gain: 0.15, ...o });
   };
+  // Bars drawn to scale (2026-10-11). A scale maps values to board px on a zero baseline:
+  //   const S = K.scale(1200000, 390);            // the largest value on this board -> 390 px
+  //   K.bar(b, { x, y, w, value: 1100000, scale: S, at });
+  // Old scenes that pass a hand-entered `h` render exactly as before; engine/lint.py flags them
+  // when two or more sit on one board. `illustrative: true` marks a bar that stands for no number.
+  K.bars = [];
+  let scales = 0;
+  K.scale = function (max, px) {
+    if (!(max > 0) || !(px > 0)) console.error("K.scale needs a positive max value and px:", max, px);
+    return { id: ++scales, max, px, h: (v) => (v / max) * px };
+  };
   K.bar = function (parent, o) { // grows upward (or downward when o.down)
+    if (o.value != null) {
+      if (!o.scale) console.error("K.bar: `value` needs `scale: K.scale(max, px)`", o);
+      else o = { ...o, h: o.scale.h(o.value) };
+    }
+    if (!parent.dataset.kboard) parent.dataset.kboard = String(K.bars.length + 1) + ":" + (parent.id || "board");
+    K.bars.push({ board: parent.dataset.kboard, value: o.value ?? null, scale: o.scale ? o.scale.id : null,
+                  h: o.h, x: o.x, at: o.at, illustrative: !!o.illustrative });
     const e = K.el("div", "abs", parent);
     gsap.set(e, { left: o.x - o.w / 2, top: o.down ? o.y : o.y - o.h, width: o.w, height: o.h, background: o.color || "#c7c2cc",
       border: o.outline ? "4px solid rgba(255,255,255,.55)" : "none", boxSizing: "border-box", transformOrigin: o.down ? "50% 0%" : "50% 100%" });
     hide(e);
     tl.fromTo(e, { scaleY: 0, autoAlpha: 1 }, { scaleY: 1, autoAlpha: 1, duration: o.dur || 0.7, ease: "power3.out", immediateRender: false }, o.at);
     K.sfx(o.at, o.sfx || "pop", 0.3);
+    e.kbar = o;
     return e;
+  };
+  // A bracket between the tops of two scaled bars, so a small true difference stays readable
+  // without stretching the bars. x: where the bracket stands; label: optional tag beside it.
+  K.delta = function (parent, a, b, o = {}) {
+    const A = a.kbar, B = b.kbar;
+    const top = (q) => (q.down ? q.y + q.h : q.y - q.h);
+    const y1 = Math.min(top(A), top(B)), y2 = Math.max(top(A), top(B)), x = o.x, arm = o.arm || 22;
+    const s = draw(parent, `M${x - arm} ${y1} L${x} ${y1} L${x} ${y2} L${x - arm} ${y2}`, { width: 5, sfx: "click", gain: 0.2, dur: 0.4, ...o });
+    if (o.label) K.tag(parent, o.label, { x: x + (o.labelDx || 90), y: (y1 + y2) / 2, lav: true, size: o.size || 32, at: o.at != null ? o.at + 0.2 : null, sfx: "click", gain: 0.15 });
+    return s;
   };
   K.highlight = function (parent, x, y, w, h, o) { // sweeps right -> left, behind text
     const e = K.el("div", "abs", parent);

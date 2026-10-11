@@ -5,6 +5,7 @@ Reads the live page (no video render) and reports:
   dead   stretches longer than --dead seconds where nothing new appears and the camera holds
   fill   stretches longer than 1.5 s where visible content covers less than --fill of the safe area
   hook   the first visual arriving later than 1.0 s
+  bars   boards where two or more bars use hand-entered heights or different scales (K.scale, docs/LOOK-V2.md)
 Writes out/lint.json and, when there are findings, out/lint.jpg: one frame per finding with the
 unsafe zones shaded red. Exit code is 0 either way: these are review flags, not hard failures.
 """
@@ -90,6 +91,27 @@ def coverage(items):
             for cx in range(max(0, int((it["x0"] - x0) // cell)), min(cols, int((it["x1"] - x0) // cell) + 1)):
                 hit.add((cx, cy))
     return len(hit) / (cols * rows)
+
+
+def bar_findings(bars):
+    """Boards whose bars are not drawn from values on one shared scale. Illustrative bars are skipped."""
+    by_board = {}
+    for b in bars:
+        if not b.get("illustrative"):
+            by_board.setdefault(b["board"], []).append(b)
+    out = []
+    for board, bs in by_board.items():
+        if len(bs) < 2:
+            continue
+        hand = [b for b in bs if b["value"] is None]
+        scales = {b["scale"] for b in bs if b["value"] is not None}
+        if hand:
+            out.append({"board": board, "why": "hand-entered heights", "at": hand[0]["at"],
+                        "detail": "h = " + ", ".join(str(round(b["h"])) for b in hand) + "; pass value + scale"})
+        elif len(scales) > 1:
+            out.append({"board": board, "why": "different scales", "at": bs[0]["at"],
+                        "detail": f"{len(scales)} scales on one board; use one K.scale per comparison"})
+    return out
 
 
 def runs(times, flags, min_len):
@@ -189,8 +211,11 @@ def main():
         first = next((t for t, f in frames if any(it["kind"] != "caption" for it in f["items"])), None)
         hook = None if first is not None and first <= 1.0 else first
 
+        # 5. bars drawn to scale
+        bars = bar_findings(page.evaluate("(K.bars || []).map(b => ({...b}))"))
+
         report = {"project": proj.name, "look2": look2, "every": a.every, "voice_end": voice_end,
-                  "safe": safe, "dead": dead, "thin": thin, "hook_late": hook,
+                  "safe": safe, "dead": dead, "thin": thin, "hook_late": hook, "bars": bars,
                   "fill_median": sorted(cov)[len(cov) // 2] if cov else 0}
         (out_dir / "lint.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
 
@@ -202,6 +227,10 @@ def main():
         print(f"  dead stretches > {a.dead}s: {dead or 'none'}")
         print(f"  thin frames (< {a.fill:.0%} of safe area for 1.5 s+): {thin or 'none'}")
         print(f"  hook: {'first visual at %.2fs (later than 1.0 s)' % hook if hook is not None else 'ok'}")
+        print(f"  bars to scale: {len(bars) or 'ok'}{' finding(s)' if bars else ''}")
+        for b in bars:
+            at = f"{b['at']:6.2f}s" if isinstance(b["at"], (int, float)) else "     -"
+            print(f"    {at}  {b['why']:22} {b['detail']}")
 
         shots = sorted({round(h["from"], 2) for h in safe if h["kind"] == "text"}
                        | {round((s + e) / 2, 2) for s, e in dead} | {round((s + e) / 2, 2) for s, e in thin})
