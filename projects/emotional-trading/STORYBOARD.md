@@ -55,3 +55,12 @@ with the 2026-10-11 takeaway ending. Beat 21 became the takeaway instead of the 
   (106-111 s, oval added); the docFocus push crops the abstract's edges on purpose (27-31 s).
 - Known v2 candidate: 31.0-32.7 s the paper wipe shows an empty page until "Emotional Trading" lands.
 - Not delivered: Drive + Airtable only when Ahmed asks.
+
+## v2 (2026-10-11): Ahmed's shorter script
+
+Ahmed found v1 too long and pasted a shorter version: the four paragraphs 'حدّد كمان…', 'الإجابات دي…', 'ولما تتوتر…'
+and 'ولو المعلومات…' are cut; every other line is unchanged ("و فبل" again kept as "وقبل"). The Airtable Brief still
+has the long version. Voice rebuilt from the cached takes (no new ElevenLabs credits): 119.6 s, 263/263 words.
+Beats 17-19 (write calmly, check the plan, decision log) removed; the four questions (ليه / هدفي / قد إيه / أخرج)
+now share one board; the paper page at 0:31 shows "Emotional Trading" from the wipe. Still flagged FLAT: 0:00.9,
+0:07.8, 1:37.8 (أخرج؟ no longer flagged).

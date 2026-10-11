@@ -5,6 +5,8 @@ Type Video), Brief read 2026-10-11. Voice: ElevenLabs (`engine/make.py tts`). Th
 spoken exactly as written and is also the caption source; `*word*` marks the caption keyword (stripped
 before TTS). Blank lines are paragraph pauses; single line breaks keep lines of one beat together.
 
+Cut 2026-10-11 (Ahmed's shorter version, pasted in chat): removed 'حدّد كمان…', 'الإجابات دي…', 'ولما تتوتر…' and 'ولو المعلومات…'; all other lines unchanged.
+
 Pauses: paragraphs split after 'أخرج؟' and 'فعلًا؟' (voice check 2026-10-11: questions read flat mid-paragraph). Words unchanged.
 
 Copy doubts (flagged, not changed):
@@ -49,16 +51,6 @@ Copy doubts (flagged, not changed):
 
 وقبل ما تحط الاستراتيجية اسأل نفسك: أنا داخل الاستثمار ده *ليه*؟ هدفي منه إيه، ولمدة قد إيه؟
 وإيه اللي لو اتغيّر يخلّيني أراجع قراري أو *أخرج*؟
-
-حدّد كمان هتدخل *بكام*، وانخفاض قيمة الاستثمار ده ممكن يأثّر إزاي على باقي فلوسك.
-
-الإجابات دي تتكتب وإنت *هادي*، قبل ما حركة السعر تحطك تحت ضغط.
-
-ولما تتوتر وتفكّر تغيّر قرارك، ارجع للي *كتبته*: ظهرت معلومة جديدة فعلًا؟
-
-ولا أنا بس عايز أعمل أي حاجة عشان *أرتاح*؟
-
-ولو المعلومات اتغيّرت، راجع خطتك. و*سجّل* قراراتك ونتايجها بعد التكاليف، عشان تعرف إنت بتلتزم بيها، وهل هي نفسها محتاجة تتعدّل.
 
 لأن ممكن تاخد قرار مدروس *وتخسر*، وممكن تاخد قرار متهوّر *وتكسب* بالحظ.
 

@@ -19,8 +19,7 @@ const B = {
   logic: K.board("logic", 0, 2800), anyone: K.board("anyone", -1400, 2800), scale: K.board("scale", -2800, 2800),
   hold: K.board("hold", 0, 4200), plank: K.board("plank", -1400, 4200), calm: K.board("calm", -2800, 4200),
   plan: K.board("plan", 0, 5600), price: K.board("price", -1400, 5600), q1: K.board("q1", -2800, 5600),
-  q2: K.board("q2", 0, 7000), write: K.board("write", -1400, 7000), check: K.board("check", -2800, 7000),
-  log: K.board("log", 0, 8400), luck: K.board("luck", -1400, 8400),
+  luck: K.board("luck", 0, 7000),
 };
 K.cam(0, "hook");
 
@@ -83,7 +82,8 @@ K.tag(B.study, "أداء أسوأ", { x: 500, y: 800, lav: true, size: 52, at: K
 const tDef = N("وهنا");
 K.cam(tDef - 0.3, "define");
 K.world(tDef - 0.3, "paper");
-K.text(B.define, "Emotional Trading", { x: 500, y: 90, size: 60, head: true, at: N("Emotional") });
+N("Emotional");
+K.text(B.define, "Emotional Trading", { x: 500, y: 90, size: 60, head: true, at: tDef + 0.4 });
 K.text(B.define, "التداول العاطفي", { x: 500, y: 220, size: 120, head: true, color: L, at: N("التداول") });
 K.underline(B.define, 170, 830, 300, { at: K.T("العاطفي", tDef) + 0.2, color: L });
 K.text(B.define, "قرارات البيع والشراء", { x: 500, y: 380, size: 46, cls: "muted", at: N("قرارات") });
@@ -234,66 +234,21 @@ const tMove = N("السعر");
 K.text(B.price, "؟", { x: cdl.x(9) + 60, y: cdl.y(7.6) - 40, size: 150, head: true, color: L, at: tMove, from: "pop", sfx: "pop" });
 K.tag(B.price, "إيه اللي بيحرك السعر؟", { x: 420, y: 800, lav: true, size: 46, at: K.T("بيحرك", tBefore) });
 
-// ---------- 16. ask yourself: why, what goal, how long / what makes me exit, how much, the rest of my money ----------
+// ---------- 16. ask yourself: why, what goal, how long, what would make me exit ----------
 const tAsk = N("اسأل");
 K.cam(tAsk - 0.3, "q1");
 K.text(B.q1, "اسأل نفسك", { x: 500, y: 70, size: 96, head: true, color: L, at: tAsk });
 const row = (b, w, html, img, i, o = {}) => {
-  const t = o.t || N(w), y = 270 + i * 230;
-  K.img(b, OBJ + img, { x: 800, y, w: 260, at: t, shadow: false, glow: o.glow });
-  K.text(b, html, { x: 390, y, size: 72, head: true, at: t + 0.05 });
+  const t = o.t || N(w), y = 235 + i * 178;
+  K.img(b, OBJ + img, { x: 800, y, w: 200, at: t, shadow: false, glow: o.glow });
+  K.text(b, html, { x: 390, y, size: 66, head: true, at: t + 0.05 });
 };
 row(B.q1, "ليه", "داخل ليه؟", "kanz-share-certificate-v01.png", 0);
 row(B.q1, "هدفي", "هدفي منه إيه؟", "kanz-savings-jar-v01.png", 1);
 row(B.q1, "ولمدة", "لمدة قد إيه؟", "kanz-calendar-v01.png", 2);
 const tExit = N("وإيه");
-K.cam(tExit - 0.3, "q2");
-row(B.q2, "", "إيه يخلّيني أخرج؟", "kanz-security-shield-v01.png", 0, { t: tExit });
-row(B.q2, "بكام", "هدخل بكام؟", "kanz-wallet-open-cash-v01.png", 1);
-K.oval(B.q2, 390, 270, 290, 90, { at: K.T("أخرج", tExit) });
-row(B.q2, "وانخفاض", "باقي فلوسك؟", "kanz-pie-chart-v01.png", 2, { glow: true });
-K.arrow(B.q2, 640, 650, 640, 760, { at: N("يأثّر"), bend: 0.001, color: RED });
-
-// ---------- 17. write the answers while calm, before the price puts you under pressure ----------
-const tAns = N("الإجابات");
-K.cam(tAns - 0.3, "write");
-K.img(B.write, OBJ + "kanz-npc-f01-neutral-v01.png", { x: 700, y: 520, w: 500, at: tAns });
-K.card(B.write, card("الإجابات<br>مكتوبة", 52), { x: 270, y: 470, w: 340, h: 300, rot: 2, at: N("تتكتب") - 0.1 });
-K.text(B.write, "وإنت هادي", { x: 500, y: 90, size: 96, head: true, color: L, at: N("هادي") - 0.1 });
-const tPress = N("حركة");
-const jag = [[60, 700], [130, 640], [190, 760], [260, 610], [320, 790], [400, 600], [460, 780], [540, 630], [610, 800], [690, 590], [760, 770], [850, 620], [940, 760]];
-gsap.set(K.line(B.write, jag, { at: tPress, dur: 1.2, color: "rgba(255,255,255,.35)", width: 6 }), { zIndex: -1 });
-K.tag(B.write, "تحت ضغط", { x: 500, y: 850, size: 46, at: N("ضغط") - 0.1 });
-
-// ---------- 18. when nervous: go back to what you wrote. New information, or just want relief? ----------
-const tNervous = N("ولما");
-K.cam(tNervous - 0.3, "check");
-K.img(B.check, OBJ + "kanz-npc-m02-worried-v01.png", { x: 790, y: 520, w: 420, at: tNervous + 0.1 });
-K.card(B.check, card("ارجع للي كتبته", 50), { x: 400, y: 160, w: 520, h: 170, rot: -2, at: N("ارجع") });
-K.card(B.check, card("ظهرت معلومة جديدة؟", 44), { x: 400, y: 450, w: 520, h: 160, rot: 1.5, at: N("ظهرت"), tape: false });
-K.text(B.check, "ولا", { x: 400, y: 590, size: 50, head: true, cls: "muted", at: N("ولا") });
-K.card(B.check, card("عايز أرتاح؟", 52), { x: 400, y: 730, w: 520, h: 160, rot: -1.5, at: N("عايز"), tape: false });
-K.oval(B.check, 400, 730, 300, 105, { at: N("أرتاح"), seed: 4 });
-
-// ---------- 19. if the information changed, review the plan; log decisions and results after costs ----------
-const tRev = N("ولو");
-K.cam(tRev - 0.3, "log");
-K.text(B.log, "راجع خطتك", { x: 500, y: 70, size: 96, head: true, at: N("راجع") - 0.1 });
-K.card(B.log, "", { x: 560, y: 480, w: 640, h: 520, rot: 1, at: N("وسجّل") - 0.1 });
-K.text(B.log, "قراراتك", { x: 700, y: 290, size: 50, head: true, color: K.INK, at: N("قراراتك") });
-K.text(B.log, "النتيجة", { x: 400, y: 290, size: 50, head: true, color: K.INK, at: N("ونتايجها") });
-[0, 1, 2].forEach((i) => {
-  const y = 400 + i * 100, t = K.T("ونتايجها") + 0.25 + i * 0.2;
-  K.line(B.log, [[820, y], [580, y]], { at: t, dur: 0.25, width: 6, color: "rgba(20,18,23,.35)" });
-  if (i === 1) K.line(B.log, [[380, y - 26], [430, y + 24]], { at: t + 0.1, dur: 0.15, width: 9, color: RED }),
-    K.line(B.log, [[430, y - 26], [380, y + 24]], { at: t + 0.2, dur: 0.15, width: 9, color: RED });
-  else tick(B.log, 405, y, t + 0.1, "#38104d");
-});
-const tCost = N("التكاليف");
-K.img(B.log, OBJ + "kanz-receipt-v01.png", { x: 150, y: 640, w: 240, at: tCost, rot: -6 });
-K.tag(B.log, "بعد التكاليف", { x: 560, y: 790, lav: true, size: 46, at: tCost });
-K.tag(B.log, "بتلتزم بيها؟", { x: 740, y: 850, size: 40, at: N("بتلتزم") });
-K.tag(B.log, "محتاجة تتعدّل؟", { x: 340, y: 850, size: 40, at: N("تتعدّل") - 0.2 });
+row(B.q1, "", "إيه يخلّيني أخرج؟", "kanz-security-shield-v01.png", 3, { t: tExit, glow: true });
+K.oval(B.q1, 390, 235 + 3 * 178, 300, 80, { at: N("أخرج") });
 
 // ---------- 20. a studied decision can lose; a reckless one can win by luck ----------
 const tLuck = N("لأن");
