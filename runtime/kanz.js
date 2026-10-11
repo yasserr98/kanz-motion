@@ -284,6 +284,92 @@
     if (o.label) K.tag(parent, o.label, { x: x + (o.labelDx || 90), y: (y1 + y2) / 2, lav: true, size: o.size || 32, at: o.at != null ? o.at + 0.2 : null, sfx: "click", gain: 0.15 });
     return s;
   };
+
+  // ---------- charts with weight (approved 2026-10-11) ----------
+  // Value-based, time left -> right. The box is centred at (x, y) with size w x h in board px.
+  let chartN = 0;
+  function chartSvg(parent) {
+    const s = document.createElementNS(ns, "svg");
+    s.setAttribute("class", "mk"); s.setAttribute("width", 1000); s.setAttribute("height", 860);
+    parent.appendChild(s);
+    return s;
+  }
+  function svgEl(s, tag, attrs) {
+    const e = document.createElementNS(ns, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    s.appendChild(e);
+    return e;
+  }
+  // K.area(board, { x, y, w, h, data: [values], min, max, at, dur, grid: 3, color, marker: { i, label }, end: { html, lav } })
+  // A line that draws itself with a lavender area under it, a glow and a dot riding its head.
+  K.area = function (parent, o) {
+    const d = o.data, n = d.length, id = "kc" + ++chartN, col = o.color || "#d5adef";
+    const lo = o.min != null ? o.min : Math.min(...d), hi = o.max != null ? o.max : Math.max(...d);
+    const X0 = o.x - o.w / 2, Y0 = o.y + o.h / 2;
+    const px = (i) => X0 + (o.w * i) / (n - 1), py = (v) => Y0 - (o.h * (v - lo)) / (hi - lo || 1);
+    const pts = d.map((v, i) => `${px(i).toFixed(1)},${py(v).toFixed(1)}`).join(" ");
+    const s = chartSvg(parent);
+    const defs = svgEl(s, "defs", {});
+    defs.innerHTML = `<linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${col}" stop-opacity=".42"/>` +
+      `<stop offset="1" stop-color="${col}" stop-opacity="0"/></linearGradient><filter id="${id}b"><feGaussianBlur stdDeviation="9"/></filter>` +
+      `<clipPath id="${id}c"><rect x="${X0}" y="${Y0 - o.h - 60}" width="0" height="${o.h + 60}"/></clipPath>`;
+    const clip = defs.querySelector("rect");
+    for (let g = 1; g <= (o.grid ?? 3); g++) svgEl(s, "line", { x1: X0, x2: X0 + o.w, y1: Y0 - (o.h * g) / (o.grid ?? 3), y2: Y0 - (o.h * g) / (o.grid ?? 3), stroke: "rgba(255,255,255,.07)", "stroke-width": 2 });
+    svgEl(s, "line", { x1: X0, x2: X0 + o.w, y1: Y0, y2: Y0, stroke: "rgba(255,255,255,.4)", "stroke-width": 3 });
+    svgEl(s, "polygon", { points: `${X0},${Y0} ${pts} ${X0 + o.w},${Y0}`, fill: `url(#${id}g)`, "clip-path": `url(#${id}c)` });
+    const glow = svgEl(s, "polyline", { points: pts, fill: "none", stroke: col, "stroke-width": 22, opacity: 0.35, "stroke-linejoin": "round", filter: `url(#${id}b)` });
+    const line = svgEl(s, "polyline", { points: pts, fill: "none", stroke: "#f4e8fb", "stroke-width": o.width || 10, "stroke-linejoin": "round", "stroke-linecap": "round" });
+    const halo = svgEl(s, "circle", { r: 40, fill: col, opacity: 0.25 }), dot = svgEl(s, "circle", { r: 16, fill: "#fff" });
+    const L = line.getTotalLength();
+    [line, glow].forEach((p) => { p.setAttribute("stroke-dasharray", L); });
+    const render = (p) => {
+      [line, glow].forEach((e) => e.setAttribute("stroke-dashoffset", L * (1 - p)));
+      clip.setAttribute("width", o.w * p);
+      const q = line.getPointAtLength(L * p);
+      [halo, dot].forEach((c) => { c.setAttribute("cx", q.x); c.setAttribute("cy", q.y); });
+    };
+    render(o.at == null ? 1 : 0);
+    if (o.at != null) {
+      const dur = o.dur || 1.6, pr = { p: 0 };
+      hide(s);
+      tl.set(s, { autoAlpha: 1 }, o.at);
+      tl.fromTo(pr, { p: 0 }, { p: 1, duration: dur, ease: "none", immediateRender: false, onUpdate: () => render(pr.p) }, o.at);
+      K.sfx(o.at, o.sfx || "marker", o.gain || 0.25);
+      if (o.marker) {
+        const mx = px(o.marker.i), mt = o.at + (dur * o.marker.i) / (n - 1);
+        draw(parent, `M${mx} ${Y0 - o.h - 30} L${mx} ${Y0}`, { dash: "14 12", width: 4, at: mt, dur: 0.3, sfx: "click", gain: 0.15 });
+        if (o.marker.label) K.tag(parent, o.marker.label, { x: mx, y: Y0 - o.h - 70, lav: true, size: o.marker.size || 34, at: mt + 0.1 });
+      }
+      if (o.end) K.tag(parent, o.end.html, { x: px(n - 1) - (o.end.dx ?? 0), y: py(d[n - 1]) - (o.end.dy ?? 80), lav: o.end.lav !== false, size: o.end.size || 40, at: o.at + dur });
+    }
+    if (o.out != null) tl.to(s, { autoAlpha: 0, duration: 0.3 }, o.out);
+    return { svg: s, x: px, y: py, at: o.at, dur: o.dur || 1.6 };
+  };
+  // K.candles(board, { x, y, w, h, data: [[open, high, low, close], ...], min, max, at, dur })
+  // Candles appear left -> right; light bodies rise, dark outlined bodies fall. Returns x(i), y(v) to annotate swings.
+  K.candles = function (parent, o) {
+    const d = o.data, n = d.length;
+    const lo = o.min != null ? o.min : Math.min(...d.map((c) => c[2])), hi = o.max != null ? o.max : Math.max(...d.map((c) => c[1]));
+    const X0 = o.x - o.w / 2, Y0 = o.y + o.h / 2, step = o.w / n, bw = Math.min(34, step * 0.55);
+    const px = (i) => X0 + step * (i + 0.5), py = (v) => Y0 - (o.h * (v - lo)) / (hi - lo || 1);
+    const s = chartSvg(parent);
+    svgEl(s, "line", { x1: X0, x2: X0 + o.w, y1: Y0, y2: Y0, stroke: "rgba(255,255,255,.35)", "stroke-width": 3 });
+    const dur = o.dur || 1.8;
+    d.forEach(([op, h, l, c], i) => {
+      const up = c >= op, col = up ? "#e9dff0" : "#6d6575", g = svgEl(s, "g", {});
+      svgEl(g, "line", { x1: px(i), x2: px(i), y1: py(h), y2: py(l), stroke: col, "stroke-width": 5, "stroke-linecap": "round" });
+      svgEl(g, "rect", { x: px(i) - bw / 2, y: py(Math.max(op, c)), width: bw, height: Math.max(6, Math.abs(py(op) - py(c))), rx: 3,
+        fill: up ? col : "#2a2630", stroke: col, "stroke-width": 4 });
+      if (o.at != null) {
+        hide(g);
+        const t = o.at + (dur * i) / n;
+        tl.fromTo(g, { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.25, immediateRender: false }, t);
+        if (i % 4 === 0) K.sfx(t, "click", 0.08);
+      }
+    });
+    if (o.out != null) tl.to(s, { autoAlpha: 0, duration: 0.3 }, o.out);
+    return { svg: s, x: px, y: py, at: o.at, dur };
+  };
   K.highlight = function (parent, x, y, w, h, o) { // sweeps right -> left, behind text
     const e = K.el("div", "abs", parent);
     gsap.set(e, { left: x - w / 2, top: y - h / 2, width: w, height: h, background: o.color || "rgba(213,173,239,.55)", transformOrigin: "100% 50%", zIndex: 0 });
@@ -387,7 +473,9 @@
 
   K.seek = function (t) {
     const q = Math.floor(t * K.fps + 1e-6) / K.fps;
-    tl.seek(q, false);
+    // a seek to exactly 0 skips the zero-duration sets placed at 0 (hide/initial states), so the first two
+    // frames showed later scenes (found 2026-10-11 in every delivered Reel); start a hair past 0 instead
+    tl.seek(Math.max(q, 1e-4), false);
     const step = Math.floor(q * K.fps);
     turb.forEach((f) => f.setAttribute("seed", String((Math.floor(q * 8) % 40) + 1)));
     if (grain) grain.style.transform = `translate(${(step * 37) % 40 - 20}px, ${(step * 53) % 40 - 20}px)`;
