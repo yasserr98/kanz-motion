@@ -41,13 +41,16 @@ python -m playwright install chromium
 python engine/make.py review pilot-01 3,20,45   # smoke test: writes projects/pilot-01/out/review.jpg
 ```
 
-For ElevenLabs voices copy `.env.example` to `.env` and fill in the key (never commit `.env`).
-A Freesound key there is optional.
+For ElevenLabs copy `.env.example` to `.env` and fill in the key (never commit `.env`). With a key,
+the engine also uses ElevenLabs for transcription (Scribe v2, which tags coughs/sighs), for timing
+captions to the exact script (forced alignment, cached), for the optional voice isolator and for
+generated sound effects. Without one it falls back to local faster-whisper. A Freesound key is optional.
 
 ## Make a video from a voice note
 
 ```bash
 python engine/make.py new my-video "path/to/voice-note.m4a"
+python engine/make.py clean my-video            # optional, noisy notes: isolated voice to compare
 # 1. read projects/my-video/transcript.raw.json, write projects/my-video/audio/edl.json (keep last good takes)
 python engine/make.py audio my-video
 python engine/make.py breaths my-video          # sighs/breaths to mute: audio/edl.json "mute"
@@ -77,11 +80,11 @@ which model to use, how to keep each video cheap, and the usage log.
 
 | Path | What |
 | --- | --- |
-| `engine/` | make (step runner), transcribe, tts (ElevenLabs), edit_audio, captions, render, sfx_library, contact (review sheets) |
+| `engine/` | make (step runner), transcribe (Scribe / Whisper), tts, align (forced alignment), edit_audio, captions, render, sfx_library, sfx_gen (generated SFX), eleven (API client), contact (review sheets) |
 | `runtime/` | `kanz.js` (timeline + components) and `kanz.css` (brand tokens, layout); `kanz-look.js/.css` look v2 for new videos (safe zones, light, depth, documents, photos, maps, counting numbers, piles), see [docs/LOOK-V2.md](docs/LOOK-V2.md) |
 | `brand/` | Kanz fonts, logo and colour tokens (copied from the Kanz repo's `assets/kanz-brand-current`) |
 | `library/objects/` | approved grayscale editorial objects used so far (from the Kanz motion library) |
-| `library/sfx/` | 124 CC0 one-shots + `manifest.json` (source page and licence for each file) |
+| `library/sfx/` | 124 CC0 one-shots + generated effects (`generated.json`, prompt per file) + `manifest.json` (source page and licence for each file) |
 | `projects/<name>/` | one video: audio edit list, transcripts, script, scene; `out/` (renders) is not committed |
 | `docs/` | Vox research findings, efficiency guide and usage log |
 
@@ -93,7 +96,7 @@ market numbers on screen without a source.
 
 ## Licences
 
-- SFX: all CC0 (Kenney.nl and BigSoundBank). See `library/sfx/manifest.json`.
+- SFX: CC0 (Kenney.nl and BigSoundBank), plus effects generated with ElevenLabs on a paid plan (commercial use), each in its own category and listed with its prompt in `library/sfx/generated.json`. See `library/sfx/manifest.json`.
 - GSAP: free under the GreenSock standard licence (npm).
 - Fonts: IBM Plex Sans Arabic is OFL. **Thmanyah Display's redistribution terms have not been
   checked**, so keep this repository private until they are.

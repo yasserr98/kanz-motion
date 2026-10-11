@@ -82,7 +82,13 @@ audio/frames before changing anything, and say where it really was if it differs
 - **Websites** shown on screen must be genuine screenshots (source URL + capture date).
 - **SFX**: only CC0 or explicitly licensed sounds; add each to `engine/sfx_library.py` with its
   source page so `library/sfx/manifest.json` stays complete. Sonniss/Mixkit files may be used
-  locally but must not be committed.
+  locally but must not be committed. When the library lacks a sound, generate it with
+  `engine/sfx_gen.py <new-category> <name> "<prompt>"` (ElevenLabs, paid-plan licence, recorded in
+  `library/sfx/generated.json`). Always a new category: a file added to an existing one changes which
+  sound finished videos pick on re-render. No generated music.
+- **Transcripts and captions**: with a key, `make.py` transcribes with ElevenLabs Scribe v2 (its
+  `"events"` list coughs/sighs/laughs for the EDL) and times captions to the corrected `script.md`
+  with forced alignment; read the "check these captions" words it prints (usually digits).
 - **Review before delivery**: render stills, look at them, render the MP4, then pull frames from
   the MP4 itself and check fonts, Arabic joining, overlaps and timing. Rendered ≠ approved ≠ posted.
 - **Delivery** (Drive + Airtable `In Review`) follows the Kanz repo's delivery guide.

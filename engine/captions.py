@@ -43,7 +43,9 @@ def main(proj):
     proj = Path(proj)
     toks = script_tokens((proj / "script.md").read_text(encoding="utf-8"))
     tr = json.loads((proj / "transcript.json").read_text(encoding="utf-8"))
-    asr = [w for s in tr["segments"] for w in s["words"] if norm(w["w"])]
+    aligned = proj / "transcript.aligned.json"  # engine/align.py: the script itself, timed against the voice
+    timing = json.loads(aligned.read_text(encoding="utf-8")) if aligned.exists() else tr
+    asr = [w for s in timing["segments"] for w in s["words"] if norm(w["w"])]
     a = [norm(t["w"]) for t in toks]
     b = [norm(w["w"]) for w in asr]
     sm = difflib.SequenceMatcher(a=a, b=b, autojunk=False)

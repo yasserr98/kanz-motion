@@ -172,13 +172,15 @@ def main():
             page.evaluate("K.camSmooth = true")
         if page.evaluate("!!K.camSmooth"):
             fps = 24
-        stage = page.locator("#stage")
+        # The stage fills the 1080x1920 viewport: capture that region directly. A locator screenshot
+        # waits for the element to be "stable", which intermittently times out on long renders.
+        clip = {"x": 0, "y": 0, "width": 1080, "height": 1920}
         if a.stills:
             sd = out_dir / ("stills-" + (a.name or "review"))
             sd.mkdir(exist_ok=True)
             for t in [float(x) for x in a.stills.split(",")]:
                 page.evaluate(f"K.seek({t})")
-                stage.screenshot(path=str(sd / f"t{t:06.2f}.png"))
+                page.screenshot(path=str(sd / f"t{t:06.2f}.png"), clip=clip)
             print("fonts:", sorted(set(fonts)), "| stills ->", sd)
             browser.close()
             return
@@ -192,7 +194,7 @@ def main():
         frames = int((t1 - a.t0) * fps)
         for i in range(frames):
             page.evaluate(f"K.seek({a.t0 + i / fps})")
-            ff.stdin.write(stage.screenshot(type="jpeg", quality=93))
+            ff.stdin.write(page.screenshot(type="jpeg", quality=93, clip=clip))
             if i % (fps * 10) == 0:
                 print(f"  frame {i}/{frames}", flush=True)
         ff.stdin.close()

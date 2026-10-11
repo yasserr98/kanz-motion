@@ -149,11 +149,6 @@ K.text(b8, "الترند", { x: 470, y: 600, size: 40, cls: "muted", at: T("ال
 K.dot(b8, 700, 400, { at: T("تقرير", 61) });
 K.oval(b8, 700, 400, 80, 70, { at: T("تقرير", 61) + 0.2, seed: 12 });
 
-// ---------- outro ----------
-const tEnd = window.DURATION + 0.05;
-K.captionsTo = tEnd;
-K.wipe(tEnd, { hold: true });
-K.tl.set("#logo", { zIndex: 30 }, tEnd);
-K.tl.to("#logo", { left: 390, top: 900, width: 300, duration: 0.5, ease: "power3.inOut" }, tEnd + 0.25);
-K.tl.to("#headline", { autoAlpha: 0, duration: 0.2 }, tEnd);
-K.duration = tEnd + 1.6;
+// ---------- end (no logo outro: Ahmed, 2026-10-06) ----------
+// Hold the last scene briefly after the voice ends.
+K.duration = window.DURATION + 0.6;

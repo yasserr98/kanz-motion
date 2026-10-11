@@ -125,7 +125,10 @@ def main():
             write(out, finish(decode(src), 1.2))
             manifest.append({"file": str(out.relative_to(OUT)).replace("\\", "/"), "category": cat, "source_file": f,
                              "source_page": KENNEY_PAGE[folder.split("/")[0]], "license": CC0, "author": "Kenney (kenney.nl)"})
-    (OUT / "manifest.json").write_text(json.dumps(manifest, indent=1), encoding="utf-8")
+    gen = OUT / "generated.json"  # ElevenLabs effects from engine/sfx_gen.py; their files are not rebuilt here
+    if gen.exists():
+        manifest += [g for g in json.loads(gen.read_text(encoding="utf-8")) if (OUT / g["file"]).exists()]
+    (OUT / "manifest.json").write_text(json.dumps(manifest, indent=1, ensure_ascii=False), encoding="utf-8")
     by = {}
     for m in manifest:
         by[m["category"]] = by.get(m["category"], 0) + 1
