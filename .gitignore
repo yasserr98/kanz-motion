@@ -6,4 +6,6 @@ projects/*/out/
 projects/*/audio/source.*
 projects/*/audio/*.wav
 *.tmp
+voice-clone/
+projects/*/audio/*.mp3
 projects/*/audio/_tts/

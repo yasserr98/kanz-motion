@@ -2,6 +2,7 @@
 
 Voice-note route
     python engine/make.py new <name> <voice-note>   # create projects/<name>/, copy audio, raw transcript
+    python engine/make.py clean <name>              # optional: ElevenLabs voice isolator on a noisy note
     python engine/make.py audio <name>              # apply audio/edl.json (cuts, pauses, speed), final transcript
 Script route (ElevenLabs voice, needs .env)
     python engine/make.py script <name>             # create projects/<name>/ with a script.md to fill in
@@ -11,7 +12,8 @@ Script route (ElevenLabs voice, needs .env)
     python engine/make.py voicecheck <name>         # re-run the voice check alone
 Both routes
     python engine/make.py breaths <name>            # list audible breaths/sighs to mute (audio/edl.json "mute")
-    python engine/make.py captions <name>           # align script.md to the final voice
+    python engine/make.py captions <name>           # time script.md against the final voice (forced alignment)
+    python engine/sfx_gen.py <category> <name> "<prompt>"   # generate a missing sound effect into library/sfx
     python engine/make.py review <name> 2,10,30     # stills -> one contact sheet out/review.jpg
     python engine/make.py render <name> [version]   # full MP4 in projects/<name>/out/
     python engine/make.py check <name> [version]    # 12 frames pulled from the MP4 -> out/check-<version>.jpg + loudness
@@ -28,6 +30,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 PY = sys.executable
 WHISPER = ["uv", "run", "--with", "faster-whisper", "python"]
+sys.path.insert(0, str(ROOT / "engine"))
+import eleven  # noqa: E402
+
+# ElevenLabs Scribe when a key is set (cloud, tags coughs/sighs); local faster-whisper otherwise
+TRANSCRIBE = [PY, "engine/transcribe.py"] if eleven.has_key() else WHISPER + ["engine/transcribe.py", "--engine", "whisper"]
 SCRIPT_STUB = """# Title (Arabic title)
 
 Source: who wrote it, date. Voice: ElevenLabs (`engine/make.py tts`). The text between the markers is
@@ -51,6 +58,13 @@ def scaffold(proj):
         shutil.copy2(ROOT / "projects" / "_template" / f, proj / f)
 
 
+def captions(proj):
+    # forced alignment first (cached by hash, so unchanged script + voice costs no API call)
+    if eleven.has_key() and (proj / "script.md").exists() and (proj / "audio" / "voice.wav").exists():
+        run([PY, "engine/align.py", proj])
+    run([PY, "engine/captions.py", proj])
+
+
 def sheet(src, out):
     sys.path.insert(0, str(ROOT / "engine"))
     from contact import sheet as make_sheet
@@ -71,11 +85,19 @@ def main():
         src = Path(arg)
         scaffold(proj)
         shutil.copy2(src, proj / "audio" / ("source" + src.suffix))
-        run(WHISPER + ["engine/transcribe.py", proj / "audio" / ("source" + src.suffix), proj / "transcript.raw.json"])
-        print(f"\nNext: write {proj / 'audio' / 'edl.json'} (keep ranges, speed) from transcript.raw.json")
+        run(TRANSCRIBE + [proj / "audio" / ("source" + src.suffix), proj / "transcript.raw.json"])
+        print(f"\nNext: write {proj / 'audio' / 'edl.json'} (keep ranges, speed) from transcript.raw.json"
+              ' (its "events" list coughs, sighs and laughs to cut)')
+    elif step == "clean":
+        src = next((proj / "audio").glob("source.*"))
+        clean = proj / "audio" / "source-clean.mp3"
+        clean.write_bytes(eleven.upload("/audio-isolation", {}, {"audio": src}, raw=True))
+        run(TRANSCRIBE + [clean, proj / "transcript.raw.json"])
+        print(f"\nIsolated voice -> {clean}. Compare it with {src.name}; if it sounds better, set"
+              f' "source": "{clean.name}" in audio/edl.json (timings are unchanged).')
     elif step == "audio":
         run([PY, "engine/edit_audio.py", proj])
-        run(WHISPER + ["engine/transcribe.py", proj / "audio" / "voice.wav", proj / "transcript.json"])
+        run(TRANSCRIBE + [proj / "audio" / "voice.wav", proj / "transcript.json"])
         print(f"\nNext: write {proj / 'script.md'} from transcript.json (fix recognition slips, mark *keywords*)")
     elif step == "script":
         scaffold(proj)
@@ -87,20 +109,20 @@ def main():
         run([PY, "engine/voicecheck.py", proj, "--pre"])
         pause = sys.argv[4] if len(sys.argv) > 4 else "0.25"
         run([PY, "engine/tts.py", proj, "--speed", arg or "1.0", "--pause", pause])
-        run([PY, "engine/captions.py", proj])
+        captions(proj)
         run([PY, "engine/voicecheck.py", proj])
     elif step == "voicecheck":
         run([PY, "engine/voicecheck.py", proj])
     elif step == "breaths":
         run([PY, "engine/breaths.py", proj])
     elif step == "captions":
-        run([PY, "engine/captions.py", proj])
+        captions(proj)
     elif step in ("stills", "review"):
-        run([PY, "engine/captions.py", proj])
+        captions(proj)
         run([PY, "engine/render.py", proj, "--stills", arg, "--name", "review"])
         print("review sheet ->", sheet(out / "stills-review", out / "review.jpg"))
     elif step == "render":
-        run([PY, "engine/captions.py", proj])
+        captions(proj)
         run([PY, "engine/render.py", proj, "--name", f"{name}-{arg or 'v1'}"])
     elif step == "check":
         version = arg or "v1"

@@ -990,5 +990,16 @@
   "source_page": "https://kenney.nl/assets/impact-sounds",
   "license": "CC0 1.0 (public domain)",
   "author": "Kenney (kenney.nl)"
+ },
+ {
+  "file": "register/cash-01.wav",
+  "category": "register",
+  "source_file": "register_cash-01.mp3",
+  "source_page": "https://elevenlabs.io/sound-effects",
+  "license": "ElevenLabs sound effects, generated on a paid plan (commercial use)",
+  "author": "ElevenLabs (generated)",
+  "prompt": "Vintage mechanical cash register: drawer slides open with a single bright bell ding, close-up, no music",
+  "seconds": 1.5,
+  "created": "2026-10-10"
  }
 ]
