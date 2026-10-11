@@ -1,0 +1,9 @@
+{
+ "_why": "Voice-only spelling; captions keep script.md. 2026-10-11 Ahmed: 'متهوّر' was mispronounced in v3; respelled as Egyptian mit-hawwar.",
+ "replace": [
+  [
+   "متهوّر",
+   "مِتْهَوَّر"
+  ]
+ ]
+}

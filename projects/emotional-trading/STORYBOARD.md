@@ -74,3 +74,11 @@ Ahmed: "still super long, 1:20 max". Proposed a whole-sentence cut (no rewording
 Scenes removed: did / moment / logic / hold / plank / calm / price, and the exit question row. Boards re-laid out 3 x 3.
 `out/emotional-trading-v3.mp4` 79.9 s, -16.7 LUFS. Airtable recN49BA2awknaqVF Brief replaced with the v3 copy
 (with 'وقبل'), read back identical; Status (Approved) and other fields untouched. Not uploaded to Drive.
+
+## v4 (2026-10-11): no last sentence, متهوّر respelled
+
+Ahmed: remove 'نتيجة صفقة واحدة…' completely; 'متهوّر' was mispronounced. Sentence and its takeaway card removed;
+the video now ends holding the careful/reckless split (slow push, 2 s). Voice-only respelling in `say.json`:
+'متهوّر' -> 'مِتْهَوَّر' (Egyptian mit-hawwar); captions keep 'متهوّر'; only the last paragraph re-generated.
+Voice 73.6 s. Airtable Brief updated without the last sentence (write response verified). If Ahmed confirms the
+new pronunciation, add it to `library/voice/lexicon.json`.

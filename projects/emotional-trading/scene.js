@@ -177,10 +177,8 @@ K.img(B.luck, OBJ + "kanz-poker-chips-v01.png", { x: 250, y: 380, w: 340, at: K.
 K.text(B.luck, "وتكسب بالحظ", { x: 290, y: 640, size: 64, head: true, color: L, at: N("وتكسب"), from: "pop", sfx: "coin", gain: 0.3 });
 K.dashed(B.luck, 500, 80, 500, 760, { at: K.T("وممكن", tLuck), color: "rgba(255,255,255,.3)" });
 
-// ---------- 21. ending: back to the opening; the thesis in the voice's words ----------
-const tOne = N("نتيجة");
-K.cam(tOne - 0.2, "hook", { via: 0.42, dur: 0.9 });
-K.takeaway(B.hook, "صفقة واحدة <span class='kw'>ما تقولكش</span><br>إنت ماشي صح ولا لأ", { x: 500, y: 90, size: 84, at: tOne + 0.6, glow: false });
+// ---------- 21. ending (Ahmed 2026-10-11: last sentence removed): hold on the two decisions, slow push ----------
+K.push(K.T("بالحظ", tLuck) + 0.4, "luck", 1.08, 2.4);
 
 // ---------- end: no closing logo or wipe, no top-left logo (Ahmed, 2026-10-06/07, as on the recent Reels) ----------
-K.duration = window.DURATION + 2.4;
+K.duration = window.DURATION + 2.0;

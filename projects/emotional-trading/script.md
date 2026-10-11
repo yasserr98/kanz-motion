@@ -5,7 +5,7 @@ Type Video), Brief read 2026-10-11. Voice: ElevenLabs (`engine/make.py tts`). Th
 spoken exactly as written and is also the caption source; `*word*` marks the caption keyword (stripped
 before TTS). Blank lines are paragraph pauses; single line breaks keep lines of one beat together.
 
-Cut to ~1:19 2026-10-11 (Ahmed: 1:20 max; approved the proposed whole-sentence cut, "aMAZING render it"): removed 'متابع الأخبار…', 'جزء من الإجابة…', 'وكل ده… منطقية', 'فممكن تتمسك…', 'والمكسب كمان…', 'المشاعر دي طبيعية…', 'قبل ما تحط فلوسك…', 'وإيه اللي لو اتغيّر…'. Earlier cut (Ahmed's shorter version, pasted in chat): removed 'حدّد كمان…', 'الإجابات دي…', 'ولما تتوتر…' and 'ولو المعلومات…'; all other lines unchanged.
+Last sentence 'نتيجة صفقة واحدة…' removed 2026-10-11 (Ahmed). Cut to ~1:19 2026-10-11 (Ahmed: 1:20 max; approved the proposed whole-sentence cut, "aMAZING render it"): removed 'متابع الأخبار…', 'جزء من الإجابة…', 'وكل ده… منطقية', 'فممكن تتمسك…', 'والمكسب كمان…', 'المشاعر دي طبيعية…', 'قبل ما تحط فلوسك…', 'وإيه اللي لو اتغيّر…'. Earlier cut (Ahmed's shorter version, pasted in chat): removed 'حدّد كمان…', 'الإجابات دي…', 'ولما تتوتر…' and 'ولو المعلومات…'; all other lines unchanged.
 
 Pauses: paragraphs split after 'أخرج؟' and 'فعلًا؟' (voice check 2026-10-11: questions read flat mid-paragraph). Words unchanged.
 
@@ -40,6 +40,4 @@ Copy doubts (flagged, not changed):
 وقبل ما تحط الاستراتيجية اسأل نفسك: أنا داخل الاستثمار ده *ليه*؟ هدفي منه إيه، ولمدة قد إيه؟
 
 لأن ممكن تاخد قرار مدروس *وتخسر*، وممكن تاخد قرار متهوّر *وتكسب* بالحظ.
-
-نتيجة صفقة واحدة ما تقولكش إنت ماشي *صح* ولا لأ.
 <!-- captions:end -->
