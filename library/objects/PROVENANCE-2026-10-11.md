@@ -50,3 +50,20 @@ Style (identical to the references): photographic grayscale editorial cutout, re
 Output: the three full-body figures centered on a SQUARE canvas (1254x1254 if available, else highest native square), feet near the lower edge with a small margin, comfortable transparent margins. TRUE RGBA PNG TRANSPARENCY everywhere outside the people, including gaps between them. No background, no floor, no glow, no drop shadow, no text, logo or watermark. No fake checkerboard pixels.
 Return only the image.
 ```
+
+## Batch 2 (2026-10-11, us-dollar-decisions v3)
+
+Requested by Ahmed in his v2 review: two different company icons (the factory was standing in for companies), a real map of America
+(border board and 'فلوسهم هناك'), and pictures of different countries ('حسب ظروف كل بلد'). Status: **candidates** until Ahmed reviews
+them in us-dollar-decisions v3. Same tool and checks as above; all 1254x1254 RGBA, compared on charcoal with the bank, factory and
+loan-agreement references (local sheet in the session scratchpad). The US map outline was checked by eye for the lower-48 shape
+(Florida, Great Lakes, Texas, Pacific coast). Prompts: `projects/us-dollar-decisions/assets/*.txt`.
+
+| File | References | Codex session |
+| --- | --- | --- |
+| `kanz-company-office-v01.png` | approved-editorial-batch-01.png + kanz-bank-v01.png | `01a129b6-29cd-7572-b496-895ed637b2ef` |
+| `kanz-company-trading-v01.png` | approved-editorial-batch-01.png + kanz-factory-v01.png | `01a129b6-29ca-7f21-ba13-c0405b2cd91f` |
+| `kanz-map-usa-v01.png` | approved-editorial-batch-01.png + kanz-loan-agreement-v01.png | `01a129b6-29d6-75e1-aae7-3b6a1c7e63b8` |
+| `kanz-landmark-egypt-v01.png` | approved-editorial-batch-01.png + kanz-bank-v01.png | `01a129b6-29d5-7721-9568-7232d01555ff` |
+| `kanz-landmark-uk-v01.png` | approved-editorial-batch-01.png + kanz-bank-v01.png | `01a129b6-29f1-7be0-a933-92d6e7e3ff58` |
+| `kanz-landmark-japan-v01.png` | approved-editorial-batch-01.png + kanz-bank-v01.png | `01a129b6-29cd-7ff3-9912-670df1d1921e` |

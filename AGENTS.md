@@ -35,6 +35,9 @@ repo or a Kanz worktree (worktrees do not contain this folder; use the absolute 
    Defaults since 2026-10-11 (`docs/LOOK-V2.md` section 9): complete first frame, fill the frame, charts with
    weight, bars to scale, paper world (`K.world`) for 1-2 chapters, takeaway ending, smooth camera
    (`K.camSmooth`), sound mix 2 (`K.mix = 2`).
+   **Simple hook (Ahmed 2026-10-11, every video):** the hook is the question headline plus ONE hero object,
+   nothing else: no second object, character, tag, arrow, label, foreground blur or extra beat until the question
+   ends. Glow, float and one slow push are the only movement. Ignore lint's hook `dead` flag for this stretch.
 7. **Review.** `python engine/lint.py projects/<slug>` (safe zones, dead stretches, thin frames, hook;
    fix or justify each flag), then `make.py review <slug> <times>` → look at `out/review.jpg`, fix, repeat.
 8. **Render and check.** `make.py render <slug> v1` in the background, then `make.py check <slug> v1`

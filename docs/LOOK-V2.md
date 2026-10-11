@@ -129,6 +129,11 @@ about 30%. Small true differences get a bracket, never a stretched bar.
 Open on the most dramatic image of the story, then rewind into it. The first visual must land by 1.0 s
 (lint checks this). Big hero object + headline + glow by 0.3 s. Not a single word on an empty board.
 
+**Keep the hook simple (Ahmed 2026-10-11, all videos):** the question headline and ONE hero object, nothing else.
+No second object, character, tag, arrow, label, foreground blur or extra beat until the question has been asked;
+glow, float and one slow `K.push` are the only movement. He rejected the busy us-dollar-decisions v2 hook
+(dollar + wallet + rate arrow + two tags + foreground stack). Lint may report the hook as `dead`; that is expected.
+
 ## 8. Characters and objects that act
 
 Codex batch 2026-10-10 (Ahmed: "create whatever you need"). The files are in `library/objects/`; their prompts and
@@ -161,7 +166,8 @@ these applied; not for posting).
 
 - **First frame is complete.** The question headline and the hero object are on screen from frame 1: no `at` on the
   hero `K.img`, headline parts with no `at` (shown from frame 1). Movement (push, float) starts after. `engine/lint.py` now flags a first
-  visual after 0.3 s (`--hook`) and a first frame under the fill threshold.
+  visual after 0.3 s (`--hook`) and a first frame under the fill threshold. The hook stays simple: headline + one
+  hero object only (section 7).
 - **Fill the frame when the voice names a thing.** Hero objects 500-600 board px, a second object for the
   consequence, one blurred `K.fg` for depth, no placeholder tags. Lint prints thin frames as MUST FIX: fix them or
   say why they stay (a board building up for under ~2 s, or a chart frame, is a fair reason).

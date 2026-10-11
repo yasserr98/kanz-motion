@@ -12,6 +12,7 @@ const hook = K.board("hook", 0, 0), b2 = K.board("two", -1400, 0);
 K.cam(0, "hook");
 
 // ---------- hook: complete from frame 1 (no `at` on the hero or the headline parts); movement starts after ----------
+// Simple hook (Ahmed 2026-10-11, every video): the headline + ONE hero object, nothing else (no tags, arrows, characters, fg)
 K.headline([{ html: "عنوان" }, { html: "السؤال؟", kw: true }], { out: T("الكلمة") - 0.25 }); // out: first word of the next chapter
 K.img(hook, OBJ + "kanz-house-v01.png", { x: 500, y: 500, w: 580, glow: true, float: true }); // hero 500-600 px
 K.push(0.4, "hook", 1.12, 2.0);
