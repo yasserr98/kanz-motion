@@ -403,6 +403,27 @@
     return box;
   };
 
+  // ---------- a second world for chapter changes (approved 2026-10-11) ----------
+  // K.world(t, "paper") wipes the stage to light paper, right -> left; K.world(t, "charcoal") wipes back.
+  // While on paper, text turns ink, lavender text/keywords turn deep purple and chart lines turn ink
+  // (kanz-look.css, #stage[data-world=paper]); captions keep their dark pill. Use for 1-2 chapters a video.
+  K.INK = "#141217";
+  K.world = function (t, name, o = {}) {
+    let bg = document.getElementById("paperworld");
+    if (!bg) {
+      bg = document.createElement("div"); bg.id = "paperworld"; stage.insertBefore(bg, world);
+      tl.set(bg, { autoAlpha: 0 }, 0);
+    }
+    const dur = o.dur || 0.6;
+    if (name === "paper") {
+      tl.fromTo(bg, { autoAlpha: 1, clipPath: "inset(0 0 0 100%)" }, { autoAlpha: 1, clipPath: "inset(0 0 0 0%)", duration: dur, ease: "power3.inOut", immediateRender: false }, t);
+    } else {
+      tl.fromTo(bg, { clipPath: "inset(0 0% 0 0)" }, { clipPath: "inset(0 100% 0 0)", duration: dur, ease: "power3.inOut", immediateRender: false }, t);
+    }
+    tl.set(stage, { attr: { "data-world": name } }, t + dur / 2);
+    if (o.sfx !== false) K.sfx(t, o.sfx || "paper", o.gain || 0.4);
+  };
+
   // ---------- ending: the video's thesis, big, held after the last word (approved 2026-10-11) ----------
   // Use words the voice actually says. Pair it with K.cam(t, <hook board>) so the last frame mirrors the first.
   K.takeaway = function (parent, html, o = {}) {

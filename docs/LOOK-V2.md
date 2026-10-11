@@ -154,13 +154,13 @@ Any further requests go in `docs/CODEX-ASSET-REQUESTS.md`.
 ## 9. Style review updates (Ahmed, 2026-10-11)
 
 From the marked style review of the five voiceover Reels. Ahmed approved: complete first frame, fill the frame,
-charts with weight, bars to scale (section 6), takeaway ending, cover style A. He rejected: on-screen source
+charts with weight, bars to scale (section 6), the paper world, takeaway ending, cover style A. He rejected: on-screen source
 documents as a default device (section 5 stays available, not required) and bigger characters with object stacks.
 New videos only. Worked example: `projects/_sample-real-estate-v3/` (a copy of the delivered real-estate v4 with
 these applied; not for posting).
 
 - **First frame is complete.** The question headline and the hero object are on screen from frame 1: no `at` on the
-  hero `K.img`, headline parts at `at: 0`. Movement (push, float) starts after. `engine/lint.py` now flags a first
+  hero `K.img`, headline parts with no `at` (shown from frame 1). Movement (push, float) starts after. `engine/lint.py` now flags a first
   visual after 0.3 s (`--hook`) and a first frame under the fill threshold.
 - **Fill the frame when the voice names a thing.** Hero objects 500-600 board px, a second object for the
   consequence, one blurred `K.fg` for depth, no placeholder tags. Lint prints thin frames as MUST FIX: fix them or
@@ -171,6 +171,11 @@ these applied; not for posting).
     a year". A non-zero `min` is fine for a time series; label the values that matter.
   - `K.candles(board, { x, y, w, h, data: [[open, high, low, close], ...], at, dur })`: candles appear left -> right.
     Returns `x(i)` / `y(v)` so `K.oval` / `K.arrow` / `K.text` can mark the swing being spoken about.
+- **Paper world** (approved 2026-10-11). `K.world(t, "paper")` wipes the stage right -> left to a light paper
+  background; `K.world(t, "charcoal")` wipes back. On paper, text turns ink, keywords and lavender text turn deep
+  purple, and chart lines turn ink (CSS in `runtime/kanz-look.css`). Captions keep their dark pill. Use it for 1-2
+  chapter turns a video, e.g. a definition or the key idea. Pass `color: K.INK` only if an element keeps a
+  light colour. Worked example: `projects/_paper-demo/` (not for posting).
 - **Takeaway ending.** After the last word, `K.cam(t, <hook board>, { via: 0.42 })` returns to the opening
   composition and `K.takeaway(board, html, { x, y, size, at })` shows the video's question or thesis in big type,
   in words the voice actually said. Extend `K.duration` by about 2 s for the hold.

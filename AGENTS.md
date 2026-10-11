@@ -32,10 +32,14 @@ repo or a Kanz worktree (worktrees do not contain this folder; use the absolute 
 5. **Script and captions.** Voice note: correct `script.md` from the transcript and flag uncertain words.
 6. **Scene.** New videos use look v2 (`docs/LOOK-V2.md`, `K.look()`; the template has it). Copy the closest finished `scene.js` (pilot-01 for a voice note, real-estate-never-loses
    for a script) and adapt it. Approved `library/objects/` only; new objects go through Codex + Ahmed.
+   Defaults since 2026-10-11 (`docs/LOOK-V2.md` section 9): complete first frame, fill the frame, charts with
+   weight, bars to scale, paper world (`K.world`) for 1-2 chapters, takeaway ending.
 7. **Review.** `python engine/lint.py projects/<slug>` (safe zones, dead stretches, thin frames, hook;
    fix or justify each flag), then `make.py review <slug> <times>` → look at `out/review.jpg`, fix, repeat.
 8. **Render and check.** `make.py render <slug> v1` in the background, then `make.py check <slug> v1`
    (frames from the MP4 + loudness ≈ −16 LUFS). Open the MP4 for Ahmed (`ii <path>`).
+   Cover (style A): write `projects/<slug>/cover.json`, run `python engine/cover.py projects/<slug>`, and check
+   the crop lines in `out/cover-review.jpg`.
 9. **Record.** Commit the project (not `out/`), push, add a row to the usage log in
    `docs/EFFICIENCY.md`, and update the Kanz backlog. Delivery to Drive + Airtable (`In Review`)
    only when Ahmed asks; rendered ≠ approved ≠ posted.

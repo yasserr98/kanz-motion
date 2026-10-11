@@ -46,3 +46,17 @@
 #safeguide{position:absolute;inset:0;pointer-events:none;z-index:40}
 #safeguide div{position:absolute;background:rgba(229,83,75,.22)}
 #safeguide .frame{background:none;border:3px dashed rgba(229,83,75,.9)}
+
+/* ---- a second world for chapter changes: light paper (K.world, approved 2026-10-11) ---- */
+#paperworld{position:absolute;inset:0;z-index:0;pointer-events:none;background:var(--paper);
+  background-image:radial-gradient(rgba(0,0,0,.05) 1px,transparent 1px);background-size:5px 5px}
+#stage[data-world=paper] #keylight{opacity:0}
+#stage[data-world=paper] #vignette{opacity:.35}
+#stage[data-world=paper] #headline,#stage[data-world=paper] #world .t{color:var(--ink)!important}
+#stage[data-world=paper] #world .muted{color:#6b6573!important}
+#stage[data-world=paper] #world .t[style*="rgb(213, 173, 239)"],#stage[data-world=paper] #headline .kw,
+#stage[data-world=paper] #world .t .kw{color:var(--purple)!important}
+#stage[data-world=paper] svg.mk polyline[stroke="#f4e8fb"],#stage[data-world=paper] svg.mk path[stroke="#fff"]{stroke:var(--ink)}
+#stage[data-world=paper] svg.mk path[stroke="#d5adef"]{stroke:#7b4fa3}
+#stage[data-world=paper] svg.mk line[stroke^="rgba(255"]{stroke:rgba(20,18,23,.25)}
+#stage[data-world=paper] .kglow{opacity:.35!important}
