@@ -64,3 +64,13 @@ has the long version. Voice rebuilt from the cached takes (no new ElevenLabs cre
 Beats 17-19 (write calmly, check the plan, decision log) removed; the four questions (ليه / هدفي / قد إيه / أخرج)
 now share one board; the paper page at 0:31 shows "Emotional Trading" from the wipe. Still flagged FLAT: 0:00.9,
 0:07.8, 1:37.8 (أخرج؟ no longer flagged).
+
+## v3 (2026-10-11): 1:20 max
+
+Ahmed: "still super long, 1:20 max". Proposed a whole-sentence cut (no rewording, the 2005 study kept); Ahmed:
+"aMAZING render it and make sure to update airtable brief". Cut 'متابع الأخبار…', 'جزء من الإجابة…', 'وكل ده… منطقية',
+'فممكن تتمسك…', 'والمكسب كمان…', 'المشاعر دي طبيعية…', 'قبل ما تحط فلوسك…', 'وإيه اللي لو اتغيّر…'. Voice 77.5 s
+(9 cached takes reused, 2 shortened paragraphs re-generated), 165/165 words; only 0:00.9 'البورصة؟' still flagged FLAT.
+Scenes removed: did / moment / logic / hold / plank / calm / price, and the exit question row. Boards re-laid out 3 x 3.
+`out/emotional-trading-v3.mp4` 79.9 s, -16.7 LUFS. Airtable recN49BA2awknaqVF Brief replaced with the v3 copy
+(with 'وقبل'), read back identical; Status (Approved) and other fields untouched. Not uploaded to Drive.

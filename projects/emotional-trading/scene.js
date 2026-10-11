@@ -14,18 +14,15 @@ const tick = (b, x, y, at, color = L) => K.line(b, [[x - 34, y - 4], [x - 10, y 
 K.look();
 // ---------- world: boards advance right -> left, row by row ----------
 const B = {
-  hook: K.board("hook", 0, 0), did: K.board("did", -1400, 0), moment: K.board("moment", -2800, 0),
-  study: K.board("study", 0, 1650, { h: 900 }), define: K.board("define", -1400, 1400), three: K.board("three", -2800, 1400),
-  logic: K.board("logic", 0, 2800), anyone: K.board("anyone", -1400, 2800), scale: K.board("scale", -2800, 2800),
-  hold: K.board("hold", 0, 4200), plank: K.board("plank", -1400, 4200), calm: K.board("calm", -2800, 4200),
-  plan: K.board("plan", 0, 5600), price: K.board("price", -1400, 5600), q1: K.board("q1", -2800, 5600),
-  luck: K.board("luck", 0, 7000),
+  hook: K.board("hook", 0, 0), study: K.board("study", -1400, 0, { h: 900 }), define: K.board("define", -2800, 0),
+  three: K.board("three", 0, 1400), anyone: K.board("anyone", -1400, 1400), scale: K.board("scale", -2800, 1400),
+  plan: K.board("plan", 0, 2800), q1: K.board("q1", -1400, 2800), luck: K.board("luck", -2800, 2800),
 };
 K.cam(0, "hook");
 
 // ---------- 1. hook: lost money in the market? Complete first frame ----------
 N("البورصة");
-K.headline([{ html: "خسرت فلوس في" }, { html: "البورصة؟", kw: true }], { out: K.T("متابع") - 0.25 });
+K.headline([{ html: "خسرت فلوس في" }, { html: "البورصة؟", kw: true }], { out: K.T("طيب") - 0.25 });
 const crash = [[120, 330], [240, 370], [340, 345], [450, 450], [550, 425], [660, 590], [770, 560], [890, 780]];
 K.line(B.hook, crash, { at: 0, dur: 1.6, color: RED, width: 10 });
 K.img(B.hook, OBJ + "kanz-share-certificate-v01.png", { x: 600, y: 520, w: 540, glow: true, rot: -6 });
@@ -33,33 +30,9 @@ K.img(B.hook, OBJ + "kanz-npc-m02-worried-v01.png", { x: 210, y: 560, w: 400 });
 K.fg(B.hook, OBJ + "kanz-egp-banknote-stack-v01.png", { x: 980, y: 830, w: 380 });
 K.push(0.4, "hook", 1.1, 1.6);
 
-// ---------- 2. you follow the news, read about companies, do everything right… and still lost? ----------
-const tNews = N("متابع");
-K.cam(tNews - 0.3, "did");
-const m1 = K.img(B.did, OBJ + "kanz-npc-m01-neutral-v01.png", { x: 500, y: 660, w: 420, at: tNews });
-[["الأخبار", "الأخبار", 790], ["الشركات", "الشركات", 500], ["صح", "كل حاجة صح", 210]].forEach(([w, html, x], i) => {
-  const t = N(w);
-  K.card(B.did, card(html, 46), { x, y: 230, w: 260, h: 170, rot: i === 1 ? 1.5 : -1.5, at: t - 0.15, tape: true });
-  tick(B.did, x + 95, 135, t + 0.3);
-});
-const tLost = N("خسرت");
-K.swap(m1, OBJ + "kanz-npc-m01-worried-wallet-v01.png", tLost);
-K.text(B.did, "خسرت؟", { x: 500, y: 420, size: 120, head: true, color: RED, at: tLost, from: "pop", sfx: "hit", gain: 0.4 });
-
 // ---------- 3. so why did that happen? ----------
 const tWhy = N("طيب");
-K.punch("طيب ليه ده حصل؟", tWhy, K.T("جزء") - 0.1, { size: 110 });
-
-// ---------- 4. part of the answer: the moment you decide to buy or sell ----------
-const tPart = N("جزء");
-K.cam(tPart - 0.3, "moment", { sfx: false, dur: 0.3 });
-const phone = K.img(B.moment, OBJ + "kanz-npc-m01-phone-choice-v01.png", { x: 610, y: 470, w: 580, at: tPart, glow: true });
-const tMom = N("اللحظة");
-K.img(B.moment, OBJ + "kanz-hourglass-v01.png", { x: 200, y: 470, w: 300, at: tMom, float: true });
-K.text(B.moment, "اللحظة", { x: 240, y: 150, size: 72, head: true, color: L, at: tMom });
-K.push(N("قرار") - 0.2, "moment", 1.12, 2.0, { dx: 80 });
-K.tag(B.moment, "البيع", { x: 760, y: 780, at: N("البيع"), size: 46 });
-K.tag(B.moment, "الشراء", { x: 470, y: 780, lav: true, at: N("الشراء"), size: 46 });
+K.punch("طيب ليه ده حصل؟", tWhy, K.T("دراسة") - 0.45, { size: 110 });
 
 // ---------- 5. the 2005 study (genuine screenshot, NBER w11243) ----------
 const tStudy = N("دراسة");
@@ -115,15 +88,6 @@ K.img(B.three, OBJ + "kanz-poker-chips-v01.png", { x: 280, y: 520, w: 460, at: t
 K.text(B.three, "فلوس أكتر", { x: 280, y: 230, size: 64, head: true, color: L, at: tMore + 0.1 });
 K.tag(B.three, "عشان ترجع اللي خسرته", { x: 500, y: 820, lav: true, size: 44, at: N("ترجع") });
 
-// ---------- 8. ...while you still believe your decisions are logical ----------
-const tAll = N("وكل");
-K.cam(tAll - 0.3, "logic");
-K.img(B.logic, OBJ + "kanz-npc-m01-thinking-v01.png", { x: 640, y: 500, w: 560, at: tAll, float: true });
-K.img(B.logic, OBJ + "kanz-calculator-v01.png", { x: 220, y: 600, w: 300, at: N("مقتنع") });
-const tLog = N("منطقية");
-K.text(B.logic, "«قرارات منطقية»", { x: 500, y: 110, size: 92, head: true, at: K.T("قرارات", tLog - 1) });
-K.oval(B.logic, 500, 110, 400, 90, { at: tLog });
-
 // ---------- 9. why can any of us fall into this? ----------
 const tAny = N("طب");
 K.cam(tAny - 0.3, "anyone");
@@ -174,40 +138,6 @@ const tSame = N("بنفس");
 K.tag(B.scale, "نفس القيمة", { x: 500, y: 820, size: 46, at: tSame });
 tiltTo(tSame + 0.5, 11);
 
-// ---------- 11. holding a losing stock: selling would make the loss real ----------
-const tHold = N("تتمسك");
-K.cam(tHold - 0.4, "hold");
-K.img(B.hold, OBJ + "kanz-npc-f01-worried-v01.png", { x: 680, y: 500, w: 520, at: tHold - 0.1 });
-K.line(B.hold, [[90, 200], [200, 240], [290, 230], [380, 360], [470, 400]], { at: N("خسران") - 0.3, dur: 0.9, color: RED, width: 9 });
-K.img(B.hold, OBJ + "kanz-share-certificate-v01.png", { x: 300, y: 470, w: 380, at: K.T("بسهم", tHold), rot: 5 });
-const tReal = N("حقيقة");
-K.img(B.hold, OBJ + "kanz-receipt-v01.png", { x: 260, y: 700, w: 230, at: K.T("بيعه", tHold) + 0.1, sfx: "paper" });
-K.text(B.hold, "الخسارة بقت حقيقة", { x: 500, y: 90, size: 76, head: true, color: RED, at: tReal - 0.2 });
-
-// ---------- 12. a gain raises your confidence: more risk than you planned (plank over the crater) ----------
-const tWin = N("والمكسب");
-K.cam(tWin - 0.3, "plank");
-K.img(B.plank, OBJ + "kanz-volcano-crater-v01.png", { x: 380, y: 650, w: 620, at: tWin, shadow: false });
-const plank = K.img(B.plank, OBJ + "kanz-wooden-plank-v01.png", { x: 500, y: 520, w: 800, at: tWin + 0.1, shadow: false });
-gsap.set(plank, { zIndex: 3 });
-const cele = K.img(B.plank, OBJ + "kanz-npc-m01-celebrating-v01.png", { x: 840, y: 340, w: 320, at: tWin + 0.2, shadow: false });
-gsap.set(cele, { zIndex: 4 });
-K.tag(B.plank, "ثقة أكبر", { x: 840, y: 90, lav: true, size: 48, at: N("ثقتك") });
-const tStep = N("تاخد");
-K.out(cele, tStep);
-K.walk(B.plank, [OBJ + "kanz-npc-m01-walk-a-v01.png", OBJ + "kanz-npc-m01-walk-b-v01.png"],
-  { from: [840, 340], to: [330, 340], at: tStep, dur: 2.2, w: 320, appear: tStep, sfx: "hit", gain: 0.08, shadow: false, z: 5 });
-K.text(B.plank, "مخاطرة أكبر", { x: 380, y: 90, size: 84, head: true, color: RED, at: N("أكبر") });
-
-// ---------- 13. these feelings are normal; what matters is how you decide with them ----------
-const tFeel = N("المشاعر");
-K.cam(tFeel - 0.3, "calm");
-K.img(B.calm, OBJ + "kanz-npc-f01-explain-v01.png", { x: 500, y: 520, w: 540, at: tFeel, glow: true });
-[["الخوف", 800, 300], ["الطمع", 200, 330], ["تعوّض", 790, 640]].forEach(([w, x, y], i) =>
-  K.text(B.calm, w, { x, y, size: 56, head: true, cls: "muted", at: tFeel + 0.2 + i * 0.15, from: "fade" }));
-K.text(B.calm, "طبيعية", { x: 500, y: 90, size: 100, head: true, color: L, at: N("طبيعية") });
-K.tag(B.calm, "إزاي تاخد قرارك؟", { x: 500, y: 830, lav: true, size: 48, at: N("قرارك") - 0.3 });
-
 // ---------- 14. strategy on paper: a clear, written, researched plan that fits your goal and risk ----------
 const tStrat = N("وهنا");
 K.cam(tStrat - 0.3, "plan");
@@ -221,34 +151,20 @@ K.card(B.plan, "", { x: 560, y: 510, w: 620, h: 620, rot: -1, at: N("خطة") - 
 });
 K.img(B.plan, OBJ + "kanz-security-shield-v01.png", { x: 150, y: 640, w: 240, at: K.T("تحمّل", tStrat), shadow: false });
 
-// ---------- 15. before putting money in: what is a stock market and what moves the price? ----------
-const tBefore = N("قبل");
+// ---------- 16. before the strategy, ask yourself: why, what goal, how long ----------
+const tBefore = N("وقبل");
 K.world(tBefore - 0.3, "charcoal");
-K.cam(tBefore - 0.3, "price");
-K.img(B.price, OBJ + "kanz-wallet-open-cash-v01.png", { x: 820, y: 640, w: 300, at: N("فلوسك") });
-const cd = [[5, 5.6, 4.7, 5.4], [5.4, 6.2, 5.2, 6], [6, 6.3, 5.1, 5.3], [5.3, 5.5, 4.4, 4.6], [4.6, 5.8, 4.5, 5.6], [5.6, 7, 5.5, 6.8],
-  [6.8, 7.1, 5.8, 6], [6, 6.4, 5, 5.2], [5.2, 6.6, 5.1, 6.4], [6.4, 7.6, 6.2, 7.3]];
-const cdl = K.candles(B.price, { x: 420, y: 470, w: 640, h: 440, data: cd, at: N("تفهم"), dur: 2.0 });
-K.text(B.price, "يعني إيه بورصة؟", { x: 500, y: 90, size: 76, head: true, at: N("بورصة") - 0.2 });
-const tMove = N("السعر");
-K.text(B.price, "؟", { x: cdl.x(9) + 60, y: cdl.y(7.6) - 40, size: 150, head: true, color: L, at: tMove, from: "pop", sfx: "pop" });
-K.tag(B.price, "إيه اللي بيحرك السعر؟", { x: 420, y: 800, lav: true, size: 46, at: K.T("بيحرك", tBefore) });
-
-// ---------- 16. ask yourself: why, what goal, how long, what would make me exit ----------
+K.cam(tBefore - 0.3, "q1");
 const tAsk = N("اسأل");
-K.cam(tAsk - 0.3, "q1");
 K.text(B.q1, "اسأل نفسك", { x: 500, y: 70, size: 96, head: true, color: L, at: tAsk });
 const row = (b, w, html, img, i, o = {}) => {
-  const t = o.t || N(w), y = 235 + i * 178;
-  K.img(b, OBJ + img, { x: 800, y, w: 200, at: t, shadow: false, glow: o.glow });
-  K.text(b, html, { x: 390, y, size: 66, head: true, at: t + 0.05 });
+  const t = o.t || N(w), y = 270 + i * 230;
+  K.img(b, OBJ + img, { x: 800, y, w: 250, at: t, shadow: false, glow: o.glow });
+  K.text(b, html, { x: 390, y, size: 72, head: true, at: t + 0.05 });
 };
 row(B.q1, "ليه", "داخل ليه؟", "kanz-share-certificate-v01.png", 0);
 row(B.q1, "هدفي", "هدفي منه إيه؟", "kanz-savings-jar-v01.png", 1);
-row(B.q1, "ولمدة", "لمدة قد إيه؟", "kanz-calendar-v01.png", 2);
-const tExit = N("وإيه");
-row(B.q1, "", "إيه يخلّيني أخرج؟", "kanz-security-shield-v01.png", 3, { t: tExit, glow: true });
-K.oval(B.q1, 390, 235 + 3 * 178, 300, 80, { at: N("أخرج") });
+row(B.q1, "ولمدة", "لمدة قد إيه؟", "kanz-calendar-v01.png", 2, { glow: true });
 
 // ---------- 20. a studied decision can lose; a reckless one can win by luck ----------
 const tLuck = N("لأن");
