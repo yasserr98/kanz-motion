@@ -143,3 +143,10 @@ Ahmed named 'ترجع اللي خسرته' and picked test clip k-4 ('...ترج�
 The same script adds silence where the voice read through punctuation (16 places, 0.10-0.28 s; the quick list
 'الخوف، أو الطمع' left alone), so no approved take was re-generated. Voice 76.1 s.
 `out/emotional-trading-v11.mp4` 78.1 s, -16.0 LUFS. Not yet re-voiced: 0:42 rushed line, 0:50 slow line.
+
+## v12 (2026-10-11): 1.1x
+
+Ahmed asked how much faster it can go; a labelled comparison of 0:30-0:50 at 1.00/1.05/1.10/1.15/1.20 (`out/speed/`,
+local) and he chose 1.1x. `speed_up.py` stretches the finished voice with rubberband (pitch kept) and divides every
+word time by 1.1, so the scene re-times itself. Order after any `make.py tts`: splice.py, voice_edits.py, speed_up.py.
+Voice 69.2 s. `out/emotional-trading-v12.mp4` 71.2 s, 24 fps, -16.1 LUFS.
