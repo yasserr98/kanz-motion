@@ -72,7 +72,10 @@ audio/frames before changing anything, and say where it really was if it differs
   Real market figures need a source on screen and in the project notes.
 - **Look**: approved charcoal grain background, Thmanyah Display headlines, IBM Plex Sans Arabic
   text, lavender `#D5ADEF` as the only pointing colour, red only for genuine losses/risk.
-  No slide counters. The Kanz logo stays small top-left and closes the video.
+  No slide counters. **Logo: none by default** (the recent Reels carry no logo, Ahmed 2026-10-06/07; reconfirmed
+  2026-10-11, the template no longer has it). When a video does add it, it must contrast with whatever is behind it:
+  the white logo turns dark automatically on the paper world (`runtime/kanz-look.css`); check every other light
+  background (paper cards, photos, screenshots) in the review sheet (Ahmed 2026-10-11: white on white).
 - **Direction**: text, highlights and label sequences run right → left; market charts keep
   time left → right.
 - **Objects**: reuse `library/objects/` (copied from the Kanz approved library) first. New
