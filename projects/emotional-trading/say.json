@@ -1,9 +1,9 @@
 {
- "_why": "Voice-only spelling; captions keep script.md. 2026-10-11 Ahmed: 'متهوّر' was mispronounced in v3; respelled as Egyptian mit-hawwar.",
+ "_why": "Voice-only spelling; captions keep script.md. 'متهوّر': v3 plain spelling and v4 'مِتْهَوَّر' both came out stretched ('motaaahawer'); Ahmed picked the hyphenated 'مِت-هَوَّر' from two rounds of test clips (out/pron, round 2 #2), 2026-10-11.",
  "replace": [
   [
    "متهوّر",
-   "مِتْهَوَّر"
+   "مِت-هَوَّر"
   ]
  ]
 }

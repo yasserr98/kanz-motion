@@ -82,3 +82,11 @@ the video now ends holding the careful/reckless split (slow push, 2 s). Voice-on
 'متهوّر' -> 'مِتْهَوَّر' (Egyptian mit-hawwar); captions keep 'متهوّر'; only the last paragraph re-generated.
 Voice 73.6 s. Airtable Brief updated without the last sentence (write response verified). If Ahmed confirms the
 new pronunciation, add it to `library/voice/lexicon.json`.
+
+## v5 (2026-10-11): pronunciation + new defaults
+
+'متهوّر' voiced as 'مِت-هَوَّر' (Ahmed picked #2 of round 2 test clips in `out/pron/`; v4's 'مِتْهَوَّر' still came
+out as 'motaaahawer'); added to `library/voice/lexicon.json`. Ahmed: "make sure this video follows the new rules too,
+with the sound mixing": scene now sets `K.camSmooth = true` (24 fps capture) and `K.mix = 2` (levelled, ducked SFX,
+-16 LUFS with limiter). `out/emotional-trading-v5.mp4` 75.7 s, 24 fps, -16.0 LUFS. Ending stays the hold on the
+careful/reckless split (no takeaway card: Ahmed removed the closing sentence). Airtable Brief already matches.

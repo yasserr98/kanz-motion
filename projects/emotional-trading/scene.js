@@ -12,6 +12,8 @@ const card = (html, size = 56) => `<div style="height:100%;display:flex;align-it
 const tick = (b, x, y, at, color = L) => K.line(b, [[x - 34, y - 4], [x - 10, y + 22], [x + 34, y - 30]], { at, dur: 0.3, width: 9, color });
 
 K.look();
+K.camSmooth = true; // camera glides at 24 fps, graphics stay on twos (LOOK-V2 section 9)
+K.mix = 2; // levelled + ducked SFX, never louder than the voice, -16 LUFS; sfx: false is silent (LOOK-V2 section 9)
 // ---------- world: boards advance right -> left, row by row ----------
 const B = {
   hook: K.board("hook", 0, 0), study: K.board("study", -1400, 0, { h: 900 }), define: K.board("define", -2800, 0),
