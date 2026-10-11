@@ -179,6 +179,10 @@ these applied; not for posting).
 - **Takeaway ending.** After the last word, `K.cam(t, <hook board>, { via: 0.42 })` returns to the opening
   composition and `K.takeaway(board, html, { x, y, size, at })` shows the video's question or thesis in big type,
   in words the voice actually said. Extend `K.duration` by about 2 s for the hold.
+- **Smooth camera** (approved 2026-10-11 from a side-by-side trial): `K.camSmooth = true` after `K.look()`
+  (the template has it). The camera follows the exact time while objects, text and charts stay on twos, so pans
+  and pushes glide without losing the hand-made feel. `engine/render.py` sees the flag and captures every frame
+  at 24 fps (about twice the render time). Trial clip: `projects/_sample-real-estate-v3/out/camera-sample.mp4`.
 - **Cover, style A ("the idea in an object").** `projects/<slug>/cover.json` -> `python engine/cover.py projects/<slug>`
   writes `out/cover.png` (1080x1920, the upload) and `out/cover-review.jpg` (3:4 / 4:5 / 1:1 crop lines and the
   3:4 profile-grid crop). Headline and object must stay inside x 150-930, y 440-1380; the script measures and warns.

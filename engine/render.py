@@ -69,6 +69,7 @@ def main():
     ap.add_argument("--from", dest="t0", type=float, default=0.0)
     ap.add_argument("--to", dest="t1", type=float)
     ap.add_argument("--name", default=None)
+    ap.add_argument("--cam24", action="store_true", help="smooth camera even if the scene does not set K.camSmooth")
     a = ap.parse_args()
     proj = Path(a.project).resolve()
     out_dir = proj / "out"
@@ -87,6 +88,12 @@ def main():
             print("PAGE ERRORS:", *errors, sep="\n  ")
         duration = page.evaluate("K.duration")
         fps = page.evaluate("K.fps")
+        # smooth camera (Ahmed 2026-10-11, new videos): scenes set K.camSmooth = true; capture every 24 fps frame
+        # so the camera glides while graphics stay on twos. Older scenes leave it off and render as before.
+        if a.cam24:
+            page.evaluate("K.camSmooth = true")
+        if page.evaluate("!!K.camSmooth"):
+            fps = 24
         stage = page.locator("#stage")
         if a.stills:
             sd = out_dir / ("stills-" + (a.name or "review"))
