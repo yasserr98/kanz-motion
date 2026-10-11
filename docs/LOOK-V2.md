@@ -133,6 +133,9 @@ Open on the most dramatic image of the story, then rewind into it. The first vis
 No second object, character, tag, arrow, label, foreground blur or extra beat until the question has been asked;
 glow, float and one slow `K.push` are the only movement. He rejected the busy us-dollar-decisions v2 hook
 (dollar + wallet + rate arrow + two tags + foreground stack). Lint may report the hook as `dead`; that is expected.
+Approved as the default on 2026-10-11 (Ahmed: "this can be the default"): the us-dollar-decisions v4 hook is the reference
+(`projects/us-dollar-decisions/scene.js`, section 1): headline in three short lines with the keyword last in lavender, one
+hero object at 600 board px centred under it (`glow`, `float`, slight rotation), `K.push(0.4, "hook", 1.12, 3.8)`.
 
 ## 8. Characters and objects that act
 
