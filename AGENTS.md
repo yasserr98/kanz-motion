@@ -43,6 +43,9 @@ repo or a Kanz worktree (worktrees do not contain this folder; use the absolute 
    ends. Glow, float and one slow push are the only movement. Ignore lint's hook `dead` flag for this stretch.
    Approved default (Ahmed, 2026-10-11, "this can be the default"): copy the hook of `projects/us-dollar-decisions`
    (v4): three-line question headline, keyword last in lavender, one 600 px hero with glow + float, `K.push(0.4, 1.12, 3.8)`.
+   **Pace (2026-10-13, trial):** `runtime/kanz-pace.js` + `K.pace()` (docs/PACE.md) applies the short-form pacing study:
+   boards arrive built (`K.go`), camera drift, carried hero (`K.carry`), room-tone bed, retimed voice (`engine/retime.py`).
+   First use: `projects/us-dollar-decisions-pace` (before/after for Ahmed). Make it the default only after he approves it.
 7. **Review.** `python engine/lint.py projects/<slug>` (safe zones, dead stretches, thin frames, hook;
    fix or justify each flag), then `make.py review <slug> <times>` → look at `out/review.jpg`, fix, repeat.
 8. **Render and check.** `make.py render <slug> v1` in the background, then `make.py check <slug> v1`

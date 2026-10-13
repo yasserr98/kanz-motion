@@ -47,7 +47,28 @@ def smooth_gain(g_db, attack, release):
 SFX_TARGET = -18.0  # loudest-50 ms RMS every SFX file is levelled to before its scene gain (mix 2)
 
 
-def mix_audio_v2(proj, cues, duration, out, t0=0.0):
+BED_UNDER_VOICE = 21.0  # room tone sits this many dB under the voice's median speech level
+
+
+def room_tone(n, seed=7):
+    """A quiet, non-musical room tone (Kanz pace, 2026-10-13): brown noise with the rumble and hiss filtered off,
+    plus a fainter pink layer for air. Generated, so it is fully owned and identical on every render."""
+    d = n / SR + 0.1
+    graph = (f"anoisesrc=color=brown:seed={seed}:amplitude=0.6:sample_rate={SR}:duration={d:.3f},highpass=f=80,lowpass=f=700[b];"
+             f"anoisesrc=color=pink:seed={seed + 1}:amplitude=0.08:sample_rate={SR}:duration={d:.3f},highpass=f=300,lowpass=f=3500[p];"
+             "[b][p]amix=inputs=2:normalize=0,aformat=channel_layouts=stereo")
+    pcm = subprocess.run(["ffmpeg", "-v", "error", "-filter_complex", graph, "-f", "s16le", "-ac", "2", "-ar", str(SR), "-"],
+                         capture_output=True, check=True).stdout
+    a = np.frombuffer(pcm, dtype=np.int16).astype(np.float32).reshape(-1, 2) / 32768
+    a = a[:n] if len(a) >= n else np.pad(a, ((0, n - len(a)), (0, 0)))
+    fade = np.ones(n, np.float32)
+    k = min(n // 4, int(0.4 * SR))
+    fade[:k] = np.linspace(0, 1, k)
+    fade[n - k:] = np.linspace(1, 0, k)
+    return a * fade[:, None]
+
+
+def mix_audio_v2(proj, cues, duration, out, t0=0.0, bed=None):
     """Mix 2 (Ahmed 2026-10-11: "sometimes the sound effects are too loud"). Library files differ by up to
     20 dB inside one category, so every file is levelled first; the SFX bus ducks ~5 dB under speech and
     can never rise above the voice; then the whole mix goes to -16 LUFS with a -1 dBFS peak limit."""
@@ -91,6 +112,10 @@ def mix_audio_v2(proj, cues, duration, out, t0=0.0):
     if len(gain) < n:
         gain = np.pad(gain, (0, n - len(gain)), constant_values=gain[-1] if len(gain) else 1.0)
     bus = vbus + sbus * gain[:, None]
+    if bed == "room":  # never digital silence between phrases (pacing study 2026-10-13)
+        rt = room_tone(n)
+        rdb = 10 * np.log10(np.mean(rt.mean(axis=1) ** 2) + 1e-12)
+        bus += rt * np.float32(10 ** (((vref - BED_UNDER_VOICE) - rdb) / 20))
     raw = out.with_name(out.stem + "-raw.wav")
     pcm = (np.clip(bus, -1, 1) * 32767).astype(np.int16).tobytes()
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "s16le", "-ar", str(SR), "-ac", "2", "-i", "-", str(raw)],
@@ -103,9 +128,9 @@ def mix_audio_v2(proj, cues, duration, out, t0=0.0):
     return sorted(used)
 
 
-def mix_audio(proj, cues, duration, out, t0=0.0, mix=1):
+def mix_audio(proj, cues, duration, out, t0=0.0, mix=1, bed=None):
     if mix == 2:
-        return mix_audio_v2(proj, cues, duration, out, t0)
+        return mix_audio_v2(proj, cues, duration, out, t0, bed)
     voice = decode(proj / "audio" / "voice.wav")
     n = int((duration - t0) * SR) + SR
     bus = np.zeros((n, 2), np.float32)
@@ -201,9 +226,10 @@ def main():
         ff.wait()
         cues = page.evaluate("K.cues")
         mix = page.evaluate("K.mix || 1")
+        bed = page.evaluate("K.bed || null")
         browser.close()
     audio = out_dir / f"_{name}-audio.wav"
-    used = mix_audio(proj, cues, t1, audio, a.t0, mix)
+    used = mix_audio(proj, cues, t1, audio, a.t0, mix, bed)
     final = out_dir / f"{name}.mp4"
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(silent), "-i", str(audio), "-c:v", "copy", "-c:a", "aac",
                     "-b:a", "192k", "-shortest", "-movflags", "+faststart", str(final)], check=True)
