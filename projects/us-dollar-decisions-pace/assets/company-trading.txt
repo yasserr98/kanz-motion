@@ -1,0 +1,7 @@
+Attachments: image 1 = the APPROVED Kanz editorial icon sheet (style authority). Image 2 = an approved Kanz library icon (finish, material, perspective, scale and framing authority).
+
+Create ONE Kanz explainer icon: a TRADING COMPANY building, a low wide two-storey office block attached to a small warehouse with one large roll-up loading door and two stacked shipping crates beside it, seen in the same three-quarter view from slightly above as image 2. It must read as a company that sells and ships goods, clearly different in shape from a tall office tower, and not a factory (no chimneys, no smokestacks).
+Lavender accent: the roll-up loading door only.
+Treatment identical to the references: photographic grayscale editorial cutout with real material texture and the same fine tactile grain, same lighting from upper left; restrained lavender #D5ADEF only on the detail named; neutral grayscale everything else. The Kanz icon style is fixed for every topic: match line weight, shapes, perspective, dimensionality, shading, texture and palette treatment exactly; no topic-specific style, no glossy colours, no cartoon.
+Output: one centered subject on a SQUARE canvas (1254x1254 if available, else highest native square), comfortable transparent margins. TRUE RGBA PNG TRANSPARENCY everywhere outside the subject. No background, no floor, no drop shadow, no fake checkerboard, no text, letters, numbers, logos, flags or watermark.
+Return only the image.
