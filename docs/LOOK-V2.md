@@ -1,5 +1,9 @@
 # Look v2: fuller, lit, evidence-led Reels
 
+> **Pace (2026-10-13, default for new videos, [PACE.md](PACE.md))** changes four things below: the hook hero settles from
+> oversized instead of `K.push` (section 7); the paper world is used at chapter turns, not only 1-2 per video; the ending
+> cuts back to the hook on the last word with a ~1.3 s tail instead of a ~2 s hold; boards sit 1,100 px apart in a snake.
+
 Approved by Ahmed 2026-10-10 for **new videos only** (finished Reels are not re-timed or re-rendered).
 No music: that was his decision on 2026-10-10, so sound stays voice + SFX.
 

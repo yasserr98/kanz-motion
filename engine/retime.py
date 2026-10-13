@@ -5,14 +5,17 @@
 Pauses (below --floor dB for longer than --max-pause) are cut down to --max-pause by removing their
 middle, then ffmpeg atempo (pitch kept) speeds the whole voice by --tempo. Word timings in
 build/timing.js (TOKENS, CAPTIONS, DURATION) are mapped through the same cuts, so the scene's
-K.T()/K.N() anchors follow the new voice. The originals are kept as audio/voice-pre-retime.wav and
-build/timing-pre-retime.js; running it again starts from those, so settings do not compound.
+K.T()/K.N() anchors follow the new voice. transcript.json and transcript.aligned.json are remapped too, so
+`make.py review/render` (which rebuild timing.js from them) stay in sync without a new alignment call. The
+originals are kept with a -pre-retime suffix; running it again starts from those, so settings do not compound.
+Normally run through `python engine/make.py retime <slug> [tempo] [max-pause]`.
 
 Pacing study 2026-10-13: the script-route voice (ElevenLabs at 1.15) runs ~2.3 words/s against
 ~3.3 in the voice-note Reels, and ElevenLabs caps speed at 1.2. Retiming keeps the approved take
 (including spliced re-voiced lines) instead of generating a new one.
 """
 import argparse
+import hashlib
 import json
 import re
 import shutil
@@ -38,9 +41,14 @@ def main():
     proj = Path(a.project)
     voice, timing = proj / "audio" / "voice.wav", proj / "build" / "timing.js"
     v0, t0 = proj / "audio" / "voice-pre-retime.wav", proj / "build" / "timing-pre-retime.js"
+    trs = [(proj / n, proj / n.replace(".json", "-pre-retime.json")) for n in ("transcript.json", "transcript.aligned.json")]
     if not v0.exists():
         shutil.copy(voice, v0)
-        shutil.copy(timing, t0)
+        if timing.exists():
+            shutil.copy(timing, t0)
+        for cur, pre in trs:
+            if cur.exists():
+                shutil.copy(cur, pre)
     dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(v0)],
                                capture_output=True, text=True).stdout)
 
@@ -72,6 +80,30 @@ def main():
     graph = parts + "".join(f"[a{i}]" for i in range(len(keep))) + f"concat=n={len(keep)}:v=0:a=1[c];[c]atempo={a.tempo}[o]"
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(v0), "-filter_complex", graph, "-map", "[o]", str(voice)], check=True)
 
+    # transcripts (segments -> words with start/end), remapped the same way
+    for cur, pre in trs:
+        if not pre.exists():
+            continue
+        tr = json.loads(pre.read_text(encoding="utf-8"))
+        for seg in tr.get("segments", []):
+            for k in ("start", "end"):
+                if k in seg:
+                    seg[k] = remap(seg[k])
+            for w in seg.get("words", []):
+                for k in ("start", "end"):
+                    if k in w:
+                        w[k] = remap(w[k])
+        if "duration" in tr:
+            tr["duration"] = remap(tr["duration"])
+        tr["retime"] = {"tempo": a.tempo, "max_pause": a.max_pause, "pauses_cut": len(cuts)}
+        if "sha256" in tr:  # engine/align.py cache key: keep it valid for the retimed voice (same text)
+            text = tr["segments"][0]["text"] if tr.get("segments") else ""
+            tr["sha256"] = hashlib.sha256(voice.read_bytes() + text.encode()).hexdigest()
+        cur.write_text(json.dumps(tr, ensure_ascii=False, indent=1), encoding="utf-8")
+
+    if not t0.exists():
+        print(f"voice retimed; no build/timing.js yet (run make.py captions)")
+        return
     src = t0.read_text(encoding="utf-8")
     tokens = json.loads(re.search(r"window\.TOKENS=(\[.*?\]);", src, re.S).group(1))
     caps = json.loads(re.search(r"window\.CAPTIONS=(\[.*?\]);", src, re.S).group(1))

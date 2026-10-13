@@ -68,6 +68,7 @@ python engine/make.py script my-video           # then paste the copy into scrip
 python engine/tts.py --list-voices              # pick a voice; put it in .env as ELEVENLABS_VOICE_ID
 python engine/make.py sample my-video 1.0       # first two paragraphs, to choose voice and speed
 python engine/make.py tts my-video 1.0          # full voice + word timings + captions
+python engine/make.py retime my-video           # pace: pauses to 0.3 s, 1.08x, captions re-timed (docs/PACE.md)
 # write scene.js, then review / render / check as above
 ```
 
