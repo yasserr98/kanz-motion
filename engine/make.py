@@ -13,6 +13,8 @@ Script route (ElevenLabs voice, needs .env)
 Both routes
     python engine/make.py breaths <name>            # list audible breaths/sighs to mute (audio/edl.json "mute")
     python engine/make.py captions <name>           # time script.md against the final voice (forced alignment)
+    python engine/make.py retime <name> [tempo] [max-pause]  # pace (docs/PACE.md): pauses -> 0.3 s, tempo 1.08
+                                                    # (script route default; voice notes: tempo 1.0), then captions
     python engine/sfx_gen.py <category> <name> "<prompt>"   # generate a missing sound effect into library/sfx
     python engine/make.py review <name> 2,10,30     # stills -> one contact sheet out/review.jpg
     python engine/make.py render <name> [version]   # full MP4 in projects/<name>/out/
@@ -79,7 +81,7 @@ def main():
     arg = sys.argv[3] if len(sys.argv) > 3 else None
     proj = ROOT / "projects" / name
     out = proj / "out"
-    if step in ("captions", "stills", "review", "render") and not (proj / "transcript.json").exists():
+    if step in ("captions", "retime", "stills", "review", "render") and not (proj / "transcript.json").exists():
         sys.exit(f"{name} has no voice yet: run `make.py tts {name}` (script route) or `make.py audio {name}` first.")
     if step == "new":
         src = Path(arg)
@@ -116,6 +118,10 @@ def main():
     elif step == "breaths":
         run([PY, "engine/breaths.py", proj])
     elif step == "captions":
+        captions(proj)
+    elif step == "retime":
+        mp = sys.argv[4] if len(sys.argv) > 4 else "0.3"
+        run([PY, "engine/retime.py", proj, "--tempo", arg or "1.08", "--max-pause", mp])
         captions(proj)
     elif step in ("stills", "review"):
         captions(proj)

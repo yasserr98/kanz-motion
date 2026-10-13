@@ -3,8 +3,9 @@
 Built 2026-10-13 from the short-form pacing study (Kanz repo `reports/shorts-pacing-study-2026-10-13/`:
 conversion.doc, Vox Shorts and 0x100x against our 7 Reels). Ahmed asked to "apply all the changes"; the first
 video built with it is `projects/us-dollar-decisions-pace/` (the delivered v4 rebuilt; v4 itself is unchanged).
-Opt-in: a project loads `runtime/kanz-pace.js` after `kanz-look.js` and calls `K.pace()` after `K.look()`.
-Projects that don't load it render exactly as before.
+**Default for new videos since 2026-10-13** (Ahmed approved the before/after: "update the engine locally and the
+github repo"). The template loads `runtime/kanz-pace.js` after `kanz-look.js` and calls `K.pace()` after `K.look()`.
+Finished projects don't load it and render exactly as before.
 
 ## What the study found (why this exists)
 
@@ -51,10 +52,12 @@ K.finish();                                                             // adds 
 
 ## Voice
 
-`python engine/retime.py projects/<slug> --tempo 1.08 --max-pause 0.3` cuts pauses longer than 0.3 s down to 0.3 s and
-speeds the voice 1.08× (pitch kept), mapping `build/timing.js`. Originals are kept (`voice-pre-retime.wav`,
-`timing-pre-retime.js`). After retiming, render with `python engine/render.py` directly: `make.py review/render`
-re-run captions and rebuild `timing.js` from the new voice (correct, but it needs the ElevenLabs alignment call).
+`python engine/make.py retime <slug> [tempo=1.08] [max-pause=0.3]` cuts pauses longer than 0.3 s down to 0.3 s,
+speeds the voice by `tempo` (pitch kept), remaps `transcript.json`, `transcript.aligned.json` and `build/timing.js`,
+then rebuilds the captions. Originals are kept with a `-pre-retime` suffix and every run starts from them, so settings
+never compound. Script route: run it right after `make.py tts` (and after any voice fix round). Voice notes are already
+1.25x: `make.py retime <slug> 1.0` tightens the pauses only. `make.py review/render` stay in sync afterwards
+(verified on us-dollar-decisions-pace: 171/171 words, identical timings).
 
 ## Sound
 
