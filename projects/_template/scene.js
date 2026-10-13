@@ -4,6 +4,8 @@
  * charts with weight, bars to scale, paper world for chapter turns, takeaway ending.
  * Pace (Ahmed 2026-10-13, docs/PACE.md): boards arrive built (K.go + at: g.lead), camera drift, one hero carried
  * between boards, 24 fps motion, room-tone bed; script-route voices are retimed (make.py retime) before the scene.
+ * Variety (Ahmed 2026-10-13, docs/PACE.md): one K.punch({riser: true}) on the key sentence, K.stack/K.pile for amounts,
+ * K.swap for state changes, map/globe + K.pin for places, real series via engine/data.py with `source`. No ground plane.
  * Worked example: projects/us-dollar-decisions-pace/ (also _sample-real-estate-v3/, _paper-demo/, _chart-demo/). */
 const { N, T, num } = K;
 const tl = K.tl;

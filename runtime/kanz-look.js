@@ -236,7 +236,7 @@
       hide(p);
       tl.fromTo(p, { autoAlpha: 0, scale: 0.95, y: 50 }, { autoAlpha: 1, scale: 1, y: 0, duration: 0.6, ease: "power3.out", immediateRender: false }, o.at);
       tl.fromTo(im, { scale: 1 }, { scale: o.kb || 1.08, duration: Math.max(1, (o.out != null ? o.out : END()) - o.at), ease: "none", immediateRender: false }, o.at);
-      K.sfx(o.at, "click", 0.3);
+      K.sfx(o.at, K.cue(o.sfx, "shutter"), 0.3); // camera shutter (2026-10-13); was a click
       if (c) { hide(c); tl.fromTo(c, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.4, immediateRender: false }, o.at + 0.4); }
     }
     if (o.out != null) tl.to(c ? [p, c] : p, { autoAlpha: 0, duration: 0.3 }, o.out);

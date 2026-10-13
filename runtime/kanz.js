@@ -346,7 +346,15 @@
       }
       if (o.end) K.tag(parent, o.end.html, { x: px(n - 1) - (o.end.dx ?? 0), y: py(d[n - 1]) - (o.end.dy ?? 80), lav: o.end.lav !== false, size: o.end.size || 40, at: o.at + dur });
     }
-    if (o.out != null) tl.to(s, { autoAlpha: 0, duration: 0.3 }, o.out);
+    // real data (2026-10-13): `source` puts the source line under the chart, e.g. "FRED · FEDFUNDS · ١٣/١٠/٢٠٢٦"
+    let src = null;
+    if (o.source) {
+      src = K.el("div", "ksrc", parent, o.source);
+      gsap.set(src, { fontSize: 24 });
+      place(src, o.x, Y0 + 48);
+      if (o.at != null) { hide(src); tl.fromTo(src, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, immediateRender: false }, o.at + 0.2); }
+    }
+    if (o.out != null) tl.to(src ? [s, src] : s, { autoAlpha: 0, duration: 0.3 }, o.out);
     return { svg: s, x: px, y: py, at: o.at, dur: o.dur || 1.6 };
   };
   // K.candles(board, { x, y, w, h, data: [[open, high, low, close], ...], min, max, at, dur })
@@ -446,14 +454,19 @@
     tl.fromTo(dim, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.12, immediateRender: false }, t0);
     tl.fromTo(e, { scale: 1.25, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.25, ease: "power4.out", immediateRender: false }, t0);
     tl.to([dim, e], { autoAlpha: 0, duration: 0.15 }, t1);
-    K.sfx(t0, "hit", 0.5);
+    // riser (2026-10-13): one per video at most, for the key reveal. The generated swell ends in its own low thud
+    // on t0, so it replaces the hit. Without the option the punch sounds exactly as before.
+    if (o.riser) K.sfx(t0 - 1.55, "riser", o.riser === true ? 0.4 : o.riser);
+    else K.sfx(t0, "hit", 0.5);
   };
   K.wipe = function (t, o = {}) { // deep-purple wave rises from the bottom, holds, clears upward
     const e = K.el("div", "abs", overlay);
     gsap.set(e, { left: -60, width: 1200, top: 0, height: 2400, background: o.color || "#38104d", borderRadius: "48% 52% 0 0 / 7% 9% 0 0" });
     hide(e);
     tl.fromTo(e, { y: 2100, autoAlpha: 1 }, { y: -260, autoAlpha: 1, duration: 0.5, ease: "power3.inOut", immediateRender: false }, t);
-    if (!o.hold) tl.to(e, { y: -2200, duration: 0.5, ease: "power3.inOut" }, t + 0.5 + (o.pause || 0.1));
+    // clear fully: the wave is 2,400 px tall, so -2,200 left a 200 px band at the top of the frame (fixed 2026-10-13)
+    if (!o.hold) tl.to(e, { y: -2500, duration: 0.5, ease: "power3.inOut" }, t + 0.5 + (o.pause || 0.1))
+      .set(e, { autoAlpha: 0 }, t + 1.0 + (o.pause || 0.1));
     K.sfx(t, "whoosh", 0.4);
     return e;
   };

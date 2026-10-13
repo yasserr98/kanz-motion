@@ -64,3 +64,42 @@ never compound. Script route: run it right after `make.py tts` (and after any vo
 `K.bed = "room"` (set by `K.pace()`): `engine/render.py` mixes a generated, non-musical room tone (filtered brown +
 pink noise, seeded, fully owned) 21 dB under the voice's median speech level, so pauses never drop to digital
 silence. No music (Ahmed 2026-10-10). `K.pace({ bed: null })` turns it off.
+
+## Variety (2026-10-13, default for new videos)
+
+From the visual review of `us-dollar-decisions-pace` v3: pace was fixed, but almost every frame was one grey object on
+charcoal with a small label. Ahmed approved everything in the review ("love everything, apply all") except the ground
+plane. Worked example of each device: `projects/_suggestions-demo/` (fixed seconds, no voice, not for posting; render with
+`python engine/render.py projects/_suggestions-demo --from <s> --to <s> --name <clip>`).
+
+Use these where the script gives a reason; the aim is that a video uses several kinds of picture, not every device:
+
+| When the voice... | Use | Note |
+| --- | --- | --- |
+| says the video's key sentence (the thesis) | `K.punch(html, t0, t1, { size: 170, riser: true })` | once per video; `riser` plays the generated swell that lands on `t0` (max one riser per video). Hold it over the next board move so a carry happens behind it |
+| compares amounts | `K.stack` / `K.pile` at true relative size | numbers only if the voice says them |
+| says something changes state (opens, empties, gives up) | `K.swap(img, src, t)` | wallet open/empty, savings jar levels, safe open, poses |
+| says someone goes somewhere | `K.walk(board, [walkA, walkB], { from, to, at, dur, w, rest })` | right to left reads naturally |
+| names places | `K.img(... kanz-map-usa ...)` / `kanz-globe` + `K.pin` + `K.arrow` | base map: Natural Earth still to download |
+| turns a chapter | `K.wipe(t)` (fixed 2026-10-13: it left a 200 px band) or `K.world` paper | |
+| cites a real series | `K.area({ ..., source })` with data from `engine/data.py` | source line on screen + `assets/SOURCE.md` |
+| shows a real photo | `K.photo` (now with a camera-shutter sound) | needs a licensed, sourced photo file first |
+
+New objects 2026-10-13 (`library/objects/PROVENANCE-2026-10-13.md`): approved copies from the Kanz explainer library
+(bank card, cash, EGP coin, payment terminal, empty tomato basket, F01 checking a receipt) and Codex **candidates** until Ahmed
+reviews them: container ship, globe, gold bars, oil barrel, phone with a blank screen, rate dial, stock exchange.
+
+New sounds: `riser` (generated swell, for the one key reveal) and `shutter` (camera, used by `K.photo`), both in their own
+categories in `library/sfx/generated.json`.
+
+Lint (`engine/lint.py`) also reports, since 2026-10-13: **covered** text (a label under an object at a sampled frame, or
+more than a quarter under a caption), objects **behind captions**, and objects pushed **past the side margin** (faint
+`K.bgObj` figures included). On the v3 baseline it caught the hidden `حكومات` label (32.75 s), the edge figure (16.5 s)
+and three problems the eye review missed (the dollar on the labels at 7.75–9 s, the stack at the left edge at 20 s, the
+price tag off the right edge at 48–54 s). A one-frame crossing during a fast camera whip is not reported, by design.
+
+**Rejected (Ahmed 2026-10-13): a ground plane** (a faint floor and horizon under objects). Objects stay on the plain
+charcoal/paper world; don't add floors or horizons.
+
+Rendering: `engine/render.py` reopens the page and redoes the frame when Chromium fails a screenshot ("Unable to capture
+screenshot", seen at ~7.7 s with 1.5 GB of memory free); stills retry the same way.

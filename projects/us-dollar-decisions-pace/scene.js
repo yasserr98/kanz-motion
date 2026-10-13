@@ -8,6 +8,9 @@
  *  - hook hero settles from oversized from frame 1; no caption under the question headline
  *  - three paper chapters (mechanism, key idea, "one factor"); snap zooms on the emphasis words
  *  - ends ~1.3 s after the last word (was 2.4 s of silent hold)
+ * Review fixes (v4 of this rebuild, 2026-10-13): "أمريكا مش طرف" as K.punch with the riser (the carried dollar crossed
+ * it); debt board raised (حكومات sat under the caption); faint F01 off the edge; dollar stack beside the demand chart;
+ * labels dimmed before the dollar leaves the salary board; price tag inside the frame; container ship for "مستوردة".
  * Delivered v4 stays the reference: projects/us-dollar-decisions.
  */
 const { N, T } = K;
@@ -40,22 +43,23 @@ K.settle(dollar, 0, { fromScale: 1.45, fromY: 70, dur: 1.2 });
 
 // ---------- 2. you earn and spend in pounds; maybe you never bought a dollar ----------
 // the hook dollar rides the move and waits, dimmed, where the "never bought a dollar" line will need it
-K.carry(dollar, "egp", gEgp.start, { x: 500, y: 770, w: 300, rot: -2, opacity: 0.3, dur: 0.55 });
+K.carry(dollar, "egp", gEgp.start, { x: 500, y: 720, w: 240, rot: -2, opacity: 0.3, dur: 0.55 });
 K.img(B.egp, OBJ + "kanz-salary-envelope-v01.png", { x: 760, y: 330, w: 380, at: gEgp.lead, enter: "fly" });
-K.text(B.egp, "بتقبض بالجنيه", { x: 760, y: 590, size: 58, head: true, at: N("بالجنيه", 0) });
+const egpLabels = [K.text(B.egp, "بتقبض بالجنيه", { x: 760, y: 570, size: 58, head: true, at: N("بالجنيه", 0) })];
 const tSpend = N("وبتصرف");
 K.frame(tSpend - 0.25, "egp"); // pull out to the whole board as the second idea arrives
 K.img(B.egp, OBJ + "kanz-grocery-basket-v01.png", { x: 260, y: 330, w: 400, at: tSpend - 0.1, enter: "fly", fromX: -60 });
-K.text(B.egp, "وبتصرف بالجنيه", { x: 260, y: 590, size: 58, head: true, at: N("بالجنيه") });
+const egpLabel2 = K.text(B.egp, "وبتصرف بالجنيه", { x: 260, y: 570, size: 58, head: true, at: N("بالجنيه") });
 K.img(B.egp, OBJ + "kanz-egp-banknote-v01.png", { x: 500, y: 130, w: 300, at: tSpend + 0.3, shadow: false });
 const tNever = N("اشتريت");
 tl.to(dollar, { opacity: 1, duration: 0.3 }, tNever - 0.1);
-K.strike(B.egp, 360, 820, 640, 720, { at: N("دولار") + 0.1, color: "#fff" });
+K.strike(B.egp, 380, 765, 620, 675, { at: N("دولار") + 0.1, color: "#fff" });
 K.tag(B.egp, "ولا دولار", { x: 760, y: 780, size: 42, at: K.T("حياتك") });
 K.fg(B.egp, OBJ + "kanz-egp-banknote-stack-v01.png", { x: 980, y: 860, w: 360, at: gEgp.start });
 
 // ---------- 3. the dollar does not stop at America's border ----------
 const gBorder = K.go(T("عشان", tNever), "border", { scale: 1.2, dy: -20 });
+K.dim([...egpLabels, egpLabel2], gBorder.start, 0, 0.2); // the carried dollar crosses them on its way out
 K.carry(dollar, "border", gBorder.start, { x: 640, y: 370, w: 260, rot: 0, opacity: 1, dur: 0.55 });
 K.img(B.border, OBJ + "kanz-map-usa-v01.png", { x: 660, y: 360, w: 640, at: gBorder.lead, shadow: false, enter: "fly", fromScale: 1.4 });
 K.glow(B.border, 640, 370, 420, { at: gBorder.arrive });
@@ -81,7 +85,7 @@ const rateTag = K.tag(B.fed, "الفايدة", { x: 840, y: 590, lav: true, size
 const tInv = N("مستثمرين");
 K.frame(tInv - 0.3, "fed");
 K.img(B.fed, OBJ + "kanz-npc-m01-counting-money-v01.png", { x: 210, y: 560, w: 380, at: tInv - 0.1, enter: "fly", fromX: -80 });
-K.bgObj(B.fed, OBJ + "kanz-npc-f01-neutral-v01.png", { x: 70, y: 470, w: 280, opacity: 0.28, at: tInv + 0.2 });
+K.bgObj(B.fed, OBJ + "kanz-npc-f01-neutral-v01.png", { x: 125, y: 470, w: 260, opacity: 0.28, at: tInv + 0.2 });
 const tBuy = N("دولارات");
 const buy = K.img(B.fed, OBJ + "kanz-usd-banknote-stack-v01.png", { x: 260, y: 300, w: 260, at: tBuy, shadow: false });
 tl.to(dollar, { opacity: 0, duration: 0.2 }, tBuy); // the carried note becomes the investors' stack
@@ -94,18 +98,18 @@ K.text(B.fed, "فلوسهم في أمريكا", { x: 640, y: 120, size: 60, head
 
 // ---------- 5. demand for dollars rises; the dollar gets stronger (still paper) ----------
 const tDem = N("فالطلب");
-const gDem = K.go(tDem, "demand", { scale: 1.15, dx: 60, dy: -20 });
-K.carry(buy, "demand", gDem.start, { x: 240, y: 520, w: 280, opacity: 0, dur: 0.5 });
+const gDem = K.go(tDem, "demand", { scale: 1.15, dx: 0, dy: -20 }); // centred: the stack sits at the left edge
+K.carry(buy, "demand", gDem.start, { x: 215, y: 520, w: 230, opacity: 1, dur: 0.5 }); // in view: the chart is about it
 const rise = [2, 2.2, 2.1, 2.6, 3.1, 3.0, 3.8, 4.5, 4.4, 5.3, 6.2];
-const ch = K.area(B.demand, { x: 600, y: 360, w: 680, h: 420, data: rise, min: 1.5, max: 7, at: gDem.lead, dur: 1.4 });
-K.text(B.demand, "الطلب على الدولار", { x: 600, y: 90, size: 56, head: true, at: gDem.lead + 0.1 });
+const ch = K.area(B.demand, { x: 650, y: 360, w: 580, h: 420, data: rise, min: 1.5, max: 7, at: gDem.lead, dur: 1.0 });
+K.text(B.demand, "الطلب على الدولار", { x: 650, y: 90, size: 56, head: true, at: gDem.lead + 0.1 });
 K.tag(B.demand, "يزيد", { x: ch.x(10) - 70, y: ch.y(6.2) - 70, lav: true, size: 46, at: N("يزيد") });
 const tStrong = N("والدولار");
 K.frame(tStrong - 0.2, "demand", { scale: 1.1, dx: -70, dy: 40 }); // towards the stack as it becomes the subject
 tl.to(buy, { opacity: 1, scale: "+=0.12", duration: 0.35, ease: "back.out(2)" }, tStrong);
-K.glow(B.demand, 240, 520, 480, { at: tStrong });
+K.glow(B.demand, 215, 520, 440, { at: tStrong });
 const tStronger = N("اقوى");
-K.text(B.demand, "أقوى", { x: 240, y: 780, size: 96, head: true, color: L, at: tStronger - 0.1, from: "pop", sfx: "hit", gain: 0.3 });
+K.text(B.demand, "أقوى", { x: 215, y: 780, size: 96, head: true, color: L, at: tStronger - 0.1, from: "pop", sfx: "hit", gain: 0.3 });
 K.snap(tStronger, 1.3, 0.55);
 
 // ---------- 6. charcoal again: an Egyptian company buys from another country, both pay in dollars ----------
@@ -134,17 +138,19 @@ ring.to(tPay - 0.1, 500, 440, 300, 300);
 K.arrow(B.trade, 620, 540, 380, 540, { at: tPay, bend: -40 });
 const tUS = N("أمريكا");
 ring.out(tUS - 0.1);
-K.text(B.trade, "أمريكا مش طرف", { x: 500, y: 760, size: 60, head: true, at: tUS });
-K.snap(N("طرف"), 1.16, 0.6);
+// big type for the key sentence (review 2026-10-13): it was a 60 px label, and the dollar carried to the next board
+// flew straight across it at 31.35 s. The punch holds until the move, so the carry happens behind it.
+N("طرف");
 
 // ---------- 7. companies and governments borrow in dollars but earn in another currency ----------
 const tDebt = N("غير");
 const gDebt = K.go(tDebt, "debt", { scale: 1.28, dx: 250, dy: 0, dur: 0.6 });
+K.punch("أمريكا<br>مش طرف", tUS - 0.05, gDebt.start + 0.25, { size: 170, riser: true });
 K.carry(buy, "debt", gDebt.start, { x: 470, y: 400, w: 220, opacity: 0.3, dur: 0.6 });
-K.img(B.debt, OBJ + "kanz-company-office-v01.png", { x: 800, y: 250, w: 280, at: gDebt.lead, enter: "fly" });
-K.tag(B.debt, "شركات", { x: 800, y: 430, size: 42, at: N("الشركات") + 0.1 });
-K.img(B.debt, OBJ + "kanz-bank-v01.png", { x: 800, y: 620, w: 280, at: N("والحكومات") - 0.1, enter: "fly", fromY: 120 });
-K.tag(B.debt, "حكومات", { x: 800, y: 800, size: 42, at: K.T("والحكومات", tDebt) + 0.1 });
+K.img(B.debt, OBJ + "kanz-company-office-v01.png", { x: 800, y: 200, w: 260, at: gDebt.lead, enter: "fly" });
+K.tag(B.debt, "شركات", { x: 800, y: 365, size: 42, at: N("الشركات") + 0.1 });
+K.img(B.debt, OBJ + "kanz-bank-v01.png", { x: 800, y: 520, w: 260, at: N("والحكومات") - 0.1, enter: "fly", fromY: 120 });
+K.tag(B.debt, "حكومات", { x: 800, y: 680, size: 42, at: K.T("والحكومات", tDebt) + 0.1 });
 const tBorrow = N("بتستلف");
 K.frame(tBorrow - 0.25, "debt");
 K.img(B.debt, OBJ + "kanz-loan-agreement-v01.png", { x: 330, y: 300, w: 360, at: tBorrow - 0.1, enter: "fly", fromX: -60 });
@@ -181,24 +187,25 @@ K.text(B.web, "ممكن يأثّر عليها", { x: 500, y: 790, size: 56, head
 
 // ---------- 9. charcoal: even a product made in Egypt can use imported materials, so making it here costs more ----------
 const tEven = N("وحتى");
-const gMade = K.go(tEven, "made", { scale: 1.3, dx: 230, dy: -40 });
+const gMade = K.go(tEven, "made", { scale: 1.3, dx: 180, dy: -40 });
 K.world(gMade.start, "charcoal");
-K.carry(buy, "made", gMade.start, { x: 330, y: 790, w: 190, opacity: 0, rot: -8, dur: 0.5 });
+K.carry(buy, "made", gMade.start, { x: 520, y: 800, w: 170, opacity: 0, rot: -8, dur: 0.5 });
 K.img(B.made, OBJ + "kanz-grocery-basket-v01.png", { x: 740, y: 330, w: 460, at: gMade.lead, enter: "fly" });
 N("المنتج");
-K.img(B.made, OBJ + "kanz-price-tag-v01.png", { x: 900, y: 170, w: 200, at: N("غلي"), shadow: false, rot: 10 });
-K.arrow(B.made, 960, 330, 960, 230, { at: K.T("غلي", tEven) + 0.2, bend: 0.001, color: RED, width: 9 });
+K.img(B.made, OBJ + "kanz-price-tag-v01.png", { x: 820, y: 175, w: 200, at: N("غلي"), shadow: false, rot: 10 });
+K.arrow(B.made, 875, 330, 875, 230, { at: K.T("غلي", tEven) + 0.2, bend: 0.001, color: RED, width: 9 });
 K.text(B.made, "سعره غلي عليك", { x: 740, y: 580, size: 52, head: true, at: K.T("عليك", tEven) });
 const tEg = N("بيتصنّع");
 K.frame(tEg - 0.3, "made", { dur: 0.6 }); // pull back to reveal the factory
 K.img(B.made, OBJ + "kanz-factory-v01.png", { x: 260, y: 330, w: 400, at: tEg - 0.15, glow: true, enter: "fly", fromX: -60 });
 K.tag(B.made, "بيتصنّع في مصر", { x: 260, y: 580, size: 44, at: N("مصر") });
 const tImp = N("خامات");
-K.frame(tImp - 0.2, "made", { scale: 1.1, dx: -60, dy: 110 });
-K.img(B.made, OBJ + "kanz-raw-material-sack-v01.png", { x: 160, y: 760, w: 220, at: tImp });
+K.frame(tImp - 0.2, "made", { scale: 1.05, dx: -30, dy: 110 });
+// imported parts: the container ship (Codex candidate 2026-10-13) instead of a raw-material sack
+K.img(B.made, OBJ + "kanz-container-ship-v01.png", { x: 250, y: 770, w: 320, at: tImp, enter: "fly", fromX: -80 });
 tl.to(buy, { opacity: 1, duration: 0.3 }, N("مكوّنات") - 0.1);
-K.tag(B.made, "مستوردة", { x: 520, y: 760, lav: true, size: 46, at: N("مستوردة") });
-K.arrow(B.made, 90, 680, 110, 470, { at: K.T("مستوردة", tEven) + 0.3, bend: -30 });
+K.tag(B.made, "مستوردة", { x: 690, y: 770, lav: true, size: 46, at: N("مستوردة") });
+K.arrow(B.made, 100, 690, 110, 470, { at: K.T("مستوردة", tEven) + 0.3, bend: -30 });
 const tCost = N("فتزيد");
 K.frame(tCost - 0.2, "made");
 K.text(B.made, "تكلفة تصنيعه تزيد", { x: 500, y: 90, size: 60, head: true, color: L, at: tCost });
