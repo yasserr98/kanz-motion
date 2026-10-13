@@ -54,8 +54,11 @@ repo or a Kanz worktree (worktrees do not contain this folder; use the absolute 
    boards (`K.carry`, `K.dim`, never clear before building), hero entrances fly in (`enter: "fly"`), a few snap zooms
    (`K.snap`), camera drift between moves (`K.finish()` as the last line), 24 fps motion, room-tone bed, paper world at
    chapter turns, ending = cut back to the hook on the last word, ~1.3 s tail. Worked example: `projects/us-dollar-decisions-pace`.
-7. **Review.** `python engine/lint.py projects/<slug>` (safe zones, dead stretches, thin frames, hook;
-   fix or justify each flag), then `make.py review <slug> <times>` → look at `out/review.jpg`, fix, repeat.
+   **Variety (Ahmed 2026-10-13, "apply all"):** read `docs/PACE.md` section Variety. One `K.punch` (with `riser: true`) on the
+   key sentence; amounts as `K.stack`/`K.pile`; state changes as `K.swap`; places as map/globe + `K.pin`; real series through
+   `engine/data.py` with a source line. Worked example: `projects/_suggestions-demo`. No ground plane (rejected 2026-10-13).
+7. **Review.** `python engine/lint.py projects/<slug>` (safe zones, dead stretches, thin frames, hook, covered text,
+   objects behind captions, objects past the side margin; fix or justify each flag), then `make.py review <slug> <times>` → look at `out/review.jpg`, fix, repeat.
 8. **Render and check.** `make.py render <slug> v1` in the background, then `make.py check <slug> v1`
    (frames from the MP4 + loudness ≈ −16 LUFS). Open the MP4 for Ahmed (`ii <path>`).
    Cover (style A): write `projects/<slug>/cover.json`, run `python engine/cover.py projects/<slug>`, and check

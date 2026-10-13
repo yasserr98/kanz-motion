@@ -204,8 +204,20 @@ def main():
             sd = out_dir / ("stills-" + (a.name or "review"))
             sd.mkdir(exist_ok=True)
             for t in [float(x) for x in a.stills.split(",")]:
-                page.evaluate(f"K.seek({t})")
-                page.screenshot(path=str(sd / f"t{t:06.2f}.png"), clip=clip)
+                for attempt in range(4):  # same intermittent capture failure as the video loop below
+                    try:
+                        page.evaluate(f"K.seek({t})")
+                        page.screenshot(path=str(sd / f"t{t:06.2f}.png"), clip=clip)
+                        break
+                    except Exception as e:  # noqa: BLE001
+                        if attempt == 3:
+                            raise
+                        print(f"  still {t}: {str(e).splitlines()[0]} -> reopening the page", flush=True)
+                        page.close()
+                        page = browser.new_page(viewport={"width": 1080, "height": 1920}, device_scale_factor=1)
+                        page.goto((proj / "index.html").as_uri())
+                        page.wait_for_function("document.fonts && document.fonts.status === 'loaded' && window.K")
+                        page.wait_for_function("Array.from(document.images).every(i => i.complete && i.naturalWidth > 0)")
             print("fonts:", sorted(set(fonts)), "| stills ->", sd)
             browser.close()
             return
@@ -217,9 +229,34 @@ def main():
                                "-pix_fmt", "yuv420p",
                                str(silent)], stdin=subprocess.PIPE)
         frames = int((t1 - a.t0) * fps)
+        def open_page():
+            pg = browser.new_page(viewport={"width": 1080, "height": 1920}, device_scale_factor=1)
+            pg.goto((proj / "index.html").as_uri())
+            pg.wait_for_function("document.fonts && document.fonts.status === 'loaded' && window.K")
+            pg.wait_for_function("Array.from(document.images).every(i => i.complete && i.naturalWidth > 0)")
+            if cam_smooth:
+                pg.evaluate("K.camSmooth = true")
+            return pg
+
+        cam_smooth = bool(a.cam24)
         for i in range(frames):
-            page.evaluate(f"K.seek({a.t0 + i / fps})")
-            ff.stdin.write(page.screenshot(type="jpeg", quality=93, clip=clip))
+            # Chromium sometimes fails a screenshot after a few hundred frames when memory is low ("Unable to capture
+            # screenshot", 2026-10-13 at ~7.7 s on a 1.5 GB-free machine). Reopen the page and redo that frame.
+            for attempt in range(4):
+                try:
+                    page.evaluate(f"K.seek({a.t0 + i / fps})")
+                    shot = page.screenshot(type="jpeg", quality=93, clip=clip)
+                    break
+                except Exception as e:  # noqa: BLE001 - playwright raises its own Error type
+                    if attempt == 3:
+                        raise
+                    print(f"  frame {i}: {str(e).splitlines()[0]} -> reopening the page", flush=True)
+                    try:
+                        page.close()
+                    except Exception:  # noqa: BLE001
+                        pass
+                    page = open_page()
+            ff.stdin.write(shot)
             if i % (fps * 10) == 0:
                 print(f"  frame {i}/{frames}", flush=True)
         ff.stdin.close()

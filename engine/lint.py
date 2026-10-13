@@ -7,6 +7,10 @@ Reads the live page (no video render) and reports:
          since 2026-10-11: fill the frame when the voice names a thing, or justify it)
   hook   the first visual arriving later than --hook (0.3 s since 2026-10-11) and a first frame below --fill
   bars   boards where two or more bars use hand-entered heights or different scales (K.scale, docs/LOOK-V2.md)
+  covered  a label or headline word hidden under an object (e.g. a carried hero crossing it) or under the caption
+  under    a focal object more than 15% behind a caption box
+  edge     an object (K.bgObj figures included) with its centre inside but over a quarter of it past the side margin
+           (covered / under / edge added 2026-10-13 from the us-dollar-decisions-pace v3 review)
 Writes out/lint.json and, when there are findings, out/lint.jpg: one frame per finding with the
 unsafe zones shaded red. Exit code is 0 either way: these are review flags, not hard failures.
 """
@@ -23,7 +27,8 @@ from contact import sheet  # noqa: E402
 
 SAFE = {"top": 270, "bottom": 1440, "left": 120, "right": 960, "upperLeft": 65, "upperRight": 1015, "upperBottom": 1000}
 TEXT = "#world .t, #world .tag, #world .card, #world .kcount, #world .ksrc, #headline .w, #overlay .t"
-OBJS = "#world img.obj, #world .kdoc, #world .kphoto, #world img.kmap, #world svg.mk path, #world svg.mk polyline, #world svg.mk rect, #world .kpin, #world .kmark, #world .kframe, #world .abs"
+COVER = "#world .t, #world .tag, #headline .w"  # labels that must stay readable (2026-10-13)
+OBJS = "#world img.obj,#world .kdoc, #world .kphoto, #world img.kmap, #world svg.mk path, #world svg.mk polyline, #world svg.mk rect, #world .kpin, #world .kmark, #world .kframe, #world .abs"
 
 PROBE = """(t) => {
   K.seek(t);
@@ -47,8 +52,26 @@ PROBE = """(t) => {
   });
   TAKE
   window.__lid = next;
+  // text hidden under an object or the caption: test three points along the label's middle line
+  const covered = [];
+  document.querySelectorAll(COVERSEL).forEach((el) => {
+    if (eff(el) < 0.5) return;
+    const r = el.getBoundingClientRect();
+    if (r.width < 3 || r.height < 3) return;
+    const ys = r.top + r.height / 2, hits = {};
+    for (const xs of [r.left + r.width * 0.25, r.left + r.width / 2, r.left + r.width * 0.75]) {
+      for (const e of document.elementsFromPoint(xs, ys)) {
+        if (e === el || el.contains(e)) break;
+        if (e.closest('#captions')) break; // caption overlap is measured by area in Python
+        if (e.matches('img.obj') && !e.matches('.kfg') && eff(e) >= 0.3) {
+          const k = (e.getAttribute('src') || '').split('/').pop(); hits[k] = (hits[k] || 0) + 1; break; }
+      }
+    }
+    const by = Object.keys(hits).find((k) => hits[k] >= 2);
+    if (by) covered.push({ id: +(el.dataset.lid || 0), txt: (el.textContent || '').trim().slice(0, 40), by });
+  });
   const w = document.getElementById('world');
-  return { items: out, cam: [gsap.getProperty(w, 'x'), gsap.getProperty(w, 'y'), gsap.getProperty(w, 'scaleX')] };
+  return { items: out, covered, cam: [gsap.getProperty(w, 'x'), gsap.getProperty(w, 'y'), gsap.getProperty(w, 'scaleX')] };
 }"""
 
 
@@ -154,7 +177,7 @@ def main():
         voice_end = page.evaluate("window.DURATION || K.duration")
         look2 = page.evaluate("!!K.LOOK")
         probe = PROBE.replace("TAKE", f"take({json.dumps(TEXT)}, 'text'); take({json.dumps(OBJS)}, 'obj');"
-                                      " take('#captions .box', 'caption');")
+                                      " take('#captions .box', 'caption');").replace("COVERSEL", json.dumps(COVER))
         # start one sample in: GSAP does not render zero-duration sets on a seek to exactly 0
         frames, t = [], a.every
         while t <= voice_end + 0.01:
@@ -217,8 +240,62 @@ def main():
         # 5. bars drawn to scale
         bars = bar_findings(page.evaluate("(K.bars || []).map(b => ({...b}))"))
 
+        # 6. covered text (2026-10-13): a label under an object at a 0.25 s sample (a one-frame crossing during a fast
+        #    camera whip is not caught, by design) or under the caption for two samples (a move sliding past is ignored)
+        cover_hits = {}
+        for t, f in frames:
+            for c in f.get("covered", []):
+                h = cover_hits.setdefault((c["id"], c["by"]), {"what": c["txt"], "by": c["by"], "from": t, "to": t, "frames": 0})
+                h["to"], h["frames"] = t, h["frames"] + 1
+        # a label more than a quarter under a caption box (area, not a centre test: half-hidden labels count)
+        for t, f in frames:
+            caps = [it for it in f["items"] if it["kind"] == "caption"]
+            for it in f["items"]:
+                if it["kind"] != "text" or it["y0"] < SAFE["top"]:
+                    continue
+                area = (it["x1"] - it["x0"]) * (it["y1"] - it["y0"])
+                ov = sum(max(0, min(it["x1"], c["x1"]) - max(it["x0"], c["x0"])) * max(0, min(it["y1"], c["y1"]) - max(it["y0"], c["y0"]))
+                         for c in caps)
+                if area and ov > 0.25 * area:
+                    h = cover_hits.setdefault((it["id"], "caption"), {"what": it["txt"], "by": "caption", "from": t, "to": t, "frames": 0})
+                    h["to"], h["frames"] = t, h["frames"] + 1
+        covered = sorted((h for h in cover_hits.values() if h["by"] != "caption" or h["frames"] >= 2), key=lambda h: h["from"])
+
+        # 7. objects behind the caption band: more than 15% of a focal object under a caption box, 2+ samples
+        under_hits = {}
+        for t, f in frames:
+            caps = [it for it in f["items"] if it["kind"] == "caption"]
+            for it in f["items"]:
+                if it["kind"] != "obj" or not it["txt"].endswith(".png"):
+                    continue
+                area = (it["x1"] - it["x0"]) * (it["y1"] - it["y0"])
+                ov = sum(max(0, min(it["x1"], c["x1"]) - max(it["x0"], c["x0"])) * max(0, min(it["y1"], c["y1"]) - max(it["y0"], c["y0"]))
+                         for c in caps)
+                if area and ov > 0.15 * area:
+                    h = under_hits.setdefault(it["id"], {"what": it["txt"], "from": t, "to": t, "frames": 0})
+                    h["to"], h["frames"] = t, h["frames"] + 1
+        under = sorted((h for h in under_hits.values() if h["frames"] >= 2), key=lambda h: h["from"])
+
+        # 8. objects pushed past the side margin: centre inside, but more than a quarter of the width beyond it
+        #    (the safe check above only catches objects whose centre is outside). Includes faint K.bgObj figures.
+        edge_hits = {}
+        for t, f in frames:
+            for it in f["items"]:
+                if it["kind"] != "obj" or not it["txt"].endswith(".png"):
+                    continue
+                w = it["x1"] - it["x0"]
+                lower = (it["y0"] + it["y1"]) / 2 > SAFE["upperBottom"]
+                left, right = (SAFE["left"], SAFE["right"]) if lower else (SAFE["upperLeft"], SAFE["upperRight"])
+                beyond = max(0, left - it["x0"]) + max(0, it["x1"] - right)
+                cx = (it["x0"] + it["x1"]) / 2
+                if w and left <= cx <= right and beyond > 0.25 * w:
+                    h = edge_hits.setdefault(it["id"], {"what": it["txt"], "from": t, "to": t, "frames": 0})
+                    h["to"], h["frames"] = t, h["frames"] + 1
+        edge = sorted((h for h in edge_hits.values() if h["frames"] >= 3), key=lambda h: h["from"])
+
         report = {"project": proj.name, "look2": look2, "every": a.every, "voice_end": voice_end,
                   "safe": safe, "dead": dead, "thin": thin, "hook_late": hook, "first_fill": first_fill, "bars": bars,
+                  "covered": covered, "under_captions": under, "edge": edge,
                   "fill_median": sorted(cov)[len(cov) // 2] if cov else 0}
         (out_dir / "lint.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
 
@@ -237,8 +314,18 @@ def main():
         for b in bars:
             at = f"{b['at']:6.2f}s" if isinstance(b["at"], (int, float)) else "     -"
             print(f"    {at}  {b['why']:22} {b['detail']}")
+        print(f"  covered text: {len(covered) or 'none'}")
+        for h in covered:
+            print(f"    {h['from']:6.2f}-{h['to']:6.2f}s  '{h['what']}' under {h['by']}")
+        print(f"  objects behind captions: {len(under) or 'none'}")
+        for h in under:
+            print(f"    {h['from']:6.2f}-{h['to']:6.2f}s  {h['what']}")
+        print(f"  objects past the side margin: {len(edge) or 'none'}")
+        for h in edge:
+            print(f"    {h['from']:6.2f}-{h['to']:6.2f}s  {h['what']}")
 
         shots = sorted({round(h["from"], 2) for h in safe if h["kind"] == "text"}
+                       | {round(h["from"], 2) for h in covered + under + edge}
                        | {round((s + e) / 2, 2) for s, e in dead} | {round((s + e) / 2, 2) for s, e in thin})
         if shots and not a.no_sheet:
             sd = out_dir / "lint"

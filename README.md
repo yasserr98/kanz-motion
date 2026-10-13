@@ -81,11 +81,11 @@ which model to use, how to keep each video cheap, and the usage log.
 
 | Path | What |
 | --- | --- |
-| `engine/` | make (step runner), transcribe (Scribe / Whisper), tts, align (forced alignment), edit_audio, captions, render, sfx_library, sfx_gen (generated SFX), eleven (API client), contact (review sheets) |
+| `engine/` | make (step runner), transcribe (Scribe / Whisper), tts, align (forced alignment), edit_audio, captions, render, sfx_library, sfx_gen (generated SFX), eleven (API client), contact (review sheets), lint (pre-render checks), data (real series for charts, with sources) |
 | `runtime/` | `kanz.js` (timeline + components) and `kanz.css` (brand tokens, layout); `kanz-look.js/.css` look v2 for new videos (safe zones, light, depth, documents, photos, maps, counting numbers, piles), see [docs/LOOK-V2.md](docs/LOOK-V2.md); `kanz-pace.js` pacing layer (arrive built, drift, carry, snap zooms, room tone), see [docs/PACE.md](docs/PACE.md) |
 | `brand/` | Kanz fonts, logo and colour tokens (copied from the Kanz repo's `assets/kanz-brand-current`) |
 | `library/objects/` | approved grayscale editorial objects used so far (from the Kanz motion library) |
-| `library/sfx/` | 124 CC0 one-shots + generated effects (`generated.json`, prompt per file) + `manifest.json` (source page and licence for each file) |
+| `library/sfx/` | 124 CC0 one-shots + generated effects (register, riser, shutter) (`generated.json`, prompt per file) + `manifest.json` (source page and licence for each file) |
 | `projects/<name>/` | one video: audio edit list, transcripts, script, scene; `out/` (renders) is not committed |
 | `docs/` | Vox research findings, efficiency guide and usage log |
 
