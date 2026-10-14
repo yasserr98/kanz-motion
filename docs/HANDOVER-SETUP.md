@@ -21,6 +21,11 @@ python -m playwright install chromium
 4. Supply an approved script or an authorized recording. For text-to-speech, configure your own ElevenLabs key and voice locally using `.env.example`; never commit `.env` or share credentials. Source voice recordings and generated MP4s are separate deliveries.
 5. Follow the `make.py` recording or script route in `AGENTS.md`; review transcript/captions, visual contact sheets and the final MP4 before delivery. Keep supplied copy unchanged except for reviewed transcription corrections.
 
+6. **Your videos stay on your machine.** Nothing you make is committed or pushed to GitHub: projects, voices and MP4s
+   stay in your local `projects/` folder, and you hand the finished MP4 over directly. GitHub only brings you engine updates.
+7. **Getting the latest engine:** paste the prompt in [UPDATE.md](UPDATE.md) into Claude. It pulls the update and leaves
+   your projects as they are.
+
 ## Privacy and scope
 
 This handover provides visual/video production tooling and finished examples, not private Arabic writing prompts or reusable voice formulas. Keep the repository private, retain asset credits and verify recipient permissions separately; credentials and private source recordings are not included.
