@@ -3,10 +3,19 @@
 Paste this into Claude, opened in your `kanz-motion` folder. It brings in Ahmed's latest engine and keeps every video
 you made exactly where it is. Your projects and renders never go to GitHub.
 
+**No GitHub account needed**: the repository is public. You only need [Git](https://git-scm.com/downloads) installed.
+If your folder came from "Download ZIP" (it has no `.git` folder), the prompt converts it to a clone first.
+
 ```text
 Update Kanz Motion to the latest version from GitHub. My own projects, voices and videos stay on this machine:
 do not commit, push, delete or overwrite any of them.
 
+0. If this folder has no `.git` folder (it came from a ZIP) or `git` is not installed, do this first and then stop:
+   install Git if missing (tell me how; no GitHub account is needed, the repo is public), run
+   `git clone https://github.com/yasserr98/kanz-motion.git kanz-motion-new` next to this folder, copy every folder under
+   my `projects/` that does not exist in `kanz-motion-new/projects/` into it (plus `.env` if I have one), run `npm ci`,
+   `python -m pip install -r requirements.txt` and `python -m playwright install chromium` there, and tell me to
+   open `kanz-motion-new` from now on. Do not delete the old folder.
 1. Run `git status --short` and `git fetch origin`. Show me how many new commits there are
    (`git log --oneline HEAD..origin/main`).
 2. If only untracked files show up (my projects under projects/, renders in out/), run
