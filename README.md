@@ -106,8 +106,8 @@ market numbers on screen without a source.
 ## Sharing this repo
 
 The repo is public: send the link. No GitHub account is needed to clone or update it, only Git installed
-(`git clone https://github.com/yasserr98/kanz-motion.git`). Prefer a clone to the "Download ZIP" button: a ZIP
-cannot pull updates (`docs/UPDATE.md` converts one). Editors only pull; their projects and videos stay on their
+(`git clone https://github.com/yasserr98/kanz-motion.git`). A "Download ZIP" copy works too: `docs/UPDATE.md`
+updates either kind of folder, with or without Git. Editors only pull; their projects and videos stay on their
 machine and never go back to GitHub (AGENTS.md, "Editors' copies"). They get everything needed to render:
 engine, brand fonts, objects, sounds and the worked examples. They do **not** get `.env` (keys), voice-note audio,
 or rendered videos; each person uses their own ElevenLabs key. Treat Kanz objects and logo as Kanz-only, not for
