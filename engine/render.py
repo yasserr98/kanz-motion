@@ -264,6 +264,9 @@ def main():
         cues = page.evaluate("K.cues")
         mix = page.evaluate("K.mix || 1")
         bed = page.evaluate("K.bed || null")
+        under = page.evaluate("K.bedUnder || null")  # per-video room-tone level, dB under the voice (Ahmed 2026-10-13: too loud)
+        if under:
+            globals()["BED_UNDER_VOICE"] = float(under)
         browser.close()
     audio = out_dir / f"_{name}-audio.wav"
     used = mix_audio(proj, cues, t1, audio, a.t0, mix, bed)

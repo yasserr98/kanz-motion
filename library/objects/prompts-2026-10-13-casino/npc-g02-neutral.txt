@@ -1,0 +1,7 @@
+Attachments: image 1 = the APPROVED Kanz anonymous-people reference sheet v04 (style authority). Image 2 = the approved production PNG of M01 neutral (finish, proportions, scale and framing authority). Match their rendering exactly; only the person and wardrobe change.
+
+Create ONE full-body person: a second casino GAMBLER, an older man in his sixties with short gray hair and a gray moustache, slightly heavier build, wearing a light-gray double-breasted suit, a white shirt, a LAVENDER bow tie and dark leather shoes. Standing in a three-quarter view, arms folded, watching something in front of him.
+Lavender accent: the bow tie only.
+Style (identical to the references): photographic grayscale editorial cutout, realistic fabric texture, fine tactile grain, natural proportions, crisp antialiased edges, same lighting from upper left; not shiny clay, not cartoon. Anonymous person: smooth featureless face with no eyes, nose or mouth, exactly like the reference sheet; hair and beard rendered like the references. Restrained lavender #D5ADEF only on the garment named; neutral grayscale everything else.
+Output: the full-body figure centered on a SQUARE canvas (1254x1254 if available, else highest native square), feet near the lower edge with a small margin, comfortable transparent margins. TRUE RGBA PNG TRANSPARENCY everywhere outside the subject. No background, no floor, no glow, no drop shadow, no text, logo or watermark. No fake checkerboard pixels.
+Return only the image.

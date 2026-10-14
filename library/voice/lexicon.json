@@ -40,6 +40,11 @@
    "from": "يوصلك",
    "to": "يوصل لك",
    "found": "us-dollar-decisions v2 1:14: 'قبل ما يوصلك' stretched to 'يوووصلك'; Ahmed picked 'يوصل لك' from four test clips (2026-10-11)"
+  },
+  {
+   "from": "الأسود",
+   "to": "الإسوِد",
+   "found": "gamblers-fallacy v1: 'الأسود' read wrong; Ahmed picked clip 1 'الإسوِد' (Egyptian el-eswed, kasra on the waw) from four test clips (out/pron), 2026-10-14"
   }
  ],
  "watch": [

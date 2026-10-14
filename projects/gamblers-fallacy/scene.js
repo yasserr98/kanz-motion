@@ -1,7 +1,9 @@
 /* gamblers-fallacy (2026-10-13): Ahmed's script, Ahmed Shaaban Shorts clone at 1.15, retimed (99.6 -> 86.9 s).
  * Pace defaults (docs/PACE.md), copied from projects/us-dollar-decisions-pace.
- * There is no approved roulette object, so the spins are shown as result discs (a data device, like bars):
- * black discs with a white rim, red discs in roulette red. The hero is the approved poker-chips object.
+ * Spins are shown as result discs (a data device, like bars): black discs with a white rim, red discs in roulette red.
+ * v2 (Ahmed 2026-10-13): casino objects generated with Codex (candidates, library/objects/PROVENANCE-2026-10-13-casino.md):
+ * roulette wheel (hook hero), croupier at a roulette table, gamblers G01/G02 (men in suits); a drawn betting layout to
+ * explain on; quieter room tone.
  * Numbers on screen are only the ones the voice says (1913, 15, 26, 25), in the script's Western digits.
  */
 const { N, T } = K;
@@ -10,9 +12,11 @@ const OBJ = "../../library/objects/";
 const L = "#d5adef", RED = "#e5534b";
 const WHITE = "rgba(255,255,255,.55)";
 const CHIPS = OBJ + "kanz-poker-chips-v01.png";
+const WHEEL = OBJ + "kanz-roulette-wheel-v01.png";
 
 K.look();
 K.pace();
+K.bedUnder = 30; // room tone 30 dB under the voice (v1: 21; Ahmed 2026-10-13: "too loud")
 
 // ---------- world: snake layout, neighbours 1,100 px apart in a row, rows 1,800 apart ----------
 const B = {
@@ -48,43 +52,85 @@ function streak(parent, n, x0, y0, d, gap, perRow, t0, t1, skip = 0) {
   }
   return out;
 }
+// the roulette betting layout (v2, Ahmed 2026-10-13: "a roulette board and you explaining on it"). Drawn, not generated,
+// so the numbers stay sharp and cells can be pointed at. European layout: 0, then 1-36 in 3 rows x 12 columns
+// (top row 3, 6 ... 36), red/black as on a real table, and the red/black boxes underneath. Numbers read left -> right
+// like a real table (a market-chart exception, not a text sequence). Returns { el, cell(n), redBox, blackBox }.
+const REDS = new Set([1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]);
+function layout(parent, cx, cy, o = {}) {
+  const cw = o.cw || 66, chh = o.ch || 84, W = cw * 13 + 24, H = chh * 4 + 40;
+  const el = K.el("div", "abs", parent);
+  gsap.set(el, { left: cx - W / 2, top: cy - H / 2, width: W, height: H, borderRadius: 18, background: "#26252b",
+    boxShadow: "0 30px 60px rgba(0,0,0,.5), inset 0 0 0 3px rgba(255,255,255,.08)" });
+  const pos = {};
+  const cell = (x, y, w, h, html, bg, size) => {
+    const c = K.el("div", "abs", el, html);
+    gsap.set(c, { left: x, top: y, width: w, height: h, background: bg, border: "2px solid rgba(255,255,255,.75)",
+      color: "#fff", fontFamily: "'IBM Plex Sans Arabic'", fontWeight: 700, fontSize: size || 30, display: "flex",
+      alignItems: "center", justifyContent: "center", boxSizing: "border-box" });
+    return c;
+  };
+  cell(12, 12, cw, chh * 3, "0", "#3a3940", 30);
+  pos[0] = [cx - W / 2 + 12 + cw / 2, cy - H / 2 + 12 + chh * 1.5];
+  for (let n = 1; n <= 36; n++) {
+    const col = Math.ceil(n / 3) - 1, row = 2 - ((n - 1) % 3);
+    const x = 12 + cw * (col + 1), y = 12 + chh * row;
+    cell(x, y, cw, chh, String(n), REDS.has(n) ? RED : "#141216");
+    pos[n] = [cx - W / 2 + x + cw / 2, cy - H / 2 + y + chh / 2];
+  }
+  const by = 12 + chh * 3 + 16, bw = cw * 4;
+  const dia = (bg) => `<span style="display:block;width:${chh * 0.55}px;height:${chh * 0.55}px;background:${bg};transform:rotate(45deg);border:2px solid rgba(255,255,255,.8)"></span>`;
+  const red = cell(12 + cw * 3, by, bw, chh, dia(RED), "transparent");
+  const black = cell(12 + cw * 7, by, bw, chh, dia("#141216"), "transparent");
+  const box = (x) => [cx - W / 2 + x + bw / 2, cy - H / 2 + by + chh / 2];
+  if (o.at != null) {
+    gsap.set(el, { autoAlpha: 0 });
+    tl.fromTo(el, { autoAlpha: 0, scale: 1.25, y: 60 }, { autoAlpha: 1, scale: 1, y: 0, duration: 0.7, ease: "power3.out", immediateRender: false }, o.at);
+    K.sfx(o.at, "paper", 0.35);
+  }
+  return { el, W, H, cell: (n) => pos[n], redBox: box(12 + cw * 3), blackBox: box(12 + cw * 7), red, black };
+}
 
-// ---------- 1. hook: headline + one hero (poker chips), complete from frame 1 ----------
+// ---------- 1. hook: headline + one hero (the roulette wheel), complete from frame 1 ----------
 const gStreak = K.go(T("لعبة"), "streak", { scale: 1.3, dx: 0, dy: -40 });
 K.headline([{ html: "سنة " + K.num("1913") + "،" }, { html: "أغرب حادثة" }, { html: "في تاريخ القمار", kw: true }], { out: gStreak.start });
 K.captionsFrom = gStreak.start;
 K.glow(B.hook, 500, 500, 870, { out: gStreak.start });
-const chips = K.img(B.hook, CHIPS, { x: 500, y: 500, w: 600, float: true, rot: -4, shadow: false });
-K.settle(chips, 0, { fromScale: 1.45, fromY: 70, dur: 1.2 });
+const hero = K.img(B.hook, WHEEL, { x: 500, y: 500, w: 640, float: true, shadow: false });
+K.settle(hero, 0, { fromScale: 1.45, fromY: 70, dur: 1.2 });
 
 // ---------- 2. roulette: black once, twice, three times ... then 15 in a row ----------
-K.carry(chips, "streak", gStreak.start, { x: 500, y: 470, w: 520, rot: 0, opacity: 1, dur: 0.55 });
+K.carry(hero, "streak", gStreak.start, { x: 500, y: 470, w: 420, opacity: 0, dur: 0.55 });
+const table = K.img(B.streak, OBJ + "kanz-roulette-table-croupier-v01.png", { x: 500, y: 470, w: 820, at: gStreak.lead, enter: "fly", fromScale: 1.5 });
 K.glow(B.streak, 500, 470, 700, { at: gStreak.arrive, out: K.T("مرة،") - 0.3 });
 const ttl = K.text(B.streak, "الروليت", { x: 500, y: 110, size: 76, head: true, at: gStreak.lead });
-tl.to(chips, { opacity: 0, scale: "*=0.8", duration: 0.35, ease: "power2.in" }, K.T("الأسود") - 0.2);
+K.dim(table, K.T("الأسود") - 0.2, 0.12, 0.35); // the table steps back behind the results
 K.frame(K.T("واتنين،") - 0.25, "streak"); // pull out so the third disc lands in frame
 const big = [N("مرة،"), N("واتنين،"), N("وتلاتة.")].map((t, i) => disc(B.streak, 770 - i * 270, 420, 220, "black", t - 0.05, { gain: 0.35 }));
 K.tag(B.streak, "أسود", { x: 770, y: 590, size: 44, at: K.T("الأسود", gStreak.start) });
 const tTill = N("لحد"), tBlk = N("الأسود"), t15 = N("15");
 K.frame(tTill - 0.2, "streak");
-K.dim([...big, ttl, chips], tTill, 0, 0.3); // the three big discs give way to the full run
+K.dim([...big, ttl, table], tTill, 0, 0.3); // the three big discs give way to the full run
 streak(B.streak, 15, 860, 300, 120, 30, 5, tBlk - 0.1, t15 + 0.1);
 K.count(B.streak, { x: 500, y: 110, from: 1, to: 15, at: tBlk, dur: t15 - tBlk + 0.1, size: 130, digits: "en", sfx: false });
 K.text(B.streak, "مرة ورا بعض", { x: 500, y: 790, size: 56, head: true, color: L, at: N("ورا") });
 
 // ---------- 3. the crowd bets more money on red ----------
 const tHere = N("هنا");
-const gBet = K.go(tHere, "bet", { scale: 1.25, dx: 200, dy: 40 });
-K.carry(chips, "bet", gBet.start, { x: 300, y: 420, w: 300, opacity: 1, dur: 0.55 });
-K.img(B.bet, OBJ + "kanz-npc-crowd-back-v01.png", { x: 720, y: 520, w: 420, at: gBet.lead, enter: "fly" });
+const gBet = K.go(tHere, "bet", { scale: 1.06, dy: 40 });
+K.carry(hero, "bet", gBet.start, { x: 500, y: 300, w: 300, opacity: 0, dur: 0.55 });
+const lay = layout(B.bet, 500, 340, { cw: 60, ch: 70, at: gBet.lead - 0.1 });
+K.img(B.bet, OBJ + "kanz-npc-gamblers-back-v01.png", { x: 500, y: 740, w: 600, at: gBet.lead, enter: "fly", fromY: 200 });
 const tMoney = N("بفلوس");
 K.frame(tMoney - 0.25, "bet");
-K.pile(B.bet, CHIPS, { x: 300, y: 650, n: 3, w: 170, at: tMoney + 0.1 });
+const [rx, ry] = lay.redBox;
+[0, 1, 2].forEach((i) => K.img(B.bet, CHIPS, { x: rx - 50 + i * 50, y: ry - 10 - i * 8, w: 110, at: tMoney + i * 0.2, enter: "fly", fromY: 260, fromScale: 1.6, shadow: false }));
 const tRed = N("الأحمر.");
-const redBig = disc(B.bet, 300, 300, 240, "red", tRed - 0.1, { gain: 0.4 });
-K.glow(B.bet, 300, 300, 420, { at: tRed - 0.1 });
-K.text(B.bet, "على الأحمر", { x: 300, y: 110, size: 64, head: true, color: L, at: tRed });
-K.arrow(B.bet, 560, 420, 420, 330, { at: tRed + 0.15, bend: 40 });
+const ringBet = K.pointer(B.bet);
+ringBet.to(tRed - 0.15, rx, ry, 300, 120);
+const redBig = disc(B.bet, rx, ry, 90, "red"); // hidden here; it rides to the next board as the "red" idea
+gsap.set(redBig, { opacity: 0 });
+K.text(B.bet, "على الأحمر", { x: 500, y: 95, size: 64, head: true, color: L, at: tRed });
 const tWhy = N("ليه؟");
 K.punch("<span class='kw'>ليه؟</span>", tWhy - 0.05, tWhy + 0.65, { size: 170 });
 
@@ -92,7 +138,7 @@ K.punch("<span class='kw'>ليه؟</span>", tWhy - 0.05, tWhy + 0.65, { size: 17
 const tSure = N("لأنهم");
 const gBelief = K.go(tSure, "belief", { scale: 1.3, dx: 220, dy: -40 });
 K.carry(redBig, "belief", gBelief.start, { x: 290, y: 420, w: 260, opacity: 0.3, dur: 0.55 });
-K.img(B.belief, OBJ + "kanz-npc-m01-thinking-v01.png", { x: 740, y: 470, w: 470, at: gBelief.lead, enter: "fly" });
+K.img(B.belief, OBJ + "kanz-npc-g01-pointing-v01.png", { x: 740, y: 480, w: 500, at: gBelief.lead, enter: "fly" });
 const tImp = N("مستحيل");
 K.frame(tImp - 0.3, "belief");
 const thoughtBlack = [0, 1, 2].map((i) => disc(B.belief, 440 - i * 130, 150, 110, "black", tImp + 0.1 + i * 0.12, { gain: 0.15 }));
@@ -119,7 +165,7 @@ K.frame(tLoss - 0.25, "lost", { scale: 1.08, dy: 70 });
 K.dim(run26, tLoss - 0.25, 0.25, 0.35);
 K.dim(again, tLoss - 0.25, 0, 0.3);
 K.img(B.lost, OBJ + "kanz-money-bag-spill-v01.png", { x: 330, y: 560, w: 380, at: tLoss - 0.1, enter: "fly", glow: true });
-K.img(B.lost, OBJ + "kanz-npc-m01-worried-wallet-v01.png", { x: 760, y: 560, w: 330, at: N("خسرت") - 0.1, enter: "fly", fromX: 60 });
+K.img(B.lost, OBJ + "kanz-npc-g01-lost-v01.png", { x: 760, y: 560, w: 380, at: N("خسرت") - 0.1, enter: "fly", fromX: 60 });
 K.text(B.lost, "مبالغ ضخمة", { x: 330, y: 840, size: 64, head: true, color: RED, at: N("ضخمة.") - 0.1 });
 
 // ---------- 6. paper chapter: the mistake. They thought each black raised red's chance ----------
@@ -132,7 +178,7 @@ const tThought = N("إنهم");
 K.frame(tThought - 0.25, "mistake");
 K.dim(qMist, tThought - 0.25, 0, 0.3);
 N("الأسود");
-K.img(B.mistake, OBJ + "kanz-npc-m02-shrug-v01.png", { x: 790, y: 560, w: 380, at: tThought - 0.1, enter: "fly", fromX: 60 });
+K.img(B.mistake, OBJ + "kanz-npc-g02-neutral-v01.png", { x: 790, y: 560, w: 380, at: tThought - 0.1, enter: "fly", fromX: 60 });
 const each = [0, 1, 2, 3].map((i) => disc(B.mistake, 700 - i * 170, 300, 140, "black", gMist.lead + 0.1 + i * 0.1, { gain: 0.15 }));
 // the belief: red's bar grows with every black (the wrong idea, drawn as a rising arrow)
 const tChance = N("فرصة");
@@ -150,24 +196,30 @@ K.dim([redSmall, wrongUp], tIndep + 0.3, 0.25, 0.4);
 const tEven = N("يعني");
 const gIndep = K.go(tEven, "indep", { scale: 1.25, dx: 180, dy: -40 });
 const tBlk25 = N("الأسود"), t25 = N("25");
-streak(B.indep, 25, 900, 260, 84, 14, 5, gIndep.lead, t25);
-K.count(B.indep, { x: 705, y: 140, from: 1, to: 25, at: tBlk25, dur: t25 - tBlk25 + 0.1, size: 110, digits: "en", sfx: false, color: K.INK });
-K.text(B.indep, "مرة", { x: 705, y: 760, size: 56, head: true, color: K.INK, at: N("مرة،") - 0.1 });
+const run25 = streak(B.indep, 25, 900, 260, 84, 14, 5, gIndep.lead, t25);
+const c25 = K.count(B.indep, { x: 705, y: 140, from: 1, to: 25, at: tBlk25, dur: t25 - tBlk25 + 0.1, size: 110, digits: "en", sfx: false, color: K.INK });
+const n25 = K.text(B.indep, "مرة", { x: 705, y: 728, size: 56, head: true, color: K.INK, at: N("مرة،") - 0.1 });
 const tNext = N("احتمالية");
 K.frame(tNext - 0.25, "indep");
-K.img(B.indep, OBJ + "kanz-balance-scale-v01.png", { x: 280, y: 470, w: 440, at: tNext - 0.1, enter: "fly", fromX: -60 });
-disc(B.indep, 175, 345, 100, "red", N("الأحمر") - 0.05);
-disc(B.indep, 385, 345, 100, "black", N("يظهر") - 0.05);
+K.dim([...run25, n25, c25], tNext - 0.3, 0, 0.3);
+const lay2 = layout(B.indep, 500, 430, { at: tNext - 0.2 });
+const ring = K.pointer(B.indep);
+ring.to(N("الأحمر") - 0.1, ...lay2.redBox, 300, 120);
+const tSpin = N("بعدها");
+ring.to(tSpin - 0.1, ...lay2.blackBox, 300, 120);
 const tSame = N("هي");
-K.text(B.indep, "هي هي", { x: 280, y: 150, size: 96, head: true, color: L, at: tSame - 0.05, from: "pop", sfx: "hit", gain: 0.3 });
-K.text(B.indep, "من أول لفة", { x: 280, y: 720, size: 56, head: true, color: K.INK, at: N("أول") - 0.1 });
-K.snap(tSame + 0.35, 1.2, 0.5);
+ring.out(tSame - 0.1);
+K.highlight(B.indep, ...lay2.redBox, 280, 100, { at: tSame - 0.1, color: "rgba(213,173,239,.45)" });
+K.highlight(B.indep, ...lay2.blackBox, 280, 100, { at: tSame + 0.1, color: "rgba(213,173,239,.45)" });
+K.text(B.indep, "=", { x: 500, y: lay2.redBox[1], size: 90, head: true, color: K.INK, at: tSame + 0.2 });
+K.text(B.indep, "هي هي", { x: 500, y: 140, size: 96, head: true, color: L, at: tSame - 0.05, from: "pop", sfx: "hit", gain: 0.3 });
+K.text(B.indep, "من أول لفة", { x: 500, y: 700, size: 56, head: true, color: K.INK, at: N("أول") - 0.1 });
 
 // ---------- 8. charcoal: the name ----------
 const tName = N("وده");
 const gName = K.go(tName, "name", { scale: 1.2, dy: -60 });
 K.world(gName.start, "charcoal");
-K.carry(chips, "name", gName.start, { x: 500, y: 560, w: 420, opacity: 1, rot: -4, dur: 0.55 });
+K.carry(hero, "name", gName.start, { x: 500, y: 560, w: 460, opacity: 1, dur: 0.55 });
 K.glow(B.name, 500, 560, 640, { at: gName.arrive });
 K.text(B.name, "Gambler's Fallacy", { x: 500, y: 300, size: 60, head: true, color: WHITE, at: N("Gambler's") - 0.05, cls: "en" });
 const tFal = N("مغالطة");
@@ -177,7 +229,7 @@ K.snap(N("المقامر.") + 0.05, 1.25, 0.6);
 // ---------- 9. the same mistake in the stock market: a share falling for two weeks ----------
 const tOdd = N("والغريب");
 const gMkt = K.go(tOdd, "market", { scale: 1.25, dx: 0, dy: -30 });
-K.carry(chips, "market", gMkt.start, { x: 500, y: 420, w: 200, opacity: 0, dur: 0.55 });
+K.carry(hero, "market", gMkt.start, { x: 500, y: 420, w: 200, opacity: 0, dur: 0.55 });
 const screen = K.img(B.market, OBJ + "kanz-trading-screen-blank-v01.png", { x: 500, y: 420, w: 760, at: gMkt.lead, enter: "fly", shadow: false });
 const same = K.text(B.market, "نفس الغلطة", { x: 500, y: 110, size: 72, head: true, at: N("نفس") - 0.1 });
 const tBourse = N("البورصة.");
@@ -222,7 +274,7 @@ K.text(B.must, "مفيش حاجة بتقول كده", { x: 500, y: 760, size: 56
 const tSure2 = N("وطبعًا");
 const gDiff = K.go(tSure2, "diff", { scale: 1.3, dx: -220, dy: -40 });
 K.world(gDiff.start, "paper");
-const rChips = K.img(B.diff, CHIPS, { x: 240, y: 360, w: 400, at: gDiff.lead, enter: "fly", shadow: false });
+const rWheel = K.img(B.diff, WHEEL, { x: 240, y: 360, w: 400, at: gDiff.lead, enter: "fly", shadow: false });
 K.text(B.diff, "≠", { x: 500, y: 340, size: 130, head: true, color: K.INK, at: N("مش") });
 K.text(B.diff, "الروليت", { x: 240, y: 560, size: 56, head: true, color: K.INK, at: N("الروليت،") - 0.1 });
 const tMove = N("لأن");
@@ -257,7 +309,7 @@ const tBack = tLast - 0.15;
 K.cam(tBack, "hook", { dur: 0.04, sfx: false });
 K.sfx(tBack, "whoosh", 0.25);
 K.glow(B.hook, 500, 540, 760, { at: tBack });
-K.img(B.hook, CHIPS, { x: 500, y: 540, w: 520, at: tBack - 0.04, rot: -4, enter: "fly", fromScale: 1.45, fromY: 60, sfx: false });
+K.img(B.hook, WHEEL, { x: 500, y: 540, w: 560, at: tBack - 0.04, enter: "fly", fromScale: 1.45, fromY: 60, sfx: false });
 K.takeaway(B.hook, "مغالطة <span class='kw'>المقامر</span>", { x: 500, y: 100, size: 110, at: tBack + 0.1, glow: false });
 K.duration = tLast + 1.3;
 K.finish();

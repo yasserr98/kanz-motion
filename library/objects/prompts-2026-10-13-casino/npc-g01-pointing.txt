@@ -1,0 +1,7 @@
+Attachments: image 1 = the APPROVED Kanz anonymous-people reference sheet v04 (style authority). Image 2 = the production PNG of gambler G01 (identity, wardrobe, finish and scale authority: the SAME man, same suit, same lavender tie). Match the rendering exactly; only the pose changes.
+
+Create ONE full-body person: the SAME gambler G01, standing confidently in a three-quarter view, pointing firmly forward and down with his right index finger as if saying 'this one', chest out, sure of himself.
+Lavender accent: the necktie only.
+Style (identical to the references): photographic grayscale editorial cutout, realistic fabric texture, fine tactile grain, natural proportions, crisp antialiased edges, same lighting from upper left; not shiny clay, not cartoon. Anonymous person: smooth featureless face with no eyes, nose or mouth, exactly like the reference sheet; hair and beard rendered like the references. Restrained lavender #D5ADEF only on the garment named; neutral grayscale everything else.
+Output: the full-body figure centered on a SQUARE canvas (1254x1254 if available, else highest native square), feet near the lower edge with a small margin, comfortable transparent margins. TRUE RGBA PNG TRANSPARENCY everywhere outside the subject. No background, no floor, no glow, no drop shadow, no text, logo or watermark. No fake checkerboard pixels.
+Return only the image.
