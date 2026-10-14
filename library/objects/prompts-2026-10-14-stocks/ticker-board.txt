@@ -1,0 +1,7 @@
+Attachments: image 1 = the APPROVED Kanz editorial icon sheet (style authority). Image 2 = an approved Kanz library icon (finish, material, perspective, scale and framing authority).
+
+Create ONE Kanz explainer icon: a wall-mounted ELECTRONIC STOCK QUOTE BOARD like in a stock exchange hall: a wide dark metal-framed display panel with five horizontal rows, each row made of blank glowing segment bars of different lengths and a small triangle marker (some pointing up, some down) at the row's end; no characters at all. Same three-quarter view and metal finish as the screen in image 2.
+Lavender accent: one highlighted row (its bars and up-triangle) only; every other row neutral gray.
+Treatment identical to the references: photographic grayscale editorial cutout with real material texture and the same fine tactile grain, same lighting from upper left; restrained lavender #D5ADEF only on the detail named; neutral grayscale everything else. The Kanz icon style is fixed for every topic: match line weight, shapes, perspective, dimensionality, shading, texture and palette treatment exactly; no topic-specific style, no glossy colours, no cartoon.
+Output: one centered subject on a SQUARE canvas (1254x1254 if available, else highest native square), comfortable transparent margins. TRUE RGBA PNG TRANSPARENCY everywhere outside the subject. No background, no floor, no drop shadow, no fake checkerboard, no text, letters, numbers, logos or watermark.
+Return only the image.
