@@ -45,6 +45,11 @@
    "from": "الأسود",
    "to": "الإسوِد",
    "found": "gamblers-fallacy v1: 'الأسود' read wrong; Ahmed picked clip 1 'الإسوِد' (Egyptian el-eswed, kasra on the waw) from four test clips (out/pron), 2026-10-14"
+  },
+  {
+   "from": "المقامر",
+   "to": "المُقامِر",
+   "found": "gamblers-fallacy v2 0:52.7: 'مغالطة المقامر' heard as 'الموقامر' (stretched first vowel); Ahmed picked clip 1 'المُقامِر' from four test clips (out/pron/muqamir), 2026-10-14"
   }
  ],
  "watch": [

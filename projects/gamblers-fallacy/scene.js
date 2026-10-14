@@ -94,7 +94,7 @@ function layout(parent, cx, cy, o = {}) {
 // ---------- 1. hook: headline + one hero (the roulette wheel), complete from frame 1 ----------
 const gStreak = K.go(T("لعبة"), "streak", { scale: 1.3, dx: 0, dy: -40 });
 K.headline([{ html: "سنة " + K.num("1913") + "،" }, { html: "أغرب حادثة" }, { html: "في تاريخ القمار", kw: true }], { out: gStreak.start });
-K.captionsFrom = gStreak.start;
+// captions from the first frame (Ahmed 2026-10-14: "first few seconds dont have a caption"; the headline is not the spoken line)
 K.glow(B.hook, 500, 500, 870, { out: gStreak.start });
 const hero = K.img(B.hook, WHEEL, { x: 500, y: 500, w: 640, float: true, shadow: false });
 K.settle(hero, 0, { fromScale: 1.45, fromY: 70, dur: 1.2 });
@@ -218,18 +218,23 @@ K.text(B.indep, "من أول لفة", { x: 500, y: 700, size: 56, head: true, co
 // ---------- 8. charcoal: the name ----------
 const tName = N("وده");
 const gName = K.go(tName, "name", { scale: 1.2, dy: -60 });
-K.world(gName.start, "charcoal");
-K.carry(hero, "name", gName.start, { x: 500, y: 560, w: 460, opacity: 1, dur: 0.55 });
+// v3 (Ahmed 2026-10-14: "the screen glitches when that part shows"): the wipe now runs after the camera lands, and a fresh
+// wheel flies in instead of the hook wheel crossing 3,600 px of world; no snap zoom on the name
+{ // crossfade back to charcoal: the wipe's moving edge left a thin line here that read as a glitch
+  const tw = gName.arrive - 0.1;
+  tl.to(document.getElementById("paperworld"), { autoAlpha: 0, duration: 0.35, ease: "power1.inOut" }, tw);
+  tl.set(document.getElementById("stage"), { attr: { "data-world": "charcoal" } }, tw + 0.17);
+}
+K.img(B.name, WHEEL, { x: 500, y: 560, w: 460, at: gName.lead, enter: "fly", shadow: false });
 K.glow(B.name, 500, 560, 640, { at: gName.arrive });
 K.text(B.name, "Gambler's Fallacy", { x: 500, y: 300, size: 60, head: true, color: WHITE, at: N("Gambler's") - 0.05, cls: "en" });
 const tFal = N("مغالطة");
 K.text(B.name, "مغالطة المقامر", { x: 500, y: 150, size: 90, head: true, color: L, at: tFal - 0.05, from: "pop", sfx: "hit", gain: 0.35 });
-K.snap(N("المقامر.") + 0.05, 1.25, 0.6);
+N("المقامر.");
 
 // ---------- 9. the same mistake in the stock market: a share falling for two weeks ----------
 const tOdd = N("والغريب");
 const gMkt = K.go(tOdd, "market", { scale: 1.25, dx: 0, dy: -30 });
-K.carry(hero, "market", gMkt.start, { x: 500, y: 420, w: 200, opacity: 0, dur: 0.55 });
 const screen = K.img(B.market, OBJ + "kanz-trading-screen-blank-v01.png", { x: 500, y: 420, w: 760, at: gMkt.lead, enter: "fly", shadow: false });
 const same = K.text(B.market, "نفس الغلطة", { x: 500, y: 110, size: 72, head: true, at: N("نفس") - 0.1 });
 const tBourse = N("البورصة.");
