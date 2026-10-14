@@ -82,7 +82,7 @@ which model to use, how to keep each video cheap, and the usage log.
 | Path | What |
 | --- | --- |
 | `engine/` | make (step runner), transcribe (Scribe / Whisper), tts, align (forced alignment), edit_audio, captions, render, sfx_library, sfx_gen (generated SFX), eleven (API client), contact (review sheets), lint (pre-render checks), data (real series for charts, with sources) |
-| `runtime/` | `kanz.js` (timeline + components) and `kanz.css` (brand tokens, layout); `kanz-look.js/.css` look v2 for new videos (safe zones, light, depth, documents, photos, maps, counting numbers, piles), see [docs/LOOK-V2.md](docs/LOOK-V2.md); `kanz-pace.js` pacing layer (arrive built, drift, carry, snap zooms, room tone), see [docs/PACE.md](docs/PACE.md) |
+| `runtime/` | `kanz.js` (timeline + components) and `kanz.css` (brand tokens, layout); `kanz-look.js/.css` look v2 for new videos (safe zones, light, depth, documents, photos, maps, counting numbers, piles), see [docs/LOOK-V2.md](docs/LOOK-V2.md); `kanz-pace.js` pacing layer (arrive built, drift, carry, snap zooms, room tone), see [docs/PACE.md](docs/PACE.md); `kanz-3d.js` 3D components `K.flip` (card turns over), `K.browser` (genuine screenshot tilted in a browser frame, marks on the page) and `K.fold` (folded note opens), worked example `projects/_3d-demo` |
 | `brand/` | Kanz fonts, logo and colour tokens (copied from the Kanz repo's `assets/kanz-brand-current`) |
 | `library/objects/` | approved grayscale editorial objects used so far (from the Kanz motion library) |
 | `library/sfx/` | 124 CC0 one-shots + generated effects (register, riser, shutter) (`generated.json`, prompt per file) + `manifest.json` (source page and licence for each file) |
