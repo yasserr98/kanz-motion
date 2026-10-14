@@ -1,0 +1,9 @@
+{
+ "_why": "Voice-only spelling; captions keep script.md. Preventive: amounts written out in Egyptian words so the clone does not read Standard Arabic numbers (see lexicon digit rows).",
+ "replace": [
+  ["بـ٢٠ ألف", "بعشرين ألف"],
+  ["٥ آلاف", "خمس تلاف"],
+  ["لـ١٥ ألف", "لخمستاشر ألف"],
+  ["بـ٣٠ ألف", "بتلاتين ألف"]
+ ]
+}
