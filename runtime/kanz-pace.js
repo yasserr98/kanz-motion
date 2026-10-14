@@ -17,6 +17,10 @@
  *   K.dim(els, t, op)           dim to `op` (default 0.3) instead of clearing: never an empty board
  *   K.snap(t, f, hold)          one-frame snap zoom on an emphasis word, snaps back after `hold`
  *   K.pointer(board)            one lavender ring that hops between targets: p.to(t, x, y, w, h), p.out(t)
+ *   frame guard (on by default) the camera never cuts an object, label or chart mark at the side of the frame:
+ *                               drift, close framing and snaps get a small extra pan / zoom-out (docs/PACE.md
+ *                               "Frame guard"). K.pace({keep: false}) turns it off; K.cam/K.frame(..., {crop: true})
+ *                               lets one framing crop on purpose; K.free(el) exempts one element
  */
 (function () {
   const K = window.K, tl = K.tl;
@@ -24,6 +28,7 @@
   const hide = (e) => tl.set(e, { autoAlpha: 0 }, 0);
   K.PACE = false;
   const moves = []; // {t, end, id, o, to}
+  const snaps = []; // {t, end}
 
   K.pace = function (o = {}) {
     K.PACE = true;
@@ -34,6 +39,7 @@
     K.driftRate = o.drift == null ? 0.02 : o.drift; // scale per second between moves (0x100x: 2-3 %/s)
     K.driftCap = o.driftCap || 0.07; // more crops objects at the board edges (review 2026-10-13)
     K.driftSide = o.driftSide == null ? 8 : o.driftSide; // board px per second, alternating direction
+    K.keep = o.keep !== false; // frame guard (2026-10-14): drift/snap/close framing pushed people and labels off-frame
     // snap zooms act on a wrapper so they never fight the camera tweens on #world
     if (!document.getElementById("camwrap")) {
       // K.world() inserts the paper layer before #world, which is about to move into the wrapper: make it now
@@ -102,6 +108,138 @@
     });
   };
 
+  // ---------- frame guard (2026-10-14) ----------
+  // An editor's neckline Reel showed the camera pushing people, chart labels and arrows past the frame edge:
+  // drift keeps panning 8 px/s for the whole gap, snaps zoom 1.3x on the centre, close framing ignores the
+  // board's width. The guard measures every visible object/label/chart mark once per 1/12 s (camera moves and
+  // snaps excluded), and where one would be cut it adds the smallest pan, then zoom-out (>= 0.8x), on #camwrap
+  // (CSS translate/scale, so it composes with the snap and never fights the #world tweens). It looks ahead and
+  // eases, so it reads as camera work; during a camera move it blends from the old board's correction to the new
+  // one's; during a snap it is measured live (a cut, no easing), which softens a snap that would crop.
+  // Bands follow lint's side margins: x 65..1015 above y 1000, 120..960 below (K.SAFE).
+  const KEEP_SEL = "#world img.obj, #world .t, #world .tag, #world .card, #world .kcount, #world .kdoc, #world .kphoto," +
+    " #world .kpin, #world svg.mk path, #world svg.mk polyline, #world svg.mk rect, #world svg.mk line, #world svg.mk circle";
+  const KEEP_SKIP = ".kfg, .kglow, .kshadow, .kmap, [data-free]";
+  const DT = 1 / 12, AHEAD = 0.45, BEHIND = 0.1, EASE = 0.25, SMIN = 0.8, OX = 540;
+  K.free = function (el) { [].concat(el).forEach((e) => e.setAttribute("data-free", "")); return el; };
+  let keepTab = null, wrap = null;
+  const setFix = (s, dx) => {
+    if (!wrap) return;
+    wrap.style.translate = Math.abs(dx) > 0.01 ? `${dx.toFixed(2)}px 0px` : "";
+    wrap.style.scale = s < 0.9999 ? s.toFixed(5) : "";
+  };
+  // constraints for the current frame: one {a, b, L, R} per visible element that is at least 30 % inside
+  const measure = () => {
+    const st = stage.getBoundingClientRect(), k = st.width / 1080 || 1, S = K.SAFE || {};
+    const memo = new Map();
+    const eff = (el) => {
+      if (!el || el === stage) return 1;
+      if (memo.has(el)) return memo.get(el);
+      const cs = getComputedStyle(el);
+      const v = cs.visibility === "hidden" || cs.display === "none" ? 0 : parseFloat(cs.opacity) * eff(el.parentElement);
+      memo.set(el, v);
+      return v;
+    };
+    const out = [];
+    document.querySelectorAll(KEEP_SEL).forEach((el) => {
+      if (el.closest(KEEP_SKIP)) return;
+      if ((gsap.getProperty(el, "scaleX") || 1) > 1.03) return; // mid fly-in / settle: oversized on purpose
+      const r = el.getBoundingClientRect();
+      if (r.width < 3 || r.height < 3) return;
+      const a = (r.left - st.left) / k, b = (r.right - st.left) / k, y0 = (r.top - st.top) / k, y1 = (r.bottom - st.top) / k;
+      if (y1 < 0 || y0 > 1920) return;
+      const inside = Math.min(b, 1080) - Math.max(a, 0);
+      if (inside < 0.3 * (b - a)) return; // mostly outside: a neighbouring board or a deliberate peek
+      if (eff(el) < 0.5) return;
+      const lower = (y0 + y1) / 2 > (S.upperBottom || 1000);
+      out.push({ a, b, L: lower ? S.left || 120 : S.upperLeft || 65, R: lower ? S.right || 960 : S.upperRight || 1015 });
+    });
+    return out;
+  };
+  // smallest correction (largest scale <= 1, then smallest pan) that puts every element inside its band
+  const solve = (cs) => {
+    if (!cs.length) return [1, 0];
+    const range = (s) => {
+      let lo = -1e9, hi = 1e9;
+      cs.forEach((c) => { lo = Math.max(lo, c.L - OX - s * (c.a - OX)); hi = Math.min(hi, c.R - OX - s * (c.b - OX)); });
+      return [lo, hi];
+    };
+    let s = 1, [lo, hi] = range(1);
+    if (lo > hi) {
+      let x = SMIN, y = 1;
+      for (let i = 0; i < 18; i++) { const m = (x + y) / 2, r = range(m); if (r[0] <= r[1]) x = m; else y = m; }
+      s = x; [lo, hi] = range(s);
+      if (lo > hi) return [s, (lo + hi) / 2]; // too wide even at SMIN: centre it
+    }
+    return [s, Math.min(Math.max(0, lo), hi)];
+  };
+  const inAny = (list, t) => list.some((m) => t > m.t && t < m.end);
+  let seekBase = null;
+  const build = () => {
+    const end = K.duration || window.DURATION || 60, n = Math.ceil(end / DT) + 1;
+    const T = [], kind = [], C = [];
+    setFix(1, 0);
+    const sorted = moves.slice().sort((a, b) => a.t - b.t);
+    for (let i = 0; i < n; i++) {
+      const t = Math.min(i * DT, end);
+      T.push(t);
+      const mv = sorted.filter((m) => m.t <= t + 1e-6).pop();
+      const k = inAny(snaps, t) ? "snap" : inAny(sorted, t) ? "move" : mv && mv.o.crop ? "free" : "settled";
+      kind.push(k);
+      if (k === "settled") { seekBase(t); C.push(measure()); } else C.push(null);
+    }
+    // look ahead / behind inside each settled stretch, so the reframe is under way before an object lands
+    const raw = T.map((t, i) => {
+      if (kind[i] !== "settled") return null;
+      const cs = [];
+      for (let j = i; j >= 0 && kind[j] === "settled" && T[j] >= t - BEHIND; j--) cs.push(...C[j]);
+      for (let j = i + 1; j < n && kind[j] === "settled" && T[j] <= t + AHEAD; j++) cs.push(...C[j]);
+      return solve(cs);
+    });
+    // ease: average over +-EASE inside the stretch, never less zoom-out than this sample needs
+    const half = Math.round(EASE / DT);
+    const fix = raw.map((r, i) => {
+      if (!r) return null;
+      let s = 0, d = 0, w = 0;
+      for (let j = i - half; j <= i + half; j++) {
+        const q = raw[Math.min(Math.max(j, 0), n - 1)] || r;
+        s += q[0]; d += q[1]; w++;
+      }
+      return [Math.min(s / w, r[0]), d / w];
+    });
+    // camera moves blend between the corrections either side; free framings and snaps carry none in the table
+    for (let i = 0; i < n; i++) {
+      if (fix[i]) continue;
+      if (kind[i] !== "move") { fix[i] = [1, 0]; continue; }
+      let a = i; while (a >= 0 && kind[a] === "move") a--;
+      let b = i; while (b < n && kind[b] === "move") b++;
+      const fa = a >= 0 ? fix[a] || [1, 0] : [1, 0];
+      const fb = b < n ? raw[b] || [1, 0] : fa;
+      const u = (i - a) / (b - a);
+      fix[i] = [fa[0] + (fb[0] - fa[0]) * u, fa[1] + (fb[1] - fa[1]) * u];
+    }
+    keepTab = { T, fix, kind };
+  };
+  // review helper: "settled" | "move" | "snap" | "free" at time t (null before the guard has measured)
+  K._keepKind = (t) => keepTab ? keepTab.kind[Math.max(0, Math.min(Math.round(t / DT), keepTab.kind.length - 1))] : null;
+  const ready = () => document.fonts && document.fonts.status === "loaded" &&
+    Array.from(document.images).every((i) => i.complete && i.naturalWidth > 0);
+  const seek2 = K.seek;
+  seekBase = seek2;
+  K.seek = function (t) {
+    if (!K.PACE || !K.keep) return seek2(t);
+    wrap = wrap || document.getElementById("camwrap");
+    if (!keepTab && ready()) build();
+    setFix(1, 0);
+    seek2(t);
+    if (!keepTab) return;
+    if (inAny(snaps, t)) { const f = solve(measure()); setFix(f[0], f[1]); return; }
+    const last = keepTab.T.length - 1, i = Math.max(0, Math.min(Math.floor(t / DT), last));
+    const a = keepTab.fix[i], b = keepTab.fix[Math.min(i + 1, last)];
+    const u = Math.min(1, Math.max(0, (t - keepTab.T[i]) / DT));
+    setFix(a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u);
+  };
+
   // ---------- entrances ----------
   const img1 = K.img;
   K.img = function (parent, src, o = {}) {
@@ -144,6 +282,7 @@
     if (!w) return;
     tl.set(w, { scale: f }, t);
     tl.set(w, { scale: 1 }, t + hold);
+    snaps.push({ t, end: t + hold });
     K.sfx(t, "click", 0.25);
   };
   K.pointer = function (parent) {

@@ -66,7 +66,8 @@ repo or a Kanz worktree (worktrees do not contain this folder; use the absolute 
    (frames from the MP4 + loudness ≈ −16 LUFS). Open the MP4 for Ahmed (`ii <path>`).
    Cover (style A): write `projects/<slug>/cover.json`, run `python engine/cover.py projects/<slug>`, and check
    the crop lines in `out/cover-review.jpg`.
-9. **Record.** Commit the project (not `out/`), push, add a row to the usage log in
+9. **Record.** Only in Ahmed's own copy (`D:\Claude Projects\Kanz\kanz-motion`); in any other clone (editors) skip
+   this step entirely, see "Editors' copies" below. Commit the project (not `out/`), push, add a row to the usage log in
    `docs/EFFICIENCY.md`, and update the Kanz backlog. Delivery to Drive + Airtable (`In Review`)
    only when Ahmed asks; rendered ≠ approved ≠ posted.
    Upload: from the Kanz repo, `python scripts/kanz_drive_upload.py <mp4> --parent 1vMk8CG7fRj15FqGpQ0mMbz-vV_MLUhlA
@@ -127,6 +128,16 @@ audio/frames before changing anything, and say where it really was if it differs
   work. Follow `docs/EFFICIENCY.md` and add a row to its usage log at the end of every video.
 - Review through one contact sheet (`make.py review`, `make.py check`), not image by image.
 - Run renders in the background; do not poll them.
+
+## Editors' copies: videos stay local (Ahmed 2026-10-14)
+
+Any clone other than Ahmed's `D:\Claude Projects\Kanz\kanz-motion` is an editor's working copy. There, projects,
+voices and rendered videos stay on the editor's machine: never `git add`, commit or push them (or anything else), and
+never ask the editor to. GitHub flows one way, Ahmed -> editors. The editor hands over the MP4 directly (Drive or
+however Ahmed asked), not through the repo. Steps 1-8 work the same. Skip step 9 (commit, push, usage log, Kanz backlog,
+Drive/Airtable delivery) unless Ahmed asks for it.
+To get engine updates, follow [docs/UPDATE.md](docs/UPDATE.md): a fast-forward pull that keeps every local project
+untouched. Never `reset --hard`, `clean`, `checkout -- .` or drop a stash in an editor's copy.
 
 ## Repo hygiene
 

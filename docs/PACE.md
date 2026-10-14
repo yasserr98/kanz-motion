@@ -100,6 +100,25 @@ more than a quarter under a caption), objects **behind captions**, and objects p
 and three problems the eye review missed (the dollar on the labels at 7.75–9 s, the stack at the left edge at 20 s, the
 price tag off the right edge at 48–54 s). A one-frame crossing during a fast camera whip is not reported, by design.
 
+## Frame guard (2026-10-14, on by default)
+
+An editor's neckline Reel showed the camera pushing people, chart labels and an arrow past the frame edge: drift keeps
+panning 8 px/s for the whole gap and zooms up to 7 %, `K.snap` zooms 1.3x on the frame centre, and close framing does not
+know how wide the board is. `runtime/kanz-pace.js` now guards every `K.pace()` video. Before the first frame it steps
+through the video (every 1/12 s, held shots only) and measures each visible object, label, card and chart mark. Where
+one would cross lint's side margin (x 65..1015 above y 1000, 120..960 below), it adds the smallest pan, then a zoom-out
+(never below 0.8x), on `#camwrap`. It starts ~0.45 s early and eases, so it reads as camera work. Camera moves blend from
+one board's correction to the next. During a snap it is measured live, which softens a snap that would crop.
+On gamblers-fallacy / us-dollar-decisions-pace the frame-edge cuts in held shots went to zero (before/after stills
+reviewed 2026-10-14).
+
+- Ignored: `K.fg` blur, glows, shadows, maps (`.kmap`), elements mostly (>70 %) outside the frame, and elements still
+  oversized from a fly-in or `K.settle`.
+- A framing that should crop on purpose: `K.cam(t, id, { crop: true })` / `K.frame(..., { crop: true })` (no guard until
+  the next camera move). One element: `K.free(el)`. The whole video: `K.pace({ keep: false })`.
+- Lint and renders use the guard automatically (they call `K.seek`). `K._keepKind(t)` says whether a time is a held
+  shot, a move, a snap or a free framing, for review scripts.
+
 **Rejected (Ahmed 2026-10-13): a ground plane** (a faint floor and horizon under objects). Objects stay on the plain
 charcoal/paper world; don't add floors or horizons.
 
