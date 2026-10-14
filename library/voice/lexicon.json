@@ -49,7 +49,7 @@
   {
    "from": "المقامر",
    "to": "المُقامِر",
-   "found": "gamblers-fallacy v2 0:52.7: 'مغالطة المقامر' heard as 'الموقامر' (stretched first vowel); Ahmed picked clip 1 'المُقامِر' from four test clips (out/pron/muqamir), 2026-10-14"
+   "found": "gamblers-fallacy v2 0:52.7: 'مغالطة المقامر' heard as 'الموقامر' (stretched first vowel); Ahmed picked clip 1 'المُقامِر' from four test clips (out/pron/muqamir), 2026-10-14; the respelled full-paragraph re-roll still sounded wrong in v3 (Ahmed: 'you still didnt change the word'), so v4 uses his exact test take (projects/gamblers-fallacy/use_take.py). Takes vary: when a respelling is picked from test clips, use that take, not a new generation"
   }
  ],
  "watch": [
