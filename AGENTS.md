@@ -57,6 +57,9 @@ repo or a Kanz worktree (worktrees do not contain this folder; use the absolute 
    **Variety (Ahmed 2026-10-13, "apply all"):** read `docs/PACE.md` section Variety. One `K.punch` (with `riser: true`) on the
    key sentence; amounts as `K.stack`/`K.pile`; state changes as `K.swap`; places as map/globe + `K.pin`; real series through
    `engine/data.py` with a source line. Worked example: `projects/_suggestions-demo`. No ground plane (rejected 2026-10-13).
+   **3D (Ahmed 2026-10-14, picked from `projects/_3d-demo`):** `runtime/kanz-3d.js` (the template loads it): `K.flip` for
+   myth -> fact / question -> answer, `K.browser` + `K.pageOval` for genuine website screenshots, `K.fold` for a reveal.
+   Rejected, do not rebuild: coin toss, isometric 3D bars, depth camera (objects at depth).
 7. **Review.** `python engine/lint.py projects/<slug>` (safe zones, dead stretches, thin frames, hook, covered text,
    objects behind captions, objects past the side margin; fix or justify each flag), then `make.py review <slug> <times>` → look at `out/review.jpg`, fix, repeat.
 8. **Render and check.** `make.py render <slug> v1` in the background, then `make.py check <slug> v1`
