@@ -42,7 +42,11 @@ def main():
     voice, timing = proj / "audio" / "voice.wav", proj / "build" / "timing.js"
     v0, t0 = proj / "audio" / "voice-pre-retime.wav", proj / "build" / "timing-pre-retime.js"
     trs = [(proj / n, proj / n.replace(".json", "-pre-retime.json")) for n in ("transcript.json", "transcript.aligned.json")]
-    if not v0.exists():
+    # A transcript without a "retime" stamp means make.py tts/audio wrote a new voice since the last retime: refresh the
+    # originals from it, or the old take would be retimed again (gamblers-fallacy 2026-10-14: a pronunciation fix was lost).
+    tr_now = proj / "transcript.json"
+    fresh = tr_now.exists() and "retime" not in json.loads(tr_now.read_text(encoding="utf-8"))
+    if not v0.exists() or fresh:
         shutil.copy(voice, v0)
         if timing.exists():
             shutil.copy(timing, t0)

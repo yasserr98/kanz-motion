@@ -55,7 +55,8 @@ K.finish();                                                             // adds 
 `python engine/make.py retime <slug> [tempo=1.08] [max-pause=0.3]` cuts pauses longer than 0.3 s down to 0.3 s,
 speeds the voice by `tempo` (pitch kept), remaps `transcript.json`, `transcript.aligned.json` and `build/timing.js`,
 then rebuilds the captions. Originals are kept with a `-pre-retime` suffix and every run starts from them, so settings
-never compound. Script route: run it right after `make.py tts` (and after any voice fix round). Voice notes are already
+never compound. Script route: run it right after `make.py tts` (and after any voice fix round). A transcript without a
+`retime` stamp (a new `tts`/`audio`) refreshes the saved originals first (fixed 2026-10-14: a fix round was retimed from the old take). Voice notes are already
 1.25x: `make.py retime <slug> 1.0` tightens the pauses only. `make.py review/render` stay in sync afterwards
 (verified on us-dollar-decisions-pace: 171/171 words, identical timings).
 
@@ -63,7 +64,8 @@ never compound. Script route: run it right after `make.py tts` (and after any vo
 
 `K.bed = "room"` (set by `K.pace()`): `engine/render.py` mixes a generated, non-musical room tone (filtered brown +
 pink noise, seeded, fully owned) 21 dB under the voice's median speech level, so pauses never drop to digital
-silence. No music (Ahmed 2026-10-10). `K.pace({ bed: null })` turns it off.
+silence. No music (Ahmed 2026-10-10). `K.pace({ bed: null })` turns it off. `K.bedUnder = 30` (after `K.pace()`) sets the level
+per video in dB under the voice (Ahmed 2026-10-13 on gamblers-fallacy v1 at 21 dB: "extremely cool but too loud").
 
 ## Variety (2026-10-13, default for new videos)
 
