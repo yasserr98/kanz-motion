@@ -2,8 +2,21 @@
 
 This repo turns a voice note into a Kanz Reel. It lives inside the Kanz working folder
 (`D:\Claude Projects\Kanz\kanz-motion`) but is its own Git repository
-(`github.com/yasserr98/kanz-motion`, private). The Kanz repo holds the brand authority and
+(`github.com/yasserr98/kanz-motion`, **public**). The Kanz repo holds the brand authority and
 research; this repo holds the engine.
+
+## Two repos, two rules (Ahmed 2026-10-14)
+
+| | Kanz (`github.com/yasserr98/kanz`) | Kanz Motion (`github.com/yasserr98/kanz-motion`) |
+|---|---|---|
+| Visibility | private, Ahmed only | **public**: anyone can read and clone it, no GitHub account needed |
+| Purpose | Ahmed's production home: anything produced may be committed there | the engine and settings the video editors pull |
+| Who pushes | Ahmed's sessions, freely | Ahmed's sessions only (engine, runtime, docs, template, examples) |
+| Editors | no access | pull only (`docs/UPDATE.md`); their projects and videos stay on their machine |
+
+Everything pushed to kanz-motion is world-readable. Push engine changes, settings and docs there; keep private
+material (unreleased scripts, keys, voice recordings, renders) out of it. Open item: Thmanyah Display's
+redistribution terms are still unchecked (README, Licences) while the font files are public.
 
 ## When Ahmed says "create a video" / "make a Reel"
 

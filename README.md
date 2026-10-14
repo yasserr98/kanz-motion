@@ -100,13 +100,15 @@ market numbers on screen without a source.
 - SFX: CC0 (Kenney.nl and BigSoundBank), plus effects generated with ElevenLabs on a paid plan (commercial use), each in its own category and listed with its prompt in `library/sfx/generated.json`. See `library/sfx/manifest.json`.
 - GSAP: free under the GreenSock standard licence (npm).
 - Fonts: IBM Plex Sans Arabic is OFL. **Thmanyah Display's redistribution terms have not been
-  checked**, so keep this repository private until they are.
+  checked**, and this repository is public, so its font files are downloadable by anyone. Open item for Ahmed.
 - Objects, logo and brand assets belong to Kanz.
 
 ## Sharing this repo
 
-Share it by adding the person as a collaborator on the private GitHub repo, not by sending a ZIP.
-They get everything needed to render: engine, brand fonts, objects, sounds and the two worked
-examples. They do **not** get `.env` (keys), voice-note audio, or rendered videos; each person uses
-their own ElevenLabs key. Do not make the repo public until the Thmanyah licence is checked, and
-treat Kanz objects and logo as Kanz-only, not for other brands.
+The repo is public: send the link. No GitHub account is needed to clone or update it, only Git installed
+(`git clone https://github.com/yasserr98/kanz-motion.git`). Prefer a clone to the "Download ZIP" button: a ZIP
+cannot pull updates (`docs/UPDATE.md` converts one). Editors only pull; their projects and videos stay on their
+machine and never go back to GitHub (AGENTS.md, "Editors' copies"). They get everything needed to render:
+engine, brand fonts, objects, sounds and the worked examples. They do **not** get `.env` (keys), voice-note audio,
+or rendered videos; each person uses their own ElevenLabs key. Treat Kanz objects and logo as Kanz-only, not for
+other brands.
