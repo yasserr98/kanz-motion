@@ -16,7 +16,7 @@ const SRC = "rgba(255,255,255,.62)";
 const ICON = "assets/codex/kanz/", PHOTO = "assets/codex/free/";
 const PH = "../../shorts/casino-wins-in-the-end/photos/";
 const MESSI_A = window.MESSI_A, MESSI_B = window.MESSI_B; // variant.js
-const print = (board, ph, o) => K.snap35(board, PH + ph.file, { ...o, credit: ph.credit });
+const print = (board, ph, o) => K.snap35(board, PH + ph.file, { pos: ph.pos, ...o }); // no on-screen credit: CREDITS.md
 
 K.look();
 K.pace();
@@ -46,8 +46,8 @@ const tUS = T("أمريكا");
 K.cam(0, "brand", { scale: 1.0 });
 K.glow(B.brand, 500, 560, 820, { at: c1, out: tUS - 0.3 });
 K.text(B.brand, "براند ميسي", { x: 500, y: 140, size: 104, head: true, color: L, at: c1 });
-const shot = print(B.brand, MESSI_A, { x: 500, y: 540, w: 520, h: 580, rot: -4, at: c1 - 0.05 });
-tl.to(shot, { y: 30, scale: 0.78, rotation: -7, duration: 0.5, ease: "power2.inOut" }, tUS - 0.35);
+const shot = print(B.brand, MESSI_A, { x: 500, y: 530, w: 440, h: 470, rot: -4, at: c1 - 0.05 });
+tl.to(shot, { y: -20, scale: 0.74, rotation: -7, duration: 0.5, ease: "power2.inOut" }, tUS - 0.35); // clear of the captions
 K.screen(PHOTO + "us-sportsbook.png", tUS - 0.3, f2);
 K.tag(B.brand, "في أمريكا", { x: 500, y: 290, size: 54, lav: true, at: tUS });
 K.tag(B.brand, "الواجهة", { x: 770, y: 420, size: 52, lav: true, at: T("كواجهة"), rot: 5 });
@@ -81,7 +81,7 @@ K.cam(c4 - 0.3, "one", { dur: 0.04, sfx: false, scale: 1.0 });
 K.screen(PHOTO + "stadium-final.png", c4 - 0.3, f5, { sfx: false });
 K.text(B.one, "ماتش واحد", { x: 500, y: 150, size: 104, head: true, at: c4 + 0.05 });
 K.tag(B.one, "النهائي", { x: 500, y: 300, size: 58, lav: true, at: T("نهائي", c4) });
-print(B.one, MESSI_B, { x: 520, y: 640, w: 600, h: 400, rot: 4, at: T("ميسي", c4) - 0.05 });
+print(B.one, MESSI_B, { x: 520, y: 570, w: 580, h: 370, rot: 4, at: T("ميسي", c4) - 0.05 });
 K.punch("أكبر حدث مراهنات<br>في تاريخ <span class='kw'>الكورة</span>", T("أكبر") - 0.05, f5 - 0.02, { size: 104, riser: true });
 
 K.duration = END;

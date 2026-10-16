@@ -52,9 +52,9 @@ K.cam(c2 - 0.3, "money", { dur: 0.04, sfx: false, scale: 1.08 });
 K.frame(T("بياخدها") - 0.2, "money", { scale: 1.12 });
 K.text(B.money, "حجم الرهان", { x: 300, y: 260, size: 60, head: true, at: c2 });
 K.pile(B.money, OBJ + "kanz-cash-v01.png", { x: 300, y: 620, w: 190, n: 6, at: c2, stagger: 0.06 });
-K.glow(B.money, 760, 520, 560, { at: c2 });
-K.img(B.money, ICON + "casino-exterior.png", { x: 760, y: 520, w: 320, shadow: false, at: c2, enter: "fly" });
-K.text(B.money, "البيت", { x: 760, y: 300, size: 54, head: true, at: c2 + 0.2 });
+K.glow(B.money, 760, 480, 560, { at: c2 });
+K.img(B.money, ICON + "casino-exterior.png", { x: 760, y: 470, w: 290, shadow: false, at: c2, enter: "fly" });
+K.text(B.money, "البيت", { x: 760, y: 255, size: 54, head: true, at: c2 + 0.2 });
 // the commission: one bundle leaves the pile for the house, again on the second "transaction"
 const fee = (t) => {
   const b = K.img(B.money, OBJ + "kanz-cash-v01.png", { x: 300, y: 560, w: 150, shadow: false });
@@ -66,7 +66,8 @@ const fee = (t) => {
 };
 fee(T("بياخدها"));
 K.tag(B.money, "العمولة", { x: 540, y: 380, size: 52, lav: true, at: T("بياخدها") + 0.3 });
-K.img(B.money, ICON + "betting-app-phone.png", { x: 540, y: 740, w: 300, at: T("عملية"), enter: "fly", fromY: 120 });
+// the phone sits under the house, clear of the cash pile and the captions (Ahmed 2026-10-16: "bad overlap")
+K.img(B.money, ICON + "betting-app-phone.png", { x: 775, y: 745, w: 185, at: T("عملية"), enter: "fly", fromY: 120 });
 fee(T("ترانزاكشن") - 0.1);
 K.snap(T("ترانزاكشن"), 1.15, 0.6);
 K.text(B.money, "كل عملية = عمولة", { x: 500, y: 130, size: 64, head: true, color: L, at: T("ترانزاكشن") });
