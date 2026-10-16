@@ -38,9 +38,15 @@
       ],
       "Brief": "spoken script from script.md captions first, then on-screen text and production notes"
     },
-    "verified": "one readback: name, status, bucket, type, episode link, Drive link, Inspiration and Brief first lines as sent"
+    "verified": "one readback: name, status, bucket, type, episode link, Drive link, Inspiration and Brief first lines as sent",
+    "status": {
+      "value": "Ready to be posted",
+      "set": "2026-10-16",
+      "by": "Ahmed: \"both should be ready to be posted\" (after watching the clean-cut versions)",
+      "verified": "PATCH response shows the status, name and Drive link"
+    }
   },
-  "not_done": "No preview image, caption, approval, scheduling or publication. Codex images remain candidates for the object library.",
+  "not_done": "Ready to be posted, not posted yet. No preview image or caption written. The Codex images are still candidates for the object library.",
   "revisions": [
     {
       "date": "2026-10-16",
