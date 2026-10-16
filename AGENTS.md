@@ -143,10 +143,15 @@ Route for "make shorts from this YouTube video". Work locally (Ahmed: "we can do
    --video-from <first clean frame>`: face frames (git-ignored), voice and word timings. Start on a word, drop lines that
    point back to the long video, end before the next sentence starts (Ahmed: trim the trailing second). Check the first
    frames: skip the source's transitions and glitch frames with `--video-from` (the first frame is held until then).
+   When the source opens on a styled shot of the speaker (the TV set in casino-wins-in-the-end), keep it instead
+   (Ahmed 2026-10-16: "leave the TV part and the zoom in"): `--tv-until <first clean second>` shows the whole
+   source frame across the width, then zooms into the 9:16 face through the source's own transition. A frozen
+   frame at the start reads as a glitch.
 5. **Scene.** Load `runtime/kanz-footage.js`; `K.footage({dir: "assets/face", n, windows, end})`.
    - **The first 3 s always show his face** (Ahmed, "always always"). No headline hook over it; captions run from 0.
    - **Alternate face and motion**: cut in the pauses before a word; face for the lines he delivers to camera, boards
-     for the mechanism. Windows can carry a jump zoom `[a, b, 1.16]`. End on his face; no takeaway tail.
+     for the mechanism. Windows can carry a jump zoom `[a, b, 1.16]`. No takeaway tail.
+   - **Don't cut back to his face at the end** (Ahmed 2026-10-16): the last board runs to the last frame.
    - **Keep the source's burned-in text** (lower-third labels such as "حجم الرهان": "leave it, it looks cool"). Keep the
      face un-zoomed while a label shows, or zoom about it (`faceY`).
    - All other Kanz Motion rules apply to the boards (approved objects, numbers, captions from the corrected script).
