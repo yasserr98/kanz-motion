@@ -105,7 +105,7 @@ note or short, gets an image pass before the scene is written. Do not settle for
    | Type | Use it for | How | Rules |
    | --- | --- | --- | --- |
    | **Full-screen photo** | a *place or setting* the line puts us in: a casino, a sportsbook, a stadium, a market floor | Codex mode `free` (generic places), or a licensed real photo when the line names a specific real place | fills the whole frame, darkened top and bottom so the headline and captions read; one per board; only text, tags and strikes go over it, never icons; holds 1.5 s or more; never presented as a specific real event |
-   | **Disposable print** | a *real person or real moment*: Messi, the 2022 final, a CEO, a news event | `K.snap35()` on an untouched licensed real photo | no date stamp; credit line under it; may sit on a full-screen photo or on the charcoal board; never generated, never repainted |
+   | **Disposable print** | a *real person or real moment*: Messi, the 2022 final, a CEO, a news event | `K.snap35()` on an untouched licensed real photo | no date stamp and no credit line on screen (Ahmed 2026-10-16: "just the image"; credits go in the post caption from `projects/<slug>/CREDITS.md`); purple tags and text sit on top of it, never behind; keep it clear of the headline and the captions; for a big moment pick the photo that shows the moment (the trophy ceremony, not players on the pitch); never generated, never repainted |
    | **Kanz icon** | a *concept, mechanism, object or number*: money, commission, a transaction, the house as a metaphor, charts | Codex mode `kanz` (the MD rules: approved icon style, transparent cutout) or `library/objects/` | lives on the charcoal board, where it can move (piles, swaps, flights); charts and numbers always on charcoal |
 
    **Headline lift (Ahmed 2026-10-16: "make sure the text of the headline doesn't blend in the image"):** `K.screen`
@@ -122,7 +122,9 @@ note or short, gets an image pass before the scene is written. Do not settle for
 4. **Real people and real events use real photos.** Never generate a real person (Messi, a CEO). Source an openly
    licensed photo (Wikimedia Commons: CC0/CC BY/CC BY-SA, credit line recorded in a `SOURCES.md`) and show it as a
    disposable print (`K.snap35`, untouched). The OpenAI image tool refuses to edit public figures (Messi, 2026-10-16);
-   `K.photo()`'s CSS grade is the Kanz-look fallback. Credit every real photo on screen and keep CC BY-SA edits under CC BY-SA.
+   `K.photo()`'s CSS grade is the Kanz-look fallback. No credit line on screen: write each photo's credit to
+   `projects/<slug>/CREDITS.md` for the post caption (the CC BY licences still need attribution), and keep CC BY-SA
+   edits under CC BY-SA.
 5. Use several Codex jobs in parallel and dispatch agents for sourcing; record what was generated in the backlog.
    New objects still need Ahmed's approval before they move into `library/objects/`.
 

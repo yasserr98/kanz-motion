@@ -6,7 +6,9 @@
  *   and a light leak. No date stamp by default (Ahmed 2026-10-16: "super great too but without the date"); `date`
  *   still draws one if a video ever asks for it. It drops in with a shutter + flash. The photo pixels are
  *   never repainted (a CSS grade over the original), so the subject stays exactly as photographed.
- *   date: optional stamp text (off by default); credit: the licence line, shown under the print.
+ *   date: optional stamp text (off by default). credit: an on-screen licence line under the print, off by default
+ *   (Ahmed 2026-10-16: "don't add the image source, just the image"); credits go in the post caption (CREDITS.md).
+ *   Tags and board text always sit on top of a print (z-index 8 over the print's 5).
  * K.snapStack(parent, items, o): several prints dealt on top of each other, slightly rotated, one per `at`.
  */
 (function () {
@@ -25,6 +27,7 @@
   .ksnapcredit{position:absolute;font-size:20px;color:rgba(255,255,255,.6);text-align:center;direction:ltr;white-space:nowrap}
   #stage[data-screen=on] #world .t,#stage[data-screen=on] #world .kcount{text-shadow:0 2px 6px rgba(0,0,0,.7),0 0 26px rgba(0,0,0,.85),0 0 60px rgba(0,0,0,.55)}
   #stage[data-screen=on] #world .tag{box-shadow:0 6px 24px rgba(0,0,0,.6)}
+  #world .tag,#world .t{z-index:8}
   #snapflash{position:absolute;inset:0;background:#fff;z-index:16;pointer-events:none;visibility:hidden}`;
   document.head.appendChild(css);
   let grainUrl = null;
