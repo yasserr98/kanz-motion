@@ -1,5 +1,5 @@
 /* short-biggest-betting-event (short D, 2026-10-16): cut from the Kanz long video "الكازينو بيكسب في الآخر"
- * (04:26.82-04:59.37), Ahmed Shaaban's own voice and face, on the footage layer (runtime/kanz-footage.js).
+ * (04:26.82-04:57.73; v5 ends on the punch, Ahmed: "leave it as أكبر حدث مراهنات في تاريخ الكورة كله"), Ahmed Shaaban's own voice and face, on the footage layer (runtime/kanz-footage.js).
  * Ahmed: "this is amazing use it too". Same rules as short B: first 3 s his face, alternate face and motion, keep the
  * source's burned-in text, end on the last word. The motion windows cover the source's own TV inserts and glitch
  * transitions (t 12.0-19.2 and 25.95-29.4), so no face window shows them.
@@ -29,10 +29,10 @@ const f3 = T("ميسي", c2) - 0.05;           // 19.75 -> face: "ميسي لو�
 const c3 = T("اتنين") - 0.04;              // 21.7 -> 2.5 billion
 const f4 = T("بالمناسبة") - 0.04;          // 23.64 -> face: "بالمناسبة ده مكنش طول البطولة كان في ماتش"
 const c4 = T("واحد،") - 0.04;              // 25.76, before the source's stadium insert -> one match board
-const f5 = T("عشان") - 0.04;               // 30.9 -> face to the end: "عشان تعرف قد ايه التخطيط مهم"
-const END = 32.55;
-K.footage({ dir: "assets/face", n: 782, end: END, faceY: 1500,
-  windows: [[0, c1], [f2, c2, 1.08], [f3, c3, 1.14], [f4, c4], [f5, END + 1, 1.1]] });
+const END = 30.91;                         // the voice ends on "كله" (Ahmed 2026-10-16); no face at the end
+const HOLD = END + 0.7;                    // the punch holds a beat after the last word
+K.footage({ dir: "assets/face", n: 743, end: END, faceY: 1500,
+  windows: [[0, c1], [f2, c2, 1.08], [f3, c3, 1.14], [f4, c4]] });
 K.captionsFrom = 0;
 
 const B = {
@@ -78,11 +78,11 @@ K.text(B.final, "توقعات Macquarie / H2 للمراهنات على النه�
 
 // ---------- 4. one match, the final (25.76-30.9): the stadium full screen, the real moment as a print, the punch ----------
 K.cam(c4 - 0.3, "one", { dur: 0.04, sfx: false, scale: 1.0 });
-K.screen(PHOTO + "stadium-final.png", c4 - 0.3, f5, { sfx: false });
+K.screen(PHOTO + "stadium-final.png", c4 - 0.3, HOLD + 1, { sfx: false });
 K.text(B.one, "ماتش واحد", { x: 500, y: 150, size: 104, head: true, at: c4 + 0.05 });
 K.tag(B.one, "النهائي", { x: 500, y: 300, size: 58, lav: true, at: T("نهائي", c4) });
 print(B.one, MESSI_B, { x: 520, y: 570, w: 580, h: 370, rot: 4, at: T("ميسي", c4) - 0.05 });
-K.punch("أكبر حدث مراهنات<br>في تاريخ <span class='kw'>الكورة</span>", T("أكبر") - 0.05, f5 - 0.02, { size: 104, riser: true });
+K.punch("أكبر حدث مراهنات<br>في تاريخ <span class='kw'>الكورة</span> كله", T("أكبر") - 0.05, HOLD + 1, { size: 104, riser: true });
 
-K.duration = END;
+K.duration = HOLD;
 K.finish();

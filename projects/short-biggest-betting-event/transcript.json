@@ -5,11 +5,11 @@
  "model": "scribe_v2",
  "transcription_id": "5qy6C89wKcmo6P23qpsO",
  "language": "ar",
- "duration": 32.55,
+ "duration": 30.91,
  "cut_from": {
   "source": "shorts/casino-wins-in-the-end/source/video.mp4",
   "start": 266.82,
-  "end": 299.37,
+  "end": 297.73,
   "video_from": 266.82
  },
  "segments": [
@@ -532,49 +532,6 @@
      "start": 30.6,
      "end": 30.88,
      "p": 0.987
-    }
-   ]
-  },
-  {
-   "start": 30.94,
-   "end": 32.56,
-   "text": "عشان تعرف قد ايه التخطيط مهم.",
-   "words": [
-    {
-     "w": "عشان",
-     "start": 30.94,
-     "end": 31.1,
-     "p": 0.996
-    },
-    {
-     "w": "تعرف",
-     "start": 31.14,
-     "end": 31.36,
-     "p": 1.0
-    },
-    {
-     "w": "قد",
-     "start": 31.4,
-     "end": 31.5,
-     "p": 0.956
-    },
-    {
-     "w": "ايه",
-     "start": 31.52,
-     "end": 31.6,
-     "p": 0.754
-    },
-    {
-     "w": "التخطيط",
-     "start": 31.6,
-     "end": 32.18,
-     "p": 1.0
-    },
-    {
-     "w": "مهم.",
-     "start": 32.22,
-     "end": 32.56,
-     "p": 0.955
     }
    ]
   }

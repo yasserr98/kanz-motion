@@ -1,6 +1,6 @@
 # نهائي 2022 أكبر حدث مراهنات في تاريخ الكورة (short D)
 
-Source: Kanz YouTube video "الكازينو بيكسب في الآخر" (gP5xAqyBrh4, 2026-07-15), 04:26.82-04:59.37, Ahmed Shaaban's
+Source: Kanz YouTube video "الكازينو بيكسب في الآخر" (gP5xAqyBrh4, 2026-07-15), 04:26.82-04:57.73, Ahmed Shaaban's
 own voice. Transcript: ElevenLabs Scribe v2 (run by Codex, 2026-10-16). Ahmed 2026-10-16: "this is amazing use it too".
 Ends on "عشان تعرف قد ايه التخطيط مهم" (before "من بعد شراكة ميسي").
 
@@ -22,5 +22,4 @@ Figures (checked 2026-10-16; on screen as source lines):
 ميسي لوحده جذب ما يقارب اتنين فاصل خمسة *مليار* دولار.
 بالمناسبة ده مكنش طول البطولة، كان في ماتش *واحد*، نهائي.
 ميسي نهائي 2022 هو *أكبر* حدث مراهنات في تاريخ الكورة كله.
-عشان تعرف قد ايه *التخطيط* مهم.
 <!-- captions:end -->

@@ -74,8 +74,7 @@ const fee = (t) => {
   K.sfx(t, "whoosh", 0.25); K.sfx(t + 0.65, "coin", 0.35);
 };
 fee(T("بياخدها"));
-// the phone sits under the house, clear of the cash pile and the captions (Ahmed 2026-10-16: "bad overlap")
-K.img(B.money, ICON + "betting-app-phone.png", { x: 775, y: 745, w: 185, at: T("عملية"), enter: "fly", fromY: 120 });
+// no phone icon here (Ahmed 2026-10-16: "the phone is irrelevant"); the second fee shows the transaction
 fee(T("ترانزاكشن") - 0.1);
 // no snap zoom on "ترانزاكشن" (Ahmed 2026-10-16: a glitch at 14 s)
 K.text(B.money, "كل عملية = عمولة", { x: 500, y: 130, size: 64, head: true, color: L, at: T("ترانزاكشن") });
