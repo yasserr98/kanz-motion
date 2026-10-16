@@ -28,6 +28,15 @@ voice note ─► transcribe (word timings) ─► cut retakes, tighten pauses, 
   flickering tongues, rising embers, pulsing glow) with a CC0 crackle (BigSoundBank s0987); first used in
   `projects/the-cost-of-a-mistake` for the volcano.
 
+- **Shorts from a long video** (2026-10-16): `engine/footage.py` cuts the speaker's face, voice and word timings
+  from a long Kanz video into a project; `runtime/kanz-footage.js` (`K.footage`) alternates that face with the motion
+  boards, captions running across both. Route and rules: `AGENTS.md`, "Shorts cut from a long Kanz video".
+- **Photos and Codex images** (2026-10-16): `K.screen()` (`runtime/kanz-snap.js`) fills the frame with a photo of a
+  place and darkens the headline and caption bands as much as that photo needs; `K.snap35()` shows a real, licensed
+  photo of a person or moment as a disposable-camera print (no date). `engine/codex_assets.py` generates a video's
+  photos and icons with Codex from `shots.json`; `engine/contrast.py` checks every headline on the rendered frame (4.5:1).
+- **Render on a server** (2026-10-16): `bash engine/vps_render.sh <slug> <name>` with `KANZ_RENDER_HOST` in `.env`.
+
 ## Setup (once, on a new computer)
 
 Needs Python 3.11+, Node.js 18+, `ffmpeg` on PATH and (for voice notes) [`uv`](https://docs.astral.sh/uv/).

@@ -77,6 +77,8 @@ repo or a Kanz worktree (worktrees do not contain this folder; use the absolute 
    objects behind captions, objects past the side margin; fix or justify each flag), then `make.py review <slug> <times>` → look at `out/review.jpg`, fix, repeat.
 8. **Render and check.** `make.py render <slug> v1` in the background, then `make.py check <slug> v1`
    (frames from the MP4 + loudness ≈ −16 LUFS). Open the MP4 for Ahmed (`ii <path>`).
+   To save local RAM, render on a server instead: `bash engine/vps_render.sh <slug> v1` (set `KANZ_RENDER_HOST`, the
+   SSH alias, in `.env`; it syncs only changed files, renders there and copies the MP4 back).
    Cover (style A): write `projects/<slug>/cover.json`, run `python engine/cover.py projects/<slug>`, and check
    the crop lines in `out/cover-review.jpg`.
 9. **Record.** Only in Ahmed's own copy (`D:\Claude Projects\Kanz\kanz-motion`); in any other clone (editors) skip
@@ -86,6 +88,67 @@ repo or a Kanz worktree (worktrees do not contain this folder; use the absolute 
    Upload: from the Kanz repo, `python scripts/kanz_drive_upload.py <mp4> --parent <private-drive-id>
    --folder "<exact Airtable Name>" --name 01.mp4` (Kanz account, size+MD5 readback), then set only the
    record's Drive link to the folder URL and save `projects/<slug>/delivery.json` (see pilot-01).
+
+## Images and icons: always ask Codex (Ahmed 2026-10-16)
+
+Ahmed: "if the video needs images or icons, it doesn't hesitate to grab the context of the whole thing and talk to
+Codex to generate this stuff ... we need to use Codex, we're not using it that much." Every video, script or voice
+note or short, gets an image pass before the scene is written. Do not settle for whatever `library/objects/` already has.
+
+1. **Shot list from the whole script.** Read the full script. For every line that names a thing, place, person or
+   setting (a casino, a stadium, Messi, a betting app), decide what the viewer should see. Write
+   `projects/<slug>/shots.json` (format in `engine/codex_assets.py`): the video's context in two or three sentences, and
+   per shot the line it illustrates, a concrete subject, the one lavender detail and a library reference.
+2. **Pick the visual type per shot (Ahmed 2026-10-16: "the MD files were meant for icons rather than photos; free
+   photos are great; the Kanz disposable is super great too but without the date").** Three types, each with one job:
+
+   | Type | Use it for | How | Rules |
+   | --- | --- | --- | --- |
+   | **Full-screen photo** | a *place or setting* the line puts us in: a casino, a sportsbook, a stadium, a market floor | Codex mode `free` (generic places), or a licensed real photo when the line names a specific real place | fills the whole frame, darkened top and bottom so the headline and captions read; one per board; only text, tags and strikes go over it, never icons; holds 1.5 s or more; never presented as a specific real event |
+   | **Disposable print** | a *real person or real moment*: Messi, the 2022 final, a CEO, a news event | `K.snap35()` on an untouched licensed real photo | no date stamp; credit line under it; may sit on a full-screen photo or on the charcoal board; never generated, never repainted |
+   | **Kanz icon** | a *concept, mechanism, object or number*: money, commission, a transaction, the house as a metaphor, charts | Codex mode `kanz` (the MD rules: approved icon style, transparent cutout) or `library/objects/` | lives on the charcoal board, where it can move (piles, swaps, flights); charts and numbers always on charcoal |
+
+   **Headline lift (Ahmed 2026-10-16: "make sure the text of the headline doesn't blend in the image"):** `K.screen`
+   measures each photo where the headline and captions sit and darkens those bands as much as that photo needs, and
+   board text gets a soft dark halo while a photo fills the screen. Verify on the rendered frame with
+   `python engine/contrast.py projects/<slug> <times of every photo moment>`: every line must reach 4.5:1 against the
+   brightest background pixels behind it; raise `dark:` or move the text if one fails.
+   Rhythm in a short: face -> place photo -> icon mechanism -> face. Open a board on a place photo when the line sets the
+   scene, then cut to charcoal for the mechanism. A real person appears as a print, never as an icon or a generated photo.
+3. **Generate with Codex, without asking first.** `python engine/codex_assets.py projects/<slug>/shots.json --jobs 4`.
+   Set each shot's `modes` to the type above (`free` for places, `kanz` for icons). Outputs and `PROVENANCE.md` land in
+   `projects/<slug>/assets/codex/`. Compare icons with the references and regenerate mismatches; check photos for text,
+   logos and identifiable faces.
+4. **Real people and real events use real photos.** Never generate a real person (Messi, a CEO). Source an openly
+   licensed photo (Wikimedia Commons: CC0/CC BY/CC BY-SA, credit line recorded in a `SOURCES.md`) and show it as a
+   disposable print (`K.snap35`, untouched). The OpenAI image tool refuses to edit public figures (Messi, 2026-10-16);
+   `K.photo()`'s CSS grade is the Kanz-look fallback. Credit every real photo on screen and keep CC BY-SA edits under CC BY-SA.
+5. Use several Codex jobs in parallel and dispatch agents for sourcing; record what was generated in the backlog.
+   New objects still need Ahmed's approval before they move into `library/objects/`.
+
+## Shorts cut from a long Kanz video (Ahmed 2026-10-16)
+
+Route for "make shorts from this YouTube video". Work locally (Ahmed: "we can do it locally here").
+
+1. **Source.** `yt-dlp --js-runtimes node -f "bv*[height<=1080]+ba" --merge-output-format mp4` into
+   `shorts/<video-slug>/source/` (git-ignored: source media never goes to this public repo).
+2. **Transcript.** Codex runs it (Ahmed: "use Codex for the transcription"): extract audio, then
+   `engine/transcribe.py` (Scribe v2, word timings) -> `shorts/<video-slug>/transcript.raw.json`.
+3. **Moments.** Score 30-60 s candidates on hook / standalone / payoff / motion, add ffmpeg scene-cut density, cut
+   9:16 previews and a picker page (`shorts/casino-wins-in-the-end/work/picker.py` is the worked example). Leave out
+   passages that attack people by religion or repeat unproven allegations; say why. Ahmed picks.
+4. **Project.** `python engine/footage.py projects/short-<slug> <source.mp4> <transcript.raw.json> <start> <end>
+   --video-from <first clean frame>`: face frames (git-ignored), voice and word timings. Start on a word, drop lines that
+   point back to the long video, end before the next sentence starts (Ahmed: trim the trailing second). Check the first
+   frames: skip the source's transitions and glitch frames with `--video-from` (the first frame is held until then).
+5. **Scene.** Load `runtime/kanz-footage.js`; `K.footage({dir: "assets/face", n, windows, end})`.
+   - **The first 3 s always show his face** (Ahmed, "always always"). No headline hook over it; captions run from 0.
+   - **Alternate face and motion**: cut in the pauses before a word; face for the lines he delivers to camera, boards
+     for the mechanism. Windows can carry a jump zoom `[a, b, 1.16]`. End on his face; no takeaway tail.
+   - **Keep the source's burned-in text** (lower-third labels such as "حجم الرهان": "leave it, it looks cool"). Keep the
+     face un-zoomed while a label shows, or zoom about it (`faceY`).
+   - All other Kanz Motion rules apply to the boards (approved objects, numbers, captions from the corrected script).
+6. Lint (dead-stretch flags inside face windows are expected), review, render, check, as for any video.
 
 Ahmed's fix requests come as timestamps ("47s there is a sigh"). Locate the exact moment in the
 audio/frames before changing anything, and say where it really was if it differs.

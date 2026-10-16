@@ -28,7 +28,7 @@ from contact import sheet  # noqa: E402
 SAFE = {"top": 270, "bottom": 1440, "left": 120, "right": 960, "upperLeft": 65, "upperRight": 1015, "upperBottom": 1000}
 TEXT = "#world .t, #world .tag, #world .card, #world .kcount, #world .ksrc, #headline .w, #overlay .t"
 COVER = "#world .t, #world .tag, #headline .w"  # labels that must stay readable (2026-10-13)
-OBJS = "#world img.obj,#world .kdoc, #world .kphoto, #world img.kmap, #world svg.mk path, #world svg.mk polyline, #world svg.mk rect, #world .kpin, #world .kmark, #world .kframe, #world .abs"
+OBJS = "#world img.obj,#world .kdoc, #world .kphoto, #world .ksnap, #world img.kmap, #world svg.mk path, #world svg.mk polyline, #world svg.mk rect, #world .kpin, #world .kmark, #world .kframe, #world .abs"
 
 PROBE = """(t) => {
   K.seek(t);
