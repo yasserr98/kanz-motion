@@ -19,7 +19,8 @@ K.pace();
 // ---------- face / motion rhythm (cuts sit in the pauses before a word) ----------
 const c1 = T("دي") - 0.04;                 // 3.0  face (hook) -> house board
 const f2 = T("الشركة") - 0.05;             // 5.2  -> face: "الشركة دي اللي بتستقبل حجم الرهان" (source label appears)
-const c2 = T("والعمولة") - 0.04;           // 9.4  -> money board
+const c2a = T("حجم", f2 + 0.6) - 0.04;     // 7.1  -> money board, word 2: "حجم الرهان ده كل الفلوس اللي الناس حطتها"
+const c2 = T("والعمولة") - 0.04;           // 9.4  word 3 on the same board
 const f3 = T("فعموما") - 0.04;             // 15.0 -> face: "سواء كسبت أو خسرت البيت كده كده كسبان"
 const c3 = T("كل", f3) - 0.04;             // 17.9 -> bettors board
 const f4 = T("المهم") - 0.04;              // 24.0 -> face: "المهم إن المحل يكون فيه رجل الزبون"
@@ -27,7 +28,7 @@ const c4 = T("فبالتالي") - 0.04;           // 27.1 -> full-shop board
 const f5 = T("وإن", c4) - 0.04;            // 31.0 -> face to the end: "وإن الزبون تيجي رجليه"
 const END = 32.34;                         // the voice file: ends before "13 يونيو"
 K.footage({ dir: "assets/face", n: 777, end: END, faceY: 1500, // zoom about the source label so it stays whole
-  windows: [[0, c1], [f2, c2], [f3, c3], [f4, c4, 1.1], [f5, END + 1, 1.05]] }); // no jump zoom at 16 s (Ahmed 2026-10-16)
+  windows: [[0, c1], [f2, c2a], [f3, c3], [f4, c4, 1.1], [f5, END + 1, 1.05]] }); // no jump zoom at 16 s (Ahmed 2026-10-16)
 K.captionsFrom = 0;
 
 const B = {
@@ -41,16 +42,25 @@ K.cam(0, "house", { scale: 1.12 });
 K.glow(B.house, 500, 470, 820, { at: c1, out: tCo });
 const house = K.img(B.house, OBJ + "kanz-house-v01.png", { x: 500, y: 470, w: 520, float: true, shadow: false });
 K.settle(house, c1, { fromScale: 1.45, fromY: 70, dur: 0.9 });
+// the three words he promises in the hook, each with its own titled beat (Ahmed 2026-10-16: "he only explains one")
+const EY = "rgba(255,255,255,.78)";
+const word = (board, n, at, out) => K.text(board, n, { x: 500, y: 50, size: 44, color: EY, at, out });
+word(B.house, "الكلمة الأولى", c1);
 K.text(B.house, "البيت", { x: 500, y: 130, size: 92, head: true, color: L, at: c1, out: tCo - 0.05 });
 tl.to(house, { autoAlpha: 0, duration: 0.1 }, tCo - 0.05);
 K.screen(PHOTO + "casino-exterior.png", tCo - 0.05, f2);
-K.text(B.house, "شركة المراهنات", { x: 500, y: 130, size: 88, head: true, at: tCo });
+K.text(B.house, "<span style='color:#d5adef'>البيت</span> = شركة المراهنات", { x: 500, y: 130, size: 74, head: true, at: tCo });
 
-// ---------- 2. حجم الرهان and العمولة, on every transaction (9.4-15.0): mechanism, icons on charcoal ----------
-K.cam(c2 - 0.3, "money", { dur: 0.04, sfx: false, scale: 1.08 });
+// ---------- 2. حجم الرهان (7.1-9.4), then العمولة on every transaction (9.4-15.0): icons on charcoal ----------
+K.cam(c2a - 0.3, "money", { dur: 0.04, sfx: false, scale: 1.08 });
 K.frame(T("بياخدها") - 0.2, "money", { scale: 1.12 });
-K.text(B.money, "حجم الرهان", { x: 300, y: 260, size: 60, head: true, at: c2 });
-K.pile(B.money, OBJ + "kanz-cash-v01.png", { x: 300, y: 620, w: 190, n: 6, at: c2, stagger: 0.06 });
+word(B.money, "الكلمة التانية", c2a, c2 - 0.05);
+K.text(B.money, "حجم الرهان", { x: 500, y: 130, size: 88, head: true, color: L, at: c2a, out: c2 - 0.05 });
+const cash = K.pile(B.money, OBJ + "kanz-cash-v01.png", { x: 500, y: 640, w: 215, n: 6, at: c2a, stagger: 0.22 });
+tl.to(cash, { x: "-=200", duration: 0.5, ease: "power2.inOut" }, c2 - 0.1); // makes room for the house
+K.text(B.money, "حجم الرهان", { x: 300, y: 260, size: 54, head: true, at: c2 + 0.3 });
+word(B.money, "الكلمة التالتة", c2, T("ترانزاكشن") - 0.05);
+K.text(B.money, "العمولة", { x: 500, y: 130, size: 88, head: true, color: L, at: c2, out: T("ترانزاكشن") - 0.05 });
 K.glow(B.money, 760, 480, 560, { at: c2 });
 K.img(B.money, ICON + "casino-exterior.png", { x: 760, y: 470, w: 290, shadow: false, at: c2, enter: "fly" });
 K.text(B.money, "البيت", { x: 760, y: 255, size: 54, head: true, at: c2 + 0.2 });
@@ -64,7 +74,6 @@ const fee = (t) => {
   K.sfx(t, "whoosh", 0.25); K.sfx(t + 0.65, "coin", 0.35);
 };
 fee(T("بياخدها"));
-K.tag(B.money, "العمولة", { x: 540, y: 380, size: 52, lav: true, at: T("بياخدها") + 0.3 });
 // the phone sits under the house, clear of the cash pile and the captions (Ahmed 2026-10-16: "bad overlap")
 K.img(B.money, ICON + "betting-app-phone.png", { x: 775, y: 745, w: 185, at: T("عملية"), enter: "fly", fromY: 120 });
 fee(T("ترانزاكشن") - 0.1);
