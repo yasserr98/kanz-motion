@@ -171,6 +171,9 @@ audio/frames before changing anything, and say where it really was if it differs
   with the reason. Default speed 1.25x (Ahmed, 2026-10-05). Re-transcribe the edited voice and
   read it through to prove no words were lost or doubled.
 - **Captions** come from the corrected `script.md`, never raw ASR. Flag uncertain words for Ahmed.
+- **Gambling content: never a hijabi woman** (Ahmed 2026-10-16: "we don't need to involve hijabis in gambling at all").
+  No hijab-wearing character (e.g. `kanz-npc-f01-*`), generated person or photo in any casino, betting or gambling
+  scene; use the men or the gamblers (`kanz-npc-m01/m02/g01/g02`). Check every Codex photo and print for it too.
 - **Numbers**: show only numbers the voice says. No "مثال افتراضي" tag on screen when the voice itself
   frames the figures as an example ("خلينا نقول", "لو"...) (Ahmed, 2026-10-11, all videos).
   Real market figures need a source on screen and in the project notes.
