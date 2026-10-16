@@ -31,7 +31,7 @@ const f4 = T("بالمناسبة") - 0.04;          // 23.64 -> face: "بالم�
 const c4 = T("واحد،") - 0.04;              // 25.76, before the source's stadium insert -> one match board
 const END = 30.91;                         // the voice ends on "كله" (Ahmed 2026-10-16); no face at the end
 const HOLD = END + 0.15;                   // no empty hold after "كله" (Ahmed 2026-10-16: trim the empty half second)
-K.footage({ dir: "assets/face", n: 743, end: END, faceY: 1500,
+K.footage({ dir: "assets/face", n: 743, end: END, faceY: 1500, xstyle: "cut", // Ahmed 2026-10-16: the clean cut
   windows: [[0, c1], [f2, c2, 1.08], [f3, c3, 1.14], [f4, c4]] });
 K.captionsFrom = 0;
 

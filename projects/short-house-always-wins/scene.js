@@ -27,7 +27,7 @@ const f4 = T("المهم") - 0.04;              // 24.0 -> face: "المهم إ�
 const c4 = T("فبالتالي") - 0.04;           // 27.1 -> full-shop board
 // no final face window (Ahmed 2026-10-16): the crowd photo carries "وإن الزبون تيجي رجليه" to the end
 const END = 33.85;                         // the voice file (from 01:13.25): ends before "13 يونيو"
-K.footage({ dir: "assets/face", n: 814, end: END, faceY: 1500, // zoom about the source label so it stays whole
+K.footage({ dir: "assets/face", n: 814, end: END, faceY: 1500, xstyle: "cut", // Ahmed 2026-10-16: the clean cut (option 1) // zoom about the source label so it stays whole
   windows: [[0, c1], [f2, c2a], [f3, c3], [f4, c4, 1.1]] }); // no jump zoom at 16 s; no cut back to the face at the end (Ahmed 2026-10-16)
 K.captionsFrom = 0;
 
@@ -58,7 +58,7 @@ K.cam(c2a - 0.3, "money", { dur: 0.04, sfx: false, scale: 1.08 });
 K.frame(T("بياخدها") - 0.2, "money", { scale: 1.12 });
 word(B.money, "الكلمة التانية", c2a - PRE, c2 - 0.05);
 K.text(B.money, "حجم الرهان", { x: 500, y: 130, size: 88, head: true, color: L, at: c2a - PRE, out: c2 - 0.05 });
-const cash = K.pile(B.money, OBJ + "kanz-cash-v01.png", { x: 500, y: 640, w: 215, n: 6, at: c2a - 0.45, stagger: 0.22 });
+const cash = K.pile(B.money, OBJ + "kanz-cash-v01.png", { x: 500, y: 640, w: 215, n: 6, at: c2a - 0.6, stagger: 0.15 });
 tl.to(cash, { x: "-=200", duration: 0.5, ease: "power2.inOut" }, c2 - 0.1); // makes room for the house
 K.text(B.money, "حجم الرهان", { x: 300, y: 260, size: 54, head: true, at: c2 + 0.3 });
 word(B.money, "الكلمة التالتة", c2, T("ترانزاكشن") - 0.05);
