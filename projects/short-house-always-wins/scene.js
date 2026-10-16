@@ -1,5 +1,5 @@
 /* short-house-always-wins (short B, 2026-10-16): cut from the Kanz long video "الكازينو بيكسب في الآخر"
- * (01:14.76-01:47.10), Ahmed Shaaban's own voice and face. First short on the footage layer (runtime/kanz-footage.js).
+ * (01:13.25-01:47.10; v7 opens on the source's TV-set shot, Ahmed: "leave the TV part and the zoom in"), Ahmed Shaaban's own voice and face. First short on the footage layer (runtime/kanz-footage.js).
  * Ahmed's brief: alternate between his face and the motion; the first 3 s always show his face; keep the source's
  * burned-in labels ("حجم الرهان" looks cool); trim the last second (ends before "13 يونيو 2018").
  * Face windows carry the lines he delivers to camera; the motion boards explain the three words: the house, the handle
@@ -25,10 +25,10 @@ const f3 = T("فعموما") - 0.04;             // 15.0 -> face: "سواء كس
 const c3 = T("كل", f3) - 0.04;             // 17.9 -> bettors board
 const f4 = T("المهم") - 0.04;              // 24.0 -> face: "المهم إن المحل يكون فيه رجل الزبون"
 const c4 = T("فبالتالي") - 0.04;           // 27.1 -> full-shop board
-const f5 = T("وإن", c4) - 0.04;            // 31.0 -> face to the end: "وإن الزبون تيجي رجليه"
-const END = 32.34;                         // the voice file: ends before "13 يونيو"
-K.footage({ dir: "assets/face", n: 777, end: END, faceY: 1500, // zoom about the source label so it stays whole
-  windows: [[0, c1], [f2, c2a], [f3, c3], [f4, c4, 1.1], [f5, END + 1, 1.05]] }); // no jump zoom at 16 s (Ahmed 2026-10-16)
+// no final face window (Ahmed 2026-10-16): the crowd photo carries "وإن الزبون تيجي رجليه" to the end
+const END = 33.85;                         // the voice file (from 01:13.25): ends before "13 يونيو"
+K.footage({ dir: "assets/face", n: 814, end: END, faceY: 1500, // zoom about the source label so it stays whole
+  windows: [[0, c1], [f2, c2a], [f3, c3], [f4, c4, 1.1]] }); // no jump zoom at 16 s; no cut back to the face at the end (Ahmed 2026-10-16)
 K.captionsFrom = 0;
 
 const B = {
@@ -103,7 +103,7 @@ const w1 = K.walk(B.full, [OBJ + "kanz-npc-m01-walk-a-v01.png", OBJ + "kanz-npc-
 // a gambler already at the door; never a hijabi woman in gambling content (Ahmed 2026-10-16)
 const w2 = K.img(B.full, OBJ + "kanz-npc-g01-neutral-v01.png", { x: 760, y: 680, w: 480, shadow: false, at: c4 + 0.4, enter: "fly" });
 tl.to([shop, w1, w2], { autoAlpha: 0, duration: 0.1 }, tFull - 0.1);
-K.screen(PHOTO + "casino-floor-crowd.png", tFull - 0.1, f5);
+K.screen(PHOTO + "casino-floor-crowd-men.png", tFull - 0.1, END + 1); // runs to the last frame; women removed (Ahmed 2026-10-16)
 K.tag(B.full, "المحل مليان", { x: 500, y: 250, size: 60, lav: true, at: tFull });
 
 K.duration = END;

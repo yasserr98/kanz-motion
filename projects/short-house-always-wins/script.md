@@ -1,13 +1,13 @@
 # البيت كسبان كده كده (short B)
 
-Source: Kanz YouTube video "الكازينو بيكسب في الآخر" (gP5xAqyBrh4, 2026-07-15), 01:14.76-01:47.10, Ahmed Shaaban's
+Source: Kanz YouTube video "الكازينو بيكسب في الآخر" (gP5xAqyBrh4, 2026-07-15), 01:13.25-01:47.10, Ahmed Shaaban's
 own voice. Transcript: ElevenLabs Scribe v2 (run by Codex, 2026-10-16), read through against the audio timings.
 Picked by Ahmed 2026-10-16 from `shorts/casino-wins-in-the-end/work/picker.html`. Opening "قبل ما ندخل في التفاصيل"
-dropped: it points back to the long video. Ends before "13 يونيو 2018" (Ahmed: trim the last second).
+kept since v7 with the source's TV-set shot (Ahmed 2026-10-16: "leave the TV part and the zoom in"). Ends before "13 يونيو 2018" (Ahmed: trim the last second).
 `*word*` marks the caption keyword.
 
 <!-- captions:start -->
-ثلاث كلمات بس محتاج تعرفها.
+قبل ما ندخل في التفاصيل في ثلاث كلمات بس محتاج تعرفها.
 *البيت* هاوس دي إشارة لشركة المراهنات نفسها.
 الشركة دي اللي بتستقبل *حجم الرهان*.
 حجم الرهان ده كل *الفلوس* اللي الناس حطتها يعني.

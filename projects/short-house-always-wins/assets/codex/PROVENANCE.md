@@ -12,3 +12,8 @@
 | 2026-10-16 | free | `casino-floor-crowd.png` | ok | `01a14265-62f5-77e3-9dad-e82200490ba0` | 88 | `free/casino-floor-crowd.prompt.txt` |
 | 2026-10-16 | kanz | `betting-app-phone.png` | ok | `01a14264-f73b-7e32-b4cb-f4bc96fc5810` | 193 | `kanz/betting-app-phone.prompt.txt` |
 | 2026-10-16 | kanz | `casino-floor-crowd.png` | ok | `01a14265-5b44-7d53-a801-001090c2837e` | 195 | `kanz/casino-floor-crowd.prompt.txt` |
+
+## 2026-10-16 casino-floor-crowd-men (Ahmed: "remove the woman in the image of the casino")
+Codex edit of `free/casino-floor-crowd.png` (prompt `free/casino-floor-crowd-men.prompt.txt`), two runs in parallel:
+`-a` (session 01a1430e-de8e-75e3-94f7-9e4c3b16ac86) and `-b` (session 01a1430e-de8e-7073-9976-033af64a2806).
+Picked `-b` -> `free/casino-floor-crowd-men.png`: same floor and light, every woman replaced by men; checked for women and hijab.
