@@ -82,6 +82,7 @@ def prompt_for(shot, mode, context):
         return (f"Create one image for a vertical short video (9:16, 1080x1920). The video is about: {context}\n"
                 f"This image appears while the narrator says: {shot['line']}\nShow: {shot['subject']}\n"
                 + shot.get("free_style", "") + "\nNo real, identifiable people. No text, letters, numbers, logos or watermark.\n"
+                "No woman wearing a hijab or headscarf (never in gambling scenes, Ahmed 2026-10-16).\n"
                 "Return only the image.")
     if mode == "edit":
         return EDIT.format(accent=shot["accent"], ratio=shot.get("ratio", "4:5 portrait"))

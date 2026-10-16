@@ -21,14 +21,13 @@ const c1 = T("دي") - 0.04;                 // 3.0  face (hook) -> house board
 const f2 = T("الشركة") - 0.05;             // 5.2  -> face: "الشركة دي اللي بتستقبل حجم الرهان" (source label appears)
 const c2 = T("والعمولة") - 0.04;           // 9.4  -> money board
 const f3 = T("فعموما") - 0.04;             // 15.0 -> face: "سواء كسبت أو خسرت البيت كده كده كسبان"
-const z3 = T("كده") - 0.02;                // jump zoom on "كده كده كسبان"
 const c3 = T("كل", f3) - 0.04;             // 17.9 -> bettors board
 const f4 = T("المهم") - 0.04;              // 24.0 -> face: "المهم إن المحل يكون فيه رجل الزبون"
 const c4 = T("فبالتالي") - 0.04;           // 27.1 -> full-shop board
 const f5 = T("وإن", c4) - 0.04;            // 31.0 -> face to the end: "وإن الزبون تيجي رجليه"
 const END = 32.34;                         // the voice file: ends before "13 يونيو"
 K.footage({ dir: "assets/face", n: 777, end: END, faceY: 1500, // zoom about the source label so it stays whole
-  windows: [[0, c1], [f2, c2], [f3, z3], [z3, c3, 1.16], [f4, c4, 1.1], [f5, END + 1, 1.05]] });
+  windows: [[0, c1], [f2, c2], [f3, c3], [f4, c4, 1.1], [f5, END + 1, 1.05]] }); // no jump zoom at 16 s (Ahmed 2026-10-16)
 K.captionsFrom = 0;
 
 const B = {
@@ -69,7 +68,7 @@ K.tag(B.money, "العمولة", { x: 540, y: 380, size: 52, lav: true, at: T("�
 // the phone sits under the house, clear of the cash pile and the captions (Ahmed 2026-10-16: "bad overlap")
 K.img(B.money, ICON + "betting-app-phone.png", { x: 775, y: 745, w: 185, at: T("عملية"), enter: "fly", fromY: 120 });
 fee(T("ترانزاكشن") - 0.1);
-K.snap(T("ترانزاكشن"), 1.15, 0.6);
+// no snap zoom on "ترانزاكشن" (Ahmed 2026-10-16: a glitch at 14 s)
 K.text(B.money, "كل عملية = عمولة", { x: 500, y: 130, size: 64, head: true, color: L, at: T("ترانزاكشن") });
 
 // ---------- 3. people who bet, on whom does not matter (17.9-24.0): the setting, full screen ----------
@@ -77,7 +76,7 @@ K.cam(c3 - 0.3, "bettors", { dur: 0.04, sfx: false, scale: 1.0 });
 const tPeople = T("ناس", c3);
 K.screen(PHOTO + "slot-machines.png", c3 - 0.3, tPeople - 0.05, { sfx: false });
 K.screen(PHOTO + "betting-app-phone.png", tPeople - 0.05, f4);
-K.text(B.bettors, "كل اللي محتاجه", { x: 500, y: 150, size: 84, head: true, at: c3 + 0.1, out: tPeople - 0.1 });
+// no headline on "كل اللي محتاجه" (Ahmed 2026-10-16): the photo carries it
 K.text(B.bettors, "ناس بتراهن", { x: 500, y: 150, size: 84, head: true, at: tPeople, out: T("بتراهن", T("وخلاص")) - 0.1 });
 const tWho = T("بتراهن", T("وخلاص"));
 K.text(B.bettors, "على مين؟", { x: 500, y: 150, size: 100, head: true, color: L, at: tWho });
@@ -92,8 +91,8 @@ const shop = K.img(B.full, ICON + "casino-exterior.png", { x: 500, y: 450, w: 54
 K.text(B.full, "هدف البيت", { x: 500, y: 120, size: 84, head: true, at: T("هدف") });
 const w1 = K.walk(B.full, [OBJ + "kanz-npc-m01-walk-a-v01.png", OBJ + "kanz-npc-m01-walk-b-v01.png"],
   { from: [40, 660], to: [300, 660], at: c4 + 0.1, dur: 2.2, w: 500, appear: c4 });
-const w2 = K.walk(B.full, [OBJ + "kanz-npc-f01-walk-a-v01.png", OBJ + "kanz-npc-f01-walk-b-v01.png"],
-  { from: [980, 680], to: [700, 680], at: c4 + 0.5, dur: 2.2, w: 480, appear: c4 + 0.4 });
+// a gambler already at the door; never a hijabi woman in gambling content (Ahmed 2026-10-16)
+const w2 = K.img(B.full, OBJ + "kanz-npc-g01-neutral-v01.png", { x: 760, y: 680, w: 480, shadow: false, at: c4 + 0.4, enter: "fly" });
 tl.to([shop, w1, w2], { autoAlpha: 0, duration: 0.1 }, tFull - 0.1);
 K.screen(PHOTO + "casino-floor-crowd.png", tFull - 0.1, f5);
 K.tag(B.full, "المحل مليان", { x: 500, y: 250, size: 60, lav: true, at: tFull });
