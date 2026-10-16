@@ -1,6 +1,6 @@
 {
   "delivered": "2026-10-16",
-  "version": "short-house-always-wins-v8 (TV-set opening, three titled words, men-only crowd photo, ends on the board, no phone icon); 33.8 s, -16 LUFS",
+  "version": "short-house-always-wins-v9 (v8 + soft 0.2 s dissolves at every face/motion change, boards built before each cut); 33.8 s, -16 LUFS",
   "requested_by": "Ahmed: upload both and link their records to their YouTube long video (the first one)",
   "drive": {
     "account": "yasser@kanzms.com",
@@ -9,21 +9,46 @@
     "folder_id": "1fX3gj3-lKmGn7bbMIJmv8s1fmAAfYtk3",
     "folder_name": "The House Wins Either Way",
     "folder_url": "https://drive.google.com/drive/folders/1fX3gj3-lKmGn7bbMIJmv8s1fmAAfYtk3",
-    "files": [{"name": "01.mp4", "id": "1f5NzIyGNoRRBu3ytumsvK2YWxz4Jk-zk", "bytes": 39341611,
-               "md5": "cebb0e35ee604b230e2481138bf29a16", "readback_size_md5_match": true}]
+    "files": [
+      {
+        "name": "01.mp4",
+        "id": "1f5NzIyGNoRRBu3ytumsvK2YWxz4Jk-zk",
+        "bytes": 39291446,
+        "md5": "24a4f805a47cddddac23c52b34574843",
+        "readback_size_md5_match": true
+      }
+    ]
   },
   "airtable": {
-    "base": "appjVgbUZdgzOs9DX", "table": "tbl9irDbqdU1zwBGO", "record": "recNnhDPTEtqnGE3K",
+    "base": "appjVgbUZdgzOs9DX",
+    "table": "tbl9irDbqdU1zwBGO",
+    "record": "recNnhDPTEtqnGE3K",
     "name": "The House Wins Either Way",
     "method": "Airtable REST API with the Kanz repo's local PAT (.env.airtable.headers); the claude.ai Airtable connector has no access to this base",
     "created": {
-      "Status": "In Review", "Content Bucket": "talking head reels", "Post Type": ["Video"],
+      "Status": "In Review",
+      "Content Bucket": "talking head reels",
+      "Post Type": [
+        "Video"
+      ],
       "Drive link": "https://drive.google.com/drive/folders/1fX3gj3-lKmGn7bbMIJmv8s1fmAAfYtk3",
       "Inspiration": "https://www.youtube.com/watch?v=gP5xAqyBrh4&t=73s",
-      "YouTube Episodes": ["recddzIZqZPzlSFin (The Casino Wins in the End, gP5xAqyBrh4, posted 2026-07-15)"],
+      "YouTube Episodes": [
+        "recddzIZqZPzlSFin (The Casino Wins in the End, gP5xAqyBrh4, posted 2026-07-15)"
+      ],
       "Brief": "spoken script from script.md captions first, then on-screen text and production notes"
     },
     "verified": "one readback: name, status, bucket, type, episode link, Drive link, Inspiration and Brief first lines as sent"
   },
-  "not_done": "No preview image, caption, approval, scheduling or publication. Codex images remain candidates for the object library."
+  "not_done": "No preview image, caption, approval, scheduling or publication. Codex images remain candidates for the object library.",
+  "revisions": [
+    {
+      "date": "2026-10-16",
+      "replaced": "short-house-always-wins-v8 (TV-set opening, three titled words, men-only crowd photo, ends on the board, no phone icon); 33.8 s, -16 LUFS",
+      "by": "short-house-always-wins-v9 (v8 + soft 0.2 s dissolves at every face/motion change, boards built before each cut); 33.8 s, -16 LUFS",
+      "why": "Ahmed: fix the transitions, especially between the video and the motion graphics, and re-upload",
+      "drive": "01.mp4 replaced in place (same file id and link), size+MD5 readback match",
+      "airtable": "Brief version note updated; other fields unchanged"
+    }
+  ]
 }

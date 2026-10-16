@@ -155,6 +155,19 @@ Route for "make shorts from this YouTube video". Work locally (Ahmed: "we can do
    - **Keep the source's burned-in text** (lower-third labels such as "حجم الرهان": "leave it, it looks cool"). Keep the
      face un-zoomed while a label shows, or zoom about it (`faceY`).
    - All other Kanz Motion rules apply to the boards (approved objects, numbers, captions from the corrected script).
+   - **Transitions (Ahmed 2026-10-16: "fix the transitions, especially between the video and the motion").** Every
+     face <-> motion change is a 0.2 s dissolve with a 6% push (`K.footage` `xfade`, on by default), never a one-frame
+     switch to a half-built board. Build each board's opening objects ~0.3 s before its cut (`const PRE = 0.3`;
+     headline, hero, glow at `c - PRE`), so the dissolve reveals a finished board. No `K.snap35` flash on a cut
+     (`flash: false`), no white frames.
+   - **No snap zooms or face jump zooms by default** (Ahmed: "glitch at 14 s", "weird zoom at 16 s"). The camera's own
+     drift and pull-outs are enough.
+   - **Pay off what the hook promises.** If he says "three words", each gets its own titled beat on screen
+     ("الكلمة الأولى / التانية / التالتة"), even when the voice runs through them fast.
+   - **Every picture must belong to the line.** No decorative props (the phone icon under the house was "irrelevant");
+     not every line needs a headline (none on "كل اللي محتاجه": the photo carries it).
+   - **Before delivery** pull 12-frame strips around every cut from the final MP4 (`ffmpeg -vf "select='gt(scene,0.25)'"`
+     finds them) and check that no cut lands on charcoal, a flash or a half-built board.
 6. Lint (dead-stretch flags inside face windows are expected), review, render, check, as for any video.
 
 Ahmed's fix requests come as timestamps ("47s there is a sigh"). Locate the exact moment in the

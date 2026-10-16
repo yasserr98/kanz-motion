@@ -1,6 +1,6 @@
 {
   "delivered": "2026-10-16",
-  "version": "short-biggest-betting-event-v6 (ends on the punch with no empty hold, trophy-ceremony print, no on-screen photo credits); 31.0 s, -16.1 LUFS",
+  "version": "short-biggest-betting-event-v7 (v6 + soft 0.2 s dissolves, boards built before each cut, no flash on the cut); 31.0 s, -16.1 LUFS",
   "requested_by": "Ahmed: trim the empty half second after 'في تاريخ الكورة كله', upload both and link their records to their YouTube long video (the first one)",
   "drive": {
     "account": "yasser@kanzms.com",
@@ -9,21 +9,46 @@
     "folder_id": "11LWsYGvXQ8PfqwFTFMpl1BJMtBZ1OSzC",
     "folder_name": "Biggest Betting Event in Football History",
     "folder_url": "https://drive.google.com/drive/folders/11LWsYGvXQ8PfqwFTFMpl1BJMtBZ1OSzC",
-    "files": [{"name": "01.mp4", "id": "1Tf6D8Ej6jMRBKRmcIB5TdRCJ6MXRPnkR", "bytes": 34399262,
-               "md5": "054d06a224a1ad087fad53cc54c10bf3", "readback_size_md5_match": true}]
+    "files": [
+      {
+        "name": "01.mp4",
+        "id": "1Tf6D8Ej6jMRBKRmcIB5TdRCJ6MXRPnkR",
+        "bytes": 34432489,
+        "md5": "664fa46bb75654bd33988e4357ba0fb9",
+        "readback_size_md5_match": true
+      }
+    ]
   },
   "airtable": {
-    "base": "appjVgbUZdgzOs9DX", "table": "tbl9irDbqdU1zwBGO", "record": "recFidLImxVYkd5Ce",
+    "base": "appjVgbUZdgzOs9DX",
+    "table": "tbl9irDbqdU1zwBGO",
+    "record": "recFidLImxVYkd5Ce",
     "name": "Biggest Betting Event in Football History",
     "method": "Airtable REST API with the Kanz repo's local PAT (.env.airtable.headers); the claude.ai Airtable connector has no access to this base",
     "created": {
-      "Status": "In Review", "Content Bucket": "talking head reels", "Post Type": ["Video"],
+      "Status": "In Review",
+      "Content Bucket": "talking head reels",
+      "Post Type": [
+        "Video"
+      ],
       "Drive link": "https://drive.google.com/drive/folders/11LWsYGvXQ8PfqwFTFMpl1BJMtBZ1OSzC",
       "Inspiration": "https://www.youtube.com/watch?v=gP5xAqyBrh4&t=266s",
-      "YouTube Episodes": ["recddzIZqZPzlSFin (The Casino Wins in the End, gP5xAqyBrh4, posted 2026-07-15)"],
+      "YouTube Episodes": [
+        "recddzIZqZPzlSFin (The Casino Wins in the End, gP5xAqyBrh4, posted 2026-07-15)"
+      ],
       "Brief": "spoken script first, then on-screen text and sources, production notes, the photo credits for the post caption (CREDITS.md) and the open $2.5B wording question"
     },
     "verified": "one readback: name, status, bucket, type, episode link, Drive link, Inspiration and Brief first lines as sent; the episode's Related Content lists recNnhDPTEtqnGE3K (short B) and recFidLImxVYkd5Ce"
   },
-  "not_done": "No preview image or caption written (the CC BY photo credits must go in the post caption). Open: Ahmed's OK on 'ميسي لوحده جذب' $2.5B. Not approved, scheduled or posted."
+  "not_done": "No preview image or caption written (the CC BY photo credits must go in the post caption). Open: Ahmed's OK on 'ميسي لوحده جذب' $2.5B. Not approved, scheduled or posted.",
+  "revisions": [
+    {
+      "date": "2026-10-16",
+      "replaced": "short-biggest-betting-event-v6 (ends on the punch with no empty hold, trophy-ceremony print, no on-screen photo credits); 31.0 s, -16.1 LUFS",
+      "by": "short-biggest-betting-event-v7 (v6 + soft 0.2 s dissolves, boards built before each cut, no flash on the cut); 31.0 s, -16.1 LUFS",
+      "why": "Ahmed: fix the transitions, especially between the video and the motion graphics, and re-upload",
+      "drive": "01.mp4 replaced in place (same file id and link), size+MD5 readback match",
+      "airtable": "Brief version note updated; other fields unchanged"
+    }
+  ]
 }

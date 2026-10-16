@@ -39,14 +39,16 @@ const B = {
 // ---------- 1. البيت = شركة المراهنات (3.0-5.2): the concept as an icon, then the place itself ----------
 const tCo = T("لشركة");
 K.cam(0, "house", { scale: 1.12 });
-K.glow(B.house, 500, 470, 820, { at: c1, out: tCo });
+// boards build ~0.3 s before their cut, under the face, so the dissolve lands on a finished board (2026-10-16)
+const PRE = 0.3;
+K.glow(B.house, 500, 470, 820, { at: c1 - PRE, out: tCo });
 const house = K.img(B.house, OBJ + "kanz-house-v01.png", { x: 500, y: 470, w: 520, float: true, shadow: false });
-K.settle(house, c1, { fromScale: 1.45, fromY: 70, dur: 0.9 });
+K.settle(house, c1 - PRE, { fromScale: 1.45, fromY: 70, dur: 0.9 });
 // the three words he promises in the hook, each with its own titled beat (Ahmed 2026-10-16: "he only explains one")
 const EY = "rgba(255,255,255,.78)";
 const word = (board, n, at, out) => K.text(board, n, { x: 500, y: 50, size: 44, color: EY, at, out });
-word(B.house, "الكلمة الأولى", c1);
-K.text(B.house, "البيت", { x: 500, y: 130, size: 92, head: true, color: L, at: c1, out: tCo - 0.05 });
+word(B.house, "الكلمة الأولى", c1 - PRE);
+K.text(B.house, "البيت", { x: 500, y: 130, size: 92, head: true, color: L, at: c1 - PRE, out: tCo - 0.05 });
 tl.to(house, { autoAlpha: 0, duration: 0.1 }, tCo - 0.05);
 K.screen(PHOTO + "casino-exterior.png", tCo - 0.05, f2);
 K.text(B.house, "<span style='color:#d5adef'>البيت</span> = شركة المراهنات", { x: 500, y: 130, size: 74, head: true, at: tCo });
@@ -54,9 +56,9 @@ K.text(B.house, "<span style='color:#d5adef'>البيت</span> = شركة الم
 // ---------- 2. حجم الرهان (7.1-9.4), then العمولة on every transaction (9.4-15.0): icons on charcoal ----------
 K.cam(c2a - 0.3, "money", { dur: 0.04, sfx: false, scale: 1.08 });
 K.frame(T("بياخدها") - 0.2, "money", { scale: 1.12 });
-word(B.money, "الكلمة التانية", c2a, c2 - 0.05);
-K.text(B.money, "حجم الرهان", { x: 500, y: 130, size: 88, head: true, color: L, at: c2a, out: c2 - 0.05 });
-const cash = K.pile(B.money, OBJ + "kanz-cash-v01.png", { x: 500, y: 640, w: 215, n: 6, at: c2a, stagger: 0.22 });
+word(B.money, "الكلمة التانية", c2a - PRE, c2 - 0.05);
+K.text(B.money, "حجم الرهان", { x: 500, y: 130, size: 88, head: true, color: L, at: c2a - PRE, out: c2 - 0.05 });
+const cash = K.pile(B.money, OBJ + "kanz-cash-v01.png", { x: 500, y: 640, w: 215, n: 6, at: c2a - 0.45, stagger: 0.22 });
 tl.to(cash, { x: "-=200", duration: 0.5, ease: "power2.inOut" }, c2 - 0.1); // makes room for the house
 K.text(B.money, "حجم الرهان", { x: 300, y: 260, size: 54, head: true, at: c2 + 0.3 });
 word(B.money, "الكلمة التالتة", c2, T("ترانزاكشن") - 0.05);
@@ -94,11 +96,11 @@ K.tag(B.bettors, "مش مهم", { x: 500, y: 300, size: 54, at: T("مهم") + 0.
 // ---------- 4. the goal: a full shop (27.1-31.0): icons for the idea, then the full floor for "مليان" ----------
 const tFull = T("مليان");
 K.cam(c4 - 0.3, "full", { dur: 0.04, sfx: false, scale: 1.05 });
-K.glow(B.full, 500, 470, 760, { at: c4, out: tFull - 0.1 });
-const shop = K.img(B.full, ICON + "casino-exterior.png", { x: 500, y: 450, w: 540, shadow: false, at: c4, enter: "fly" });
+K.glow(B.full, 500, 470, 760, { at: c4 - PRE, out: tFull - 0.1 });
+const shop = K.img(B.full, ICON + "casino-exterior.png", { x: 500, y: 450, w: 540, shadow: false, at: c4 - 0.35, enter: "fly" });
 K.text(B.full, "هدف البيت", { x: 500, y: 120, size: 84, head: true, at: T("هدف") });
 const w1 = K.walk(B.full, [OBJ + "kanz-npc-m01-walk-a-v01.png", OBJ + "kanz-npc-m01-walk-b-v01.png"],
-  { from: [40, 660], to: [300, 660], at: c4 + 0.1, dur: 2.2, w: 500, appear: c4 });
+  { from: [40, 660], to: [300, 660], at: c4 - 0.2, dur: 2.5, w: 500, appear: c4 - PRE });
 // a gambler already at the door; never a hijabi woman in gambling content (Ahmed 2026-10-16)
 const w2 = K.img(B.full, OBJ + "kanz-npc-g01-neutral-v01.png", { x: 760, y: 680, w: 480, shadow: false, at: c4 + 0.4, enter: "fly" });
 tl.to([shop, w1, w2], { autoAlpha: 0, duration: 0.1 }, tFull - 0.1);

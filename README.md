@@ -30,7 +30,8 @@ voice note ─► transcribe (word timings) ─► cut retakes, tighten pauses, 
 
 - **Shorts from a long video** (2026-10-16): `engine/footage.py` cuts the speaker's face, voice and word timings
   from a long Kanz video into a project; `runtime/kanz-footage.js` (`K.footage`) alternates that face with the motion
-  boards, captions running across both. Route and rules: `AGENTS.md`, "Shorts cut from a long Kanz video".
+  boards, captions running across both, with a 0.2 s dissolve at every change (`xfade`); `--tv-until` keeps a styled
+  source opening (the speaker in a TV set) and zooms into the face. Route and rules: `AGENTS.md`, "Shorts cut from a long Kanz video".
 - **Photos and Codex images** (2026-10-16): `K.screen()` (`runtime/kanz-snap.js`) fills the frame with a photo of a
   place and darkens the headline and caption bands as much as that photo needs; `K.snap35()` shows a real, licensed
   photo of a person or moment as a disposable-camera print (no date). `engine/codex_assets.py` generates a video's

@@ -44,9 +44,11 @@ const B = {
 // the person as a print on charcoal; America arrives as the place, full screen, behind the print
 const tUS = T("أمريكا");
 K.cam(0, "brand", { scale: 1.0 });
-K.glow(B.brand, 500, 560, 820, { at: c1, out: tUS - 0.3 });
-K.text(B.brand, "براند ميسي", { x: 500, y: 140, size: 104, head: true, color: L, at: c1 });
-const shot = print(B.brand, MESSI_A, { x: 500, y: 530, w: 440, h: 470, rot: -4, at: c1 - 0.05 });
+// boards build ~0.3 s before their cut, under the face, so the dissolve lands on a finished board (2026-10-16)
+const PRE = 0.3;
+K.glow(B.brand, 500, 560, 820, { at: c1 - PRE, out: tUS - 0.3 });
+K.text(B.brand, "براند ميسي", { x: 500, y: 140, size: 104, head: true, color: L, at: c1 - PRE });
+const shot = print(B.brand, MESSI_A, { x: 500, y: 530, w: 440, h: 470, rot: -4, at: c1 - 0.35, flash: false }); // no white flash on the cut
 tl.to(shot, { y: -20, scale: 0.74, rotation: -7, duration: 0.5, ease: "power2.inOut" }, tUS - 0.35); // clear of the captions
 K.screen(PHOTO + "us-sportsbook.png", tUS - 0.3, f2);
 K.tag(B.brand, "في أمريكا", { x: 500, y: 290, size: 54, lav: true, at: tUS });
@@ -69,9 +71,9 @@ K.tag(B.numbers, "حجم المراهنات", { x: 700, y: 610, size: 44, lav: t
 
 // ---------- 3. ~$2.5B (21.7-23.64): the amount, icons on charcoal ----------
 K.cam(c3 - 0.3, "final", { dur: 0.04, sfx: false, scale: 1.08 });
-K.glow(B.final, 500, 560, 760, { at: c3 });
-K.pile(B.final, OBJ + "kanz-cash-v01.png", { x: 470, y: 700, w: 200, n: 10, at: c3, stagger: 0.05 });
-K.img(B.final, ICON + "betting-slip.png", { x: 800, y: 580, w: 320, shadow: false, at: c3 + 0.15, enter: "fly", fromX: 80, rot: 8 });
+K.glow(B.final, 500, 560, 760, { at: c3 - PRE });
+K.pile(B.final, OBJ + "kanz-cash-v01.png", { x: 470, y: 700, w: 200, n: 10, at: c3 - 0.4, stagger: 0.05 });
+K.img(B.final, ICON + "betting-slip.png", { x: 800, y: 580, w: 320, shadow: false, at: c3 - 0.25, enter: "fly", fromX: 80, rot: 8 });
 K.count(B.final, { x: 500, y: 260, from: 0, to: 2.5, decimals: 1, suffix: " مليار دولار", size: 112, at: T("فاصل") - 0.3, dur: 0.9, digits: "en" });
 K.text(B.final, "توقعات Macquarie / H2 للمراهنات على النهائي · casino.org، نوفمبر 2022",
   { x: 500, y: 360, size: 24, color: SRC, w: 820, at: T("مليار", c3) });
@@ -79,7 +81,7 @@ K.text(B.final, "توقعات Macquarie / H2 للمراهنات على النه�
 // ---------- 4. one match, the final (25.76-30.9): the stadium full screen, the real moment as a print, the punch ----------
 K.cam(c4 - 0.3, "one", { dur: 0.04, sfx: false, scale: 1.0 });
 K.screen(PHOTO + "stadium-final.png", c4 - 0.3, HOLD + 1, { sfx: false });
-K.text(B.one, "ماتش واحد", { x: 500, y: 150, size: 104, head: true, at: c4 + 0.05 });
+K.text(B.one, "ماتش واحد", { x: 500, y: 150, size: 104, head: true, at: c4 - 0.25 });
 K.tag(B.one, "النهائي", { x: 500, y: 300, size: 58, lav: true, at: T("نهائي", c4) });
 print(B.one, MESSI_B, { x: 520, y: 570, w: 580, h: 370, rot: 4, at: T("ميسي", c4) - 0.05 });
 K.punch("أكبر حدث مراهنات<br>في تاريخ <span class='kw'>الكورة</span> كله", T("أكبر") - 0.05, HOLD + 1, { size: 104, riser: true });
