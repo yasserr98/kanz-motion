@@ -1,0 +1,74 @@
+{
+ "project": "projects/short-biggest-betting-event",
+ "context": "An Egyptian finance explainer: the 2022 World Cup was the real test of Lionel Messi's brand in the US betting market; World Cup betting rose about 65% vs 2018 to about $35 billion (pre-tournament projections), and the Argentina-France final was the biggest betting event in football history.",
+ "shots": [
+  {
+   "name": "world-cup-trophy",
+   "line": "كأس العالم 2022 (the 2022 World Cup)",
+   "subject": "a generic golden football world-cup-style trophy: two stylised figures spiralling up to hold a globe, on a two-band base (not the exact FIFA design, no text)",
+   "accent": "the two bands on the base",
+   "modes": [
+    "kanz",
+    "free"
+   ],
+   "ref": "kanz-gold-bars-v01.png",
+   "free_style": "A real-looking studio photograph on a dark background."
+  },
+  {
+   "name": "number-10-shirt",
+   "line": "لبراند ميسي (Messi's brand)",
+   "subject": "a football shirt with vertical stripes hanging on a hanger, a large blank number area on the back showing the number shape 10 only as a simple stitched outline, no names, crests or sponsor logos",
+   "accent": "the stripes",
+   "modes": [
+    "kanz",
+    "free"
+   ],
+   "ref": "kanz-salary-envelope-v01.png",
+   "free_style": "A real-looking photograph, sky-blue and white stripes, soft studio light."
+  },
+  {
+   "name": "us-sportsbook",
+   "line": "في عالم المراهنات في أمريكا (in the US betting world)",
+   "subject": "a sportsbook wall of large TV screens above a betting counter, each screen showing a football pitch from above, odds boards as blank tiles",
+   "accent": "one central screen",
+   "modes": [
+    "kanz",
+    "free"
+   ],
+   "ref": "kanz-ticker-board-v01.png",
+   "free_style": "A real-looking photograph of a Las Vegas-style sportsbook, no identifiable people."
+  },
+  {
+   "name": "stadium-final",
+   "line": "ماتش واحد، نهائي (one match, the final)",
+   "subject": "a packed football stadium at night seen from the upper stands, floodlights, a bright pitch, fireworks above the roof",
+   "accent": "the fireworks",
+   "modes": [
+    "kanz",
+    "free"
+   ],
+   "ref": "kanz-stock-exchange-v01.png",
+   "free_style": "A real-looking photograph, crowd too distant to identify anyone."
+  },
+  {
+   "name": "betting-slip",
+   "line": "أكبر حدث مراهنات في تاريخ الكورة (the biggest betting event in football history)",
+   "subject": "a long printed betting slip curling at one end, blank lines in place of text, a small football icon at the top, held under a paperweight of chips",
+   "accent": "the paper's top band",
+   "modes": [
+    "kanz",
+    "free"
+   ],
+   "ref": "kanz-receipt-v01.png",
+   "free_style": "A real-looking close-up photograph."
+  },
+  {
+   "name": "messi-kanz-edit",
+   "mode": "edit",
+   "line": "لبراند ميسي (Messi's brand)",
+   "source": "shorts/casino-wins-in-the-end/photos/messi-wc2022-portrait-02.jpg",
+   "accent": "the captain's armband",
+   "ratio": "4:5 portrait"
+  }
+ ]
+}

@@ -1,0 +1,9 @@
+Attachments: image 1 = the APPROVED Kanz editorial icon sheet (style authority). Image 2 = an approved Kanz library object (finish, material, perspective, scale and framing authority).
+
+Create ONE Kanz explainer icon for a video about: An Egyptian finance explainer: the 2022 World Cup was the real test of Lionel Messi's brand in the US betting market; World Cup betting rose about 65% vs 2018 to about $35 billion (pre-tournament projections), and the Argentina-France final was the biggest betting event in football history.
+It illustrates the line: أكبر حدث مراهنات في تاريخ الكورة (the biggest betting event in football history)
+Subject: a long printed betting slip curling at one end, blank lines in place of text, a small football icon at the top, held under a paperweight of chips
+Lavender accent: the paper's top band only.
+Treatment identical to the references: photographic grayscale editorial cutout with real material texture and the same fine tactile grain, same lighting from upper left; restrained lavender #D5ADEF only on the detail named; neutral grayscale everything else. The Kanz icon style is fixed for every topic: match line weight, shapes, perspective, dimensionality, shading, texture and palette treatment exactly; no topic-specific style, no glossy colours, no cartoon.
+Output: one centered subject on a SQUARE canvas (1254x1254 if available, else highest native square), comfortable transparent margins. TRUE RGBA PNG TRANSPARENCY everywhere outside the subject. No background, no floor, no drop shadow, no fake checkerboard, no text, letters, numbers, logos or watermark.
+Return only the image.

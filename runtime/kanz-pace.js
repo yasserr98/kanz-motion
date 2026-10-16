@@ -117,7 +117,7 @@
   // eases, so it reads as camera work; during a camera move it blends from the old board's correction to the new
   // one's; during a snap it is measured live (a cut, no easing), which softens a snap that would crop.
   // Bands follow lint's side margins: x 65..1015 above y 1000, 120..960 below (K.SAFE).
-  const KEEP_SEL = "#world img.obj, #world .t, #world .tag, #world .card, #world .kcount, #world .kdoc, #world .kphoto," +
+  const KEEP_SEL = "#world img.obj, #world .t, #world .tag, #world .card, #world .kcount, #world .kdoc, #world .kphoto, #world .ksnap," +
     " #world .kpin, #world svg.mk path, #world svg.mk polyline, #world svg.mk rect, #world svg.mk line, #world svg.mk circle";
   const KEEP_SKIP = ".kfg, .kglow, .kshadow, .kmap, [data-free]";
   const DT = 1 / 12, AHEAD = 0.45, BEHIND = 0.1, EASE = 0.25, SMIN = 0.8, OX = 540;

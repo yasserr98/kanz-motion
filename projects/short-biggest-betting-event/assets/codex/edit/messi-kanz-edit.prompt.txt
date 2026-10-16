@@ -1,0 +1,7 @@
+Edit image 1; image 2 is a finish/color reference only.
+
+Preserve the people and scene in image 1 exactly as depicted: facial identity, age, expression, gaze, hair, pose, hands, clothing shapes and camera perspective. Keep the original scene and the subject's real relationship to it. Do not add or remove people, invent an event, or copy objects from image 2.
+
+Apply Kanz's restrained editorial treatment: neutral grayscale subject with clear facial/structural detail; darker, quieter grayscale surroundings; fine subtle tactile grain. Keep skin grayscale. Add a controlled #D5ADEF lavender accent only to the captain's armband, following its actual shape, light and material. Use #08070B / #11081A in dark supporting areas, with no blanket purple wash, neon outline or heavy glow.
+
+Output 4:5 portrait. Keep this recognizably the same photograph with a coherent editorial finish. No new illustration style, anonymous face, replacement wardrobe, added props, text, numbers, logo or watermark. Return only the image. If preserving the source conflicts with the requested crop/effect, preserve the source rather than inventing missing content.

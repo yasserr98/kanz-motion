@@ -1,0 +1,168 @@
+{
+  "source": "https://www.youtube.com/watch?v=gP5xAqyBrh4",
+  "title": "الكازينو بيكسب في الآخر | كنز",
+  "uploaded": "2026-07-15",
+  "transcript": "transcript.raw.json (ElevenLabs Scribe v2, run by Codex 2026-10-16)",
+  "scoring": "hook = first 3 s stops the scroll; standalone = makes sense without the long video; payoff = ends on a point; motion = numbers/contrasts Kanz Motion can animate. 1-5 each, judged by Claude from the transcript; cut density from ffmpeg scene detection (scene > 0.3).",
+  "candidates": [
+    {
+      "id": "E",
+      "name": "odds-vs-money",
+      "title": "السوق بيسعّر ميسي مش الاحتمالات",
+      "parts": [
+        [
+          544.38,
+          599.67
+        ]
+      ],
+      "hook": 5,
+      "standalone": 5,
+      "payoff": 5,
+      "motion": 5,
+      "why": "Opens on 'وهنا هتبدأ الغرابة', sets up France 33% vs Argentina 20%, asks 'صح؟ لأ.', then the money flips it (100M vs 95M; 5.1M vs 2.9M per 1%). Ends on the thesis: markets price personalities, not odds. Best chart short in the video.",
+      "duration": 55.3,
+      "graphic_cuts": 3
+    },
+    {
+      "id": "B",
+      "name": "house-always-wins",
+      "title": "البيت كسبان كده كده",
+      "parts": [
+        [
+          73.18,
+          107.43
+        ]
+      ],
+      "hook": 4,
+      "standalone": 5,
+      "payoff": 5,
+      "motion": 4,
+      "why": "Evergreen explainer: house, handle, commission in three words; win or lose, the house wins; its only goal is foot traffic. Fits Kanz's education door and works without the World Cup context.",
+      "duration": 34.2,
+      "graphic_cuts": 2
+    },
+    {
+      "id": "A",
+      "name": "zero-point-six-percent",
+      "title": "نسبة فوز الأرجنتين كانت 0.6%",
+      "parts": [
+        [
+          0,
+          60.25
+        ]
+      ],
+      "hook": 5,
+      "standalone": 4,
+      "payoff": 4,
+      "motion": 4,
+      "why": "The video's cold open: Opta gave Argentina 0.6% at minute 78, they won 3-2, then the controversy, then 'I'm not here to say yes or no, I'm here to help you answer'. Strong curiosity close that points to the long video.",
+      "duration": 60.2,
+      "graphic_cuts": 1
+    },
+    {
+      "id": "C",
+      "name": "one-circle",
+      "title": "دايرة واحدة وشخص واحد بياخد من كل الجهات",
+      "parts": [
+        [
+          242.52,
+          267.09
+        ]
+      ],
+      "hook": 4,
+      "standalone": 4,
+      "payoff": 5,
+      "motion": 5,
+      "why": "'اقفل بقى معايا الدايرة': $530M riding on Messi and Argentina; the casino pays him, the platform pays him, the tournament is built on him; nothing illegal, it's one circle. 24 s, a natural loop diagram.",
+      "duration": 24.6,
+      "graphic_cuts": 0
+    },
+    {
+      "id": "H",
+      "name": "betting-apps-egypt",
+      "title": "تراهن بعشرين ترجع لك ميتين",
+      "parts": [
+        [
+          807.26,
+          850.95
+        ]
+      ],
+      "hook": 4,
+      "standalone": 5,
+      "payoff": 4,
+      "motion": 3,
+      "why": "Local and personal: betting apps spread among young Egyptians, any payment method, from 5 EGP; Indian league, Malaysian cup; bet 20 get 200; it becomes addiction; the law was written for physical betting shops; Al-Azhar's fatwa.",
+      "duration": 43.7,
+      "graphic_cuts": 4
+    },
+    {
+      "id": "D",
+      "name": "biggest-betting-event",
+      "title": "نهائي 2022 أكبر حدث مراهنات في تاريخ الكورة",
+      "parts": [
+        [
+          266.76,
+          299.87
+        ]
+      ],
+      "hook": 3,
+      "standalone": 4,
+      "payoff": 4,
+      "motion": 5,
+      "why": "Messi as the face of US betting: World Cup betting up 65% vs 2018 (~$35B), Messi alone ~$2.5B, from one match: the 2022 final. Number-led; ends 'عشان تعرف قد ايه التخطيط مهم'.",
+      "duration": 33.1,
+      "graphic_cuts": 9
+    },
+    {
+      "id": "G",
+      "name": "not-me-the-reason",
+      "title": "مش أنا السبب",
+      "parts": [
+        [
+          720.08,
+          778.79
+        ]
+      ],
+      "hook": 4,
+      "standalone": 4,
+      "payoff": 5,
+      "motion": 4,
+      "why": "Refereeing stats in a repeated 'مش أنا السبب' rhythm (VAR calls, 1 yellow per 20 fouls vs 1 per 7, 5 penalties in 7 matches), ending 'صعب نقول صدفة'. Strong rhetoric.",
+      "risk": "Every referee figure needs a source on screen before use (Kanz numbers rule). Accusatory in tone; Ahmed should decide.",
+      "duration": 58.7,
+      "graphic_cuts": 13
+    },
+    {
+      "id": "F",
+      "name": "who-gets-paid",
+      "title": "مين المستفيد من كل رجل بتخش المحل؟",
+      "parts": [
+        [
+          640.28,
+          672.05
+        ],
+        [
+          698.08,
+          709.97
+        ]
+      ],
+      "hook": 4,
+      "standalone": 4,
+      "payoff": 4,
+      "motion": 5,
+      "why": "FIFA ~$13B of the $50-60B, host country ~$17B, Messi ~$70M, each Argentina match adds $1-2.5B; then 'the system doesn't need to win, it needs to exist... not a conspiracy, simple math'. One internal cut (11:11.8-11:38.2) to fit.",
+      "duration": 43.7,
+      "graphic_cuts": 7
+    }
+  ],
+  "excluded": [
+    {
+      "range": "02:53-03:27",
+      "why": "Describes the Hard Rock owner by religion and as a Zionist. As a standalone short that framing is a reputational and legal risk; not proposed."
+    },
+    {
+      "range": "06:30-07:13",
+      "why": "FBI investigation of named Argentine FA officials; the video itself says nobody has been charged. Allegation-only, risky out of context."
+    }
+  ]
+}
