@@ -155,11 +155,12 @@ Route for "make shorts from this YouTube video". Work locally (Ahmed: "we can do
    - **Keep the source's burned-in text** (lower-third labels such as "حجم الرهان": "leave it, it looks cool"). Keep the
      face un-zoomed while a label shows, or zoom about it (`faceY`).
    - All other Kanz Motion rules apply to the boards (approved objects, numbers, captions from the corrected script).
-   - **Transitions (Ahmed 2026-10-16: "fix the transitions, especially between the video and the motion").** Every
-     face <-> motion change is a 0.2 s dissolve with a 6% push (`K.footage` `xfade`, on by default), never a one-frame
-     switch to a half-built board. Build each board's opening objects ~0.3 s before its cut (`const PRE = 0.3`;
-     headline, hero, glow at `c - PRE`), so the dissolve reveals a finished board. No `K.snap35` flash on a cut
-     (`flash: false`), no white frames.
+   - **Transitions: the clean cut (Ahmed 2026-10-16).** Every face <-> motion change is a straight cut in the pause
+     before a word, onto a board that is already built (`K.footage` `xstyle: "cut"`, the default). He hated the soft
+     dissolve; whip, zoom-through and TV-glitch styles exist (`xstyle`) but were not picked (comparison:
+     `projects/short-house-always-wins`, transition-options). Build each board's opening objects ~0.3 s before its cut
+     (`const PRE = 0.3`; headline, hero, glow at `c - PRE`) so the cut never lands on charcoal or a half-built board.
+     No `K.snap35` flash on a cut (`flash: false`), no white frames.
    - **No snap zooms or face jump zooms by default** (Ahmed: "glitch at 14 s", "weird zoom at 16 s"). The camera's own
      drift and pull-outs are enough.
    - **Pay off what the hook promises.** If he says "three words", each gets its own titled beat on screen

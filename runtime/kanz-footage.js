@@ -8,6 +8,10 @@
  *   windows  [[t0, t1, zoom?], ...] when the face covers the frame; between them the motion world shows.
  *            zoom (default 1) punches in on the face; two touching windows with different zooms = a jump zoom
  *   end      optional: video end, so a face window that closes the video gets no whoosh
+ *   xstyle   how face <-> motion changes look: "cut" (default since 2026-10-16: Ahmed picked the clean cut, a hard
+ *            cut in the pause onto a board that is already built; he hated the dissolve), "dissolve" (uses xfade),
+ *            "whip" (fast blurred slide), "zoom" (fast blurred zoom-through), "glitch" (a few frames of TV glitch, like
+ *            the source's own transitions). Each spans ~0.16 s around the cut; the cut itself stays on the pause.
  *   xfade    seconds of the soft dissolve at every face <-> motion change (default 0.2; 0 = hard cut). The face
  *            fades and pushes in 6% on the way out, and settles from 6% on the way back (Ahmed 2026-10-16: fix the
  *            transitions between the video and the motion). Touching windows (jump zooms) stay hard cuts. Build each
@@ -71,17 +75,76 @@
       return null;
     };
 
+    const style = o.xstyle || "cut";
+    // changes between face and motion: [time, dir] with dir +1 = face -> motion, -1 = motion -> face
+    const edges = [];
+    o.windows.forEach(([a, b]) => {
+      if (a > 0 && !o.windows.some(([, e]) => Math.abs(e - a) < 0.02)) edges.push([a, -1]);
+      if (!touches(b) && (o.end == null || b < o.end - 0.1)) edges.push([b, 1]);
+    });
+    const motion = () => [document.getElementById("camwrap") || document.getElementById("world"),
+      ...document.querySelectorAll("#stage > [id^=screen]")].filter(Boolean);
+    let fx = null;
+    if (style === "glitch") {
+      fx = document.createElement("div");
+      fx.style.cssText = "position:absolute;inset:0;z-index:5;pointer-events:none;visibility:hidden;mix-blend-mode:screen;" +
+        "background:repeating-linear-gradient(0deg,rgba(255,255,255,.14) 0 3px,rgba(0,0,0,0) 3px 7px)";
+      stage.insertBefore(fx, document.getElementById("headline"));
+    }
+    const W = 0.16;
+    // the motion side of a change (the face side is styled in K.seek): returns nothing, sets CSS on the world/screens
+    const styleMotion = (t) => {
+      const els = motion();
+      els.forEach((e) => { e.style.translate = ""; e.style.scale = ""; e.style.filter = ""; });
+      if (fx) fx.style.visibility = "hidden";
+      for (const [c, dir] of edges) {
+        const d = t - c;
+        if (Math.abs(d) > W) continue;
+        // the motion is on screen after a face->motion cut (d >= 0) and before a motion->face cut (d < 0)
+        const shown = dir > 0 ? d >= 0 : d < 0;
+        const k = 1 - Math.abs(d) / W; // 1 at the cut, 0 at the edges
+        if (style === "whip" && shown) els.forEach((e) => { e.style.translate = `${dir * (d >= 0 ? 1 : -1) * 260 * k}px 0`; e.style.filter = `blur(${18 * k}px)`; });
+        if (style === "zoom" && shown) els.forEach((e) => { e.style.scale = String(1 + 0.25 * k); e.style.filter = `blur(${14 * k}px)`; });
+        if (style === "glitch" && Math.abs(d) < 0.09) {
+          const j = Math.round((t * 24) % 3) - 1;
+          if (shown) els.forEach((e) => { e.style.translate = `${j * 34}px 0`; e.style.filter = "contrast(1.5) saturate(1.8) hue-rotate(" + j * 25 + "deg)"; });
+          fx.style.visibility = "visible";
+        }
+      }
+    };
+    // the face side: extra transform/filter on top of the window zoom
+    const styleFace = (t) => {
+      for (const [c, dir] of edges) {
+        const d = t - c;
+        if (Math.abs(d) > W) continue;
+        const k = 1 - Math.abs(d) / W;
+        if (style === "whip") return { tx: -dir * (d < 0 ? 1 : -1) * 260 * k, blur: 18 * k };
+        if (style === "zoom") return { s: 1 + 0.35 * k, blur: 14 * k };
+        if (style === "glitch" && Math.abs(d) < 0.09) { const j = Math.round((t * 24) % 3) - 1; return { tx: j * 34, f: "contrast(1.5) saturate(1.8) hue-rotate(" + j * 25 + "deg)" }; }
+      }
+      return null;
+    };
+    const faceStyled = (t) => {
+      if (style === "dissolve") return faceAt(t);
+      const win = o.windows.find(([a, b]) => t >= a && t < b);
+      return win ? { z: win[2] || 1, op: 1 } : null;
+    };
+
     const prev = K.seek;
     K.seek = function (t) {
       prev(t);
-      const win = faceAt(t);
+      if (style !== "dissolve") styleMotion(t);
+      const win = faceStyled(t);
       const on = !!win;
       box.style.visibility = on ? "visible" : "hidden";
       if (grain) grain.style.opacity = on && win.op > 0.5 ? String(grainOp * 0.45) : grainOp; // light grain on skin
       if (!on) return;
       box.style.opacity = String(win.op);
-      box.style.background = win.op < 1 ? "transparent" : "#000";
-      img.style.transform = `scale(${win.z})`;
+      const sliding = style === "whip" && styleFace(t);
+      box.style.background = win.op < 1 || sliding ? "transparent" : "#000"; // a slide reveals the board underneath
+      const sf = style === "dissolve" ? null : styleFace(t);
+      img.style.transform = `translateX(${sf && sf.tx || 0}px) scale(${win.z * (sf && sf.s || 1)})`;
+      img.style.filter = sf ? (sf.f || `blur(${sf.blur || 0}px)`) : "";
       const i = Math.max(1, Math.min(o.n, Math.floor(t * fps + 1e-6) + 1));
       if (img.dataset.i === String(i)) return;
       img.dataset.i = String(i);
