@@ -63,6 +63,7 @@
   // ---------- per-frame layer: parallax, idle float, followers (shadow/glow track their object) ----------
   const movers = new Map(); // el -> [fn(q, cam) -> [dx, dy]]
   const followers = [];
+  const poses = new Map(); // logical object -> time-ordered replacement poses
   const addMover = (el, fn) => { if (!movers.has(el)) movers.set(el, []); movers.get(el).push(fn); };
   const seek0 = K.seek;
   K.seek = function (t) {
@@ -73,6 +74,21 @@
       let dx = 0, dy = 0;
       fns.forEach((f) => { const d = f(q, cam); dx += d[0]; dy += d[1]; });
       el.style.translate = `${dx.toFixed(1)}px ${dy.toFixed(1)}px`;
+    });
+    // The original owns motion/opacity. Pose visibility is a separate mask, so rewinds retain that state.
+    poses.forEach((list, root) => {
+      const active = showing(root, q);
+      root.classList.toggle("kpose-hidden", active !== root);
+      list.forEach((s) => {
+        s.el.classList.toggle("kpose-hidden", active !== s.el);
+        const v = {};
+        ["left", "top", "width", "x", "y", "xPercent", "yPercent", "rotation", "scaleX", "scaleY"].forEach((p) => { v[p] = gsap.getProperty(root, p); });
+        v.scaleX *= s.state.pop; v.scaleY *= s.state.pop;
+        v.opacity = gsap.getProperty(root, "opacity") * s.state.opacity;
+        v.visibility = root.style.visibility;
+        gsap.set(s.el, v);
+        s.el.style.translate = root.style.translate;
+      });
     });
     followers.forEach((f) => f(q));
   };
@@ -214,10 +230,13 @@
   // slow camera push onto a point of the screenshot (its own pixels). Resolved when the image loads,
   // so do not use {via} on the K.cam() that follows it.
   K.docFocus = function (t, doc, x, y, scale, dur = 1.2) {
+    const interval = K._reserveCamera(t, dur);
+    const release = K._reserveFocus ? K._reserveFocus(t, dur) : () => {};
     const go = () => {
       const id = boardOf(doc), b = K.boards[id], o = doc._o, k = doc._k;
       const px = o.x - o.w / 2 + doc._pad + x * k, py = o.y - doc._h / 2 + doc._pad + y * k;
-      K.push(t, id, scale, dur, { dx: px - 500, dy: py - (b.h || 860) / 2 });
+      K.push(t, id, scale, dur, { dx: px - 500, dy: py - (b.h || 860) / 2, _cameraInterval: interval });
+      release();
     };
     doc._k ? go() : doc._pending.push(go);
   };
@@ -358,21 +377,26 @@
   // K.swap(img, src, t): the object or character changes state in place on a word (wallet closed -> open,
   // M01 neutral -> pointing). Same position, size and rotation; its contact shadow and glow carry over.
   K.swap = function (el, src, t, o = {}) {
-    const n = K.el("img", "obj", el.parentNode);
+    const root = el._poseRoot || el;
+    if (!poses.size) {
+      const css = document.createElement("style");
+      css.textContent = ".kpose-hidden{visibility:hidden!important}"; document.head.appendChild(css);
+    }
+    if (!poses.has(root)) poses.set(root, []);
+    const n = K.el("img", "obj kpose-hidden", root.parentNode);
     n.src = src;
-    gsap.set(n, { left: gsap.getProperty(el, "left"), top: gsap.getProperty(el, "top"), width: el.style.width || gsap.getProperty(el, "width"),
-      xPercent: gsap.getProperty(el, "xPercent"), yPercent: gsap.getProperty(el, "yPercent"), rotation: gsap.getProperty(el, "rotation"),
-      zIndex: el.style.zIndex || "auto" });
-    hide(n);
-    tl.set(el, { autoAlpha: 0 }, t);
-    tl.fromTo(n, { autoAlpha: 1, scale: o.pop === false ? 1 : 1.04 }, { autoAlpha: 1, scale: 1, duration: 0.25, ease: "power2.out", immediateRender: false }, t);
-    (el._swaps = el._swaps || []).push({ t, el: n });
+    n._poseRoot = root;
+    gsap.set(n, { zIndex: root.style.zIndex || "auto" });
+    const state = { pop: 1, opacity: 1 };
+    tl.fromTo(state, { pop: o.pop === false ? 1 : 1.04 }, { pop: 1, duration: 0.25, ease: "power2.out", immediateRender: false }, t);
+    const list = poses.get(root);
+    list.push({ t, el: n, state }); list.sort((a, b) => a.t - b.t);
     if (o.sfx !== false) K.sfx(t, K.cue(o.sfx, "pop"), o.gain || 0.25);
-    if (o.out != null) tl.to(n, { autoAlpha: 0, duration: 0.3 }, o.out);
+    if (o.out != null) tl.to(state, { opacity: 0, duration: 0.3 }, o.out);
     return n;
   };
   // the follower of an element reads whichever state is showing at time q
-  const showing = (e, q) => { let cur = e; (e._swaps || []).forEach((s) => { if (q >= s.t) cur = s.el; }); return cur; };
+  const showing = (e, q) => { const root = e._poseRoot || e; let cur = root; (poses.get(root) || []).forEach((s) => { if (q >= s.t) cur = s.el; }); return cur; };
 
   // K.walk(board, [frameA, frameB], {from: [x, y], to: [x, y], at, dur, w, rest, step, sfx}): a character walks
   // between two board points with the two-frame walk cycle (frames face left; walking right mirrors them).
