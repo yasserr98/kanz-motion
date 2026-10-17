@@ -1,5 +1,8 @@
 node_modules/
-.env
+.env*
+!.env.example
+**/*.log
+projects/*/assets/photos/
 __pycache__/
 library/sfx/raw/
 projects/*/out/
@@ -22,3 +25,5 @@ projects/*/assets/codex/**/*.log
 shorts/*/transcript.*
 shorts/*/work/*.png
 shorts/*/work/*.jpg
+.pytest_cache/
+tests/.tmp*/
