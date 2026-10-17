@@ -153,3 +153,57 @@ def test_missing_caption_markers_stop_clearly():
     with pytest.raises(SystemExit) as exc:
         captions.script_tokens("no markers here")
     assert "captions:start" in str(exc.value)
+
+
+def test_objects_flags_candidates_and_unlisted(tmp_path):
+    import objects
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(json.dumps({"objects": [{"file": "kanz-bank-v01.png", "status": "approved"},
+                                                {"file": "kanz-roulette-wheel-v01.png", "status": "candidate", "note": "casino"}]}))
+    (tmp_path / "scene.js").write_text('K.img(b, OBJ + "kanz-bank-v01.png"); K.img(b, OBJ + "kanz-roulette-wheel-v01.png");')
+    found = objects.findings(tmp_path, manifest)
+    assert len(found) == 1 and "kanz-roulette-wheel-v01.png: candidate" in found[0]
+
+
+def test_library_manifest_lists_every_object():
+    import objects
+    names = {p.name for p in (objects.ROOT / "library/objects").glob("kanz-*.png")}
+    listed = objects.statuses()
+    assert names == set(listed)
+    assert {o["status"] for o in listed.values()} <= {"approved", "candidate", "rejected"}
+
+
+def test_ship_stops_at_lint(project, monkeypatch, capsys):
+    import make
+    calls = []
+    def run(cmd, **kwargs):
+        calls.append(cmd)
+        return SimpleNamespace(returncode=1)
+    monkeypatch.setattr(make.subprocess, "run", run)
+    monkeypatch.setattr(make, "render", lambda *a, **k: pytest.fail("ship must stop before render"))
+    with pytest.raises(SystemExit) as exc:
+        make.ship(project, "demo", "v1")
+    assert exc.value.code == 1
+    assert "--strict" in [str(c) for c in calls[0]]
+    assert "SHIP STOPPED at lint" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("host,local,expect", [(None, False, "render.py"), ("vps", False, "vps_render.sh"),
+                                               ("vps", True, "render.py")])
+def test_render_goes_to_host_when_set(project, monkeypatch, host, local, expect):
+    import make
+    ran = []
+    monkeypatch.setattr(make, "render_host", lambda: host)
+    monkeypatch.setattr(make.shutil, "which", lambda name: "bash")
+    monkeypatch.setattr(make, "run", lambda cmd: ran.append(" ".join(str(c) for c in cmd)))
+    make.render(project, "demo-v1", local)
+    assert expect in ran[0]
+
+
+def test_project_dir_falls_back_to_examples(monkeypatch, tmp_path):
+    import make
+    monkeypatch.setattr(make, "ROOT", tmp_path)
+    (tmp_path / "examples/demo").mkdir(parents=True)
+    assert make.project_dir("demo") == tmp_path / "examples/demo"
+    (tmp_path / "projects/demo").mkdir(parents=True)
+    assert make.project_dir("demo") == tmp_path / "projects/demo"

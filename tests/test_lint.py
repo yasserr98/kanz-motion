@@ -128,11 +128,14 @@ def test_gitignore_patterns(tmp_path):
     shutil.copyfile(Path(__file__).resolve().parents[1] / '.gitignore', repo / '.gitignore')
     subprocess.run(['git', 'init', '-q', str(repo)], check=True, capture_output=True)
     paths = ['.env', '.env.local', '.env.example', 'nested/.env.secret', 'nested/.env.example',
-             'error.log', 'nested/error.log', 'projects/demo/assets/photos/image.jpg', 'projects/demo/scene.js']
+             'error.log', 'nested/error.log', 'projects/demo/assets/photos/image.jpg', 'projects/demo/scene.js',
+             'projects/_template/scene.js', 'projects/_3d-demo/scene.js', 'examples/demo/scene.js',
+             'examples/demo/delivery.json', 'examples/demo/out/v1.mp4']
     result = subprocess.run(['git', '-c', 'core.excludesFile=', 'check-ignore', '-z', '--stdin'],
                             cwd=repo, input=('\0'.join(paths) + '\0').encode(), capture_output=True)
     assert result.returncode == 0, result.stderr
-    assert set(result.stdout.decode().strip('\0').split('\0')) == set(paths) - {'.env.example', 'nested/.env.example', 'projects/demo/scene.js'}
+    assert set(result.stdout.decode().strip('\0').split('\0')) == set(paths) - {'.env.example', 'nested/.env.example',
+        'projects/_template/scene.js', 'projects/_3d-demo/scene.js', 'examples/demo/scene.js'}
 
 
 @pytest.mark.parametrize('strict,waiver,expected', [(False, False, 0), (True, False, 1), (True, True, 0)])
