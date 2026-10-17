@@ -11,6 +11,7 @@
     fps: 12, W: 1080, H: 1920, view: { x: 540, y: 960 }, zoom: 1.06,
     tl: gsap.timeline({ paused: true, defaults: { ease: "power3.out" } }),
     cues: [], warnings: [], boards: {}, duration: (window.DURATION || 10) + 1.6,
+    D: {}, // visual defaults switched on by K.pace({defaults}) (kanz-pace.js); empty for finished projects
   });
   const tl = K.tl;
   const stage = document.getElementById("stage");
@@ -176,9 +177,10 @@
     p.setAttribute("stroke", o.color || "#d5adef"); p.setAttribute("stroke-width", o.width || 7);
     p.setAttribute("stroke-linecap", "round"); p.setAttribute("stroke-linejoin", "round");
     if (o.dash) p.setAttribute("stroke-dasharray", o.dash);
+    if (o.lazy && !o.dash) p.setAttribute("pathLength", 1); // geometry arrives later (marks sized to an element)
     s.appendChild(p);
     if (o.at != null) {
-      const L = p.getTotalLength();
+      const L = o.lazy && !o.dash ? 1 : p.getTotalLength();
       if (o.dash) { // dashed lines reveal with a clip instead of dashoffset
         hide(s);
         tl.fromTo(s, { autoAlpha: 0, clipPath: "inset(0 0 0 100%)" }, { autoAlpha: 1, clipPath: "inset(0 0 0 0%)", duration: o.dur || 0.6, ease: "power2.inOut", immediateRender: false }, o.at);
@@ -195,14 +197,65 @@
     return s;
   }
   const rnd = (i, s) => Math.sin(i * 12.9898 + s * 78.233) * 0.5;
-  K.oval = function (parent, cx, cy, rx, ry, o = {}) {
-    const pts = [], n = 56, turns = 1.13, a0 = -Math.PI * 0.62, seed = o.seed || 1;
+
+  // ---------- marks sized to an element (2026-10-17) ----------
+  // K.oval(parent, el, o), K.rect(parent, el, o), K.arrow(parent, x1, y1, el, o) / K.arrow(parent, fromEl, el, o):
+  // the element's layout box (entrance transforms ignored) in parent's coordinates, padded `pad` (16) px, measured on
+  // the first K.seek after fonts and images are ready; the mark sits behind the element.
+  const isEl = (v) => v instanceof Element;
+  const layoutQ = [];
+  const loadedIn = (el) => [el, ...el.querySelectorAll("img")].every((i) => i.tagName !== "IMG" || (i.complete && i.naturalWidth > 0));
+  function flushLayout() {
+    if (!layoutQ.length || (document.fonts && document.fonts.status !== "loaded")) return;
+    for (let i = 0; i < layoutQ.length; i++) {
+      if (!layoutQ[i].els.every(loadedIn)) continue;
+      layoutQ[i].fn(); layoutQ.splice(i--, 1);
+    }
+  }
+  function boxIn(el, parent) {
+    let x = 0, y = 0, e = el;
+    while (e && e !== parent) {
+      x += e.offsetLeft + ((gsap.getProperty(e, "xPercent") || 0) / 100) * e.offsetWidth;
+      y += e.offsetTop + ((gsap.getProperty(e, "yPercent") || 0) / 100) * e.offsetHeight;
+      e = e.offsetParent;
+    }
+    const w = el.offsetWidth, h = el.offsetHeight;
+    return { x, y, w, h, cx: x + w / 2, cy: y + h / 2 };
+  }
+  // point on the padded box edge on the way from its centre to (px, py)
+  function edge(b, px, py, pad) {
+    const dx = px - b.cx, dy = py - b.cy;
+    const k = Math.min(dx ? (b.w / 2 + pad) / Math.abs(dx) : Infinity, dy ? (b.h / 2 + pad) / Math.abs(dy) : Infinity);
+    return k >= 1 || !isFinite(k) ? [b.cx, b.cy] : [b.cx + dx * k, b.cy + dy * k];
+  }
+  function markOn(parent, els, o, path) {
+    const s = draw(parent, "M0 0", { ...o, lazy: true });
+    let c = els[0]; while (c && c.parentNode !== parent) c = c.parentNode;
+    if (c) parent.insertBefore(s, c); // behind the target
+    s.dataset.lintSized = "1"; // engine/lint.py: clears its element by construction, not a crossing
+    layoutQ.push({ els, fn: () => s.querySelector("path").setAttribute("d", path()) });
+    return s;
+  }
+  const ovalD = (cx, cy, rx, ry, seed) => {
+    const pts = [], n = 56, turns = 1.13, a0 = -Math.PI * 0.62;
     for (let i = 0; i <= n; i++) {
       const a = a0 - (i / n) * Math.PI * 2 * turns; // counter-clockwise, like a right-handed pen in RTL
       const r = 1 + 0.035 * rnd(i, seed) + (i / n) * 0.07;
       pts.push([cx + Math.cos(a) * rx * r, cy + Math.sin(a) * ry * r]);
     }
-    return draw(parent, "M" + pts.map((p) => p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" L"), { dur: 0.6, ...o });
+    return "M" + pts.map((p) => p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" L");
+  };
+  K.oval = function (parent, cx, cy, rx, ry, o = {}) {
+    if (isEl(cx)) {
+      const el = cx; o = cy || {};
+      return markOn(parent, [el], { dur: 0.6, ...o }, () => {
+        // the smallest oval of the box's proportions (+pad) that still clears its corners
+        const b = boxIn(el, parent), P = o.pad == null ? 16 : o.pad, a = b.w / 2 + P, c = b.h / 2 + P;
+        const k = Math.max(1, Math.hypot(b.w / 2 / a, b.h / 2 / c));
+        return ovalD(b.cx, b.cy, a * k, c * k, o.seed || 1);
+      });
+    }
+    return draw(parent, ovalD(cx, cy, rx, ry, o.seed || 1), { dur: 0.6, ...o });
   };
   K.underline = function (parent, x1, x2, y, o = {}) { // drawn right -> left
     const pts = [], n = 10;
@@ -212,16 +265,41 @@
   K.strike = function (parent, x1, y1, x2, y2, o = {}) {
     return draw(parent, `M${x1} ${y1} Q ${(x1 + x2) / 2 + 12} ${(y1 + y2) / 2 - 18} ${x2} ${y2}`, { dur: 0.4, width: 9, ...o });
   };
-  K.arrow = function (parent, x1, y1, x2, y2, o = {}) {
+  // one arrowhead (2026-10-17, with the `marks` default): an open chevron scaled to the stroke, on the curve's tangent
+  const arrowD = (x1, y1, x2, y2, o) => {
     const mx = (x1 + x2) / 2 + (o.bend || 60), my = (y1 + y2) / 2 - (o.bend || 60);
-    const ang = Math.atan2(y2 - my, x2 - mx), h = 26;
-    const d = `M${x1} ${y1} Q ${mx} ${my} ${x2} ${y2} M${x2 - h * Math.cos(ang - 0.5)} ${y2 - h * Math.sin(ang - 0.5)} L${x2} ${y2} L${x2 - h * Math.cos(ang + 0.5)} ${y2 - h * Math.sin(ang + 0.5)}`;
-    return draw(parent, d, { dur: 0.5, ...o });
+    const ang = Math.atan2(y2 - my, x2 - mx), h = K.D.marks ? Math.max(22, 3.6 * (o.width || 7)) : 26;
+    return `M${x1} ${y1} Q ${mx} ${my} ${x2} ${y2} M${x2 - h * Math.cos(ang - 0.5)} ${y2 - h * Math.sin(ang - 0.5)} L${x2} ${y2} L${x2 - h * Math.cos(ang + 0.5)} ${y2 - h * Math.sin(ang + 0.5)}`;
+  };
+  K.arrow = function (parent, x1, y1, x2, y2, o = {}) {
+    if (isEl(x1) || isEl(x2)) { // (parent, fromEl, toEl, o) or (parent, x1, y1, toEl, o): stops `pad` px short
+      const from = isEl(x1) ? x1 : null, to = from ? y1 : x2, opt = (from ? x2 : y2) || {}, P = opt.pad == null ? 16 : opt.pad;
+      return markOn(parent, [to].concat(from ? [from] : []), { dur: 0.5, ...opt }, () => {
+        const B = boxIn(to, parent);
+        const a = from ? edge(boxIn(from, parent), B.cx, B.cy, P) : [x1, y1];
+        const b = edge(B, a[0], a[1], P);
+        return arrowD(a[0], a[1], b[0], b[1], opt);
+      });
+    }
+    if (K.D.marks) {
+      const w = "K.arrow without a target element points at hand-entered coordinates: pass the element it points to";
+      K.warnings.push(w); console.warn(w);
+    }
+    return draw(parent, arrowD(x1, y1, x2, y2, o), { dur: 0.5, ...o });
+  };
+  const rectD = (x, y, w, h, seed) => {
+    const j = (i) => 3 * rnd(i, seed);
+    return `M${x + w} ${y + j(1)} L${x + j(2)} ${y + j(3)} L${x + j(4)} ${y + h + j(5)} L${x + w + j(6)} ${y + h} L${x + w + j(8)} ${y - 6}`;
   };
   K.rect = function (parent, x, y, w, h, o = {}) { // hand-drawn frame, starts top-right (RTL)
-    const j = (i) => 3 * rnd(i, o.seed || 7);
-    const d = `M${x + w} ${y + j(1)} L${x + j(2)} ${y + j(3)} L${x + j(4)} ${y + h + j(5)} L${x + w + j(6)} ${y + h} L${x + w + j(8)} ${y - 6}`;
-    return draw(parent, d, { dur: 0.8, width: 5, ...o });
+    if (isEl(x)) {
+      const el = x; o = y || {};
+      return markOn(parent, [el], { dur: 0.8, width: 5, ...o }, () => {
+        const b = boxIn(el, parent), P = o.pad == null ? 16 : o.pad;
+        return rectD(b.x - P, b.y - P, b.w + 2 * P, b.h + 2 * P, o.seed || 7);
+      });
+    }
+    return draw(parent, rectD(x, y, w, h, o.seed || 7), { dur: 0.8, width: 5, ...o });
   };
   K.dot = function (parent, x, y, o) {
     const e = K.el("div", "abs", parent);
@@ -504,6 +582,7 @@
   const turb = document.querySelectorAll("feTurbulence.boil");
 
   K.seek = function (t) {
+    flushLayout();
     const q = Math.floor(t * K.fps + 1e-6) / K.fps;
     // a seek to exactly 0 skips the zero-duration sets placed at 0 (hide/initial states), so the first two
     // frames showed later scenes (found 2026-10-11 in every delivered Reel); start a hair past 0 instead

@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ["kanz.js", "kanz-look.js", "kanz-pace.js", "kanz-footage.js", "kanz-snap.js"]
 HTML = """<style>
 #stage{position:relative;width:1080px;height:1920px} #world{position:absolute;transform-origin:0 0}
-.board{position:absolute;width:1000px;height:860px} .obj,.abs{position:absolute}
+.board{position:absolute;width:1000px;height:860px} .obj,.abs,.t,.tag{position:absolute;white-space:nowrap}
 </style><div id="stage"><div id="world"></div><div id="headline"></div>
 <div id="captions"></div><div id="overlay"></div><div id="grain"></div></div>"""
 SETUP = """() => {
@@ -125,6 +125,64 @@ CHECKS = {
       const networkRetry=K.seek(6);finish(requests[8],145);await networkRetry;
       check(drawn.at(-1)===145,'network failure not retried');
       CanvasRenderingContext2D.prototype.drawImage=draw0;
+    }""",
+    "visual defaults stay off without the flag": """() => {
+      check(Object.values(K.D).every(v => !v), 'defaults on without K.pace({defaults})');
+      const e=K.tag(a,'x',{x:500,y:400}); K.dim(e,1,.3); K.seek(2);
+      check(near(gsap.getProperty(e,'opacity'),.3),'old dim changed');
+    }""",
+    "caption band guard pans up": """async () => {
+      K.pace({defaults:'2026-10-17'}); K.duration = 4;
+      const e = K.img(a, pic, {x:500, y:800, w:200, shadow:false});
+      await Promise.all(Array.from(document.images).map(i => i.decode()));
+      K.seek(2);
+      const tr = document.getElementById('camwrap').style.translate.split(' '), dy = parseFloat(tr[1] || 0);
+      const bottom = e.getBoundingClientRect().bottom - document.getElementById('stage').getBoundingClientRect().top;
+      check(dy < -50 && bottom <= 1191, 'object left in the caption band: ' + tr + ' ' + bottom);
+    }""",
+    "caption band guard off without the flag": """async () => {
+      K.pace({}); K.duration = 4;
+      K.img(a, pic, {x:500, y:800, w:200, shadow:false});
+      await Promise.all(Array.from(document.images).map(i => i.decode()));
+      K.seek(2);
+      check(!parseFloat(document.getElementById('camwrap').style.translate.split(' ')[1] || 0), 'band guard ran without the flag');
+    }""",
+    "go brings its board forward, chart opens drawn": """() => {
+      K.pace({keep:false, defaults:'2026-10-17'});
+      const g = K.go(3, 'b');
+      const late = K.img(b, pic, {x:500, y:400, w:100, at:g.arrive + 0.3});
+      const after = K.tag(b, 'x', {x:500, y:600, at:g.arrive + 0.6});
+      const c = K.area(b, {x:500, y:400, w:600, h:300, data:[1,2,3], at:g.arrive});
+      const start = (e) => Math.min(...K.tl.getChildren().filter(t => t.targets().includes(e) && t.startTime() > 0).map(t => t.startTime()));
+      check(near(start(late), g.lead), 'late element not brought forward');
+      check(near(start(after), g.arrive + 0.6), 'element after the window moved');
+      check(near(c.at, g.lead) && near(c.at + c.dur, g.arrive + 0.6), 'chart timing ' + c.at + ' ' + c.dur);
+      const p = (g.arrive - c.at) / c.dur; check(p > .3 && p < .5, 'chart not ~40% drawn on arrival: ' + p);
+    }""",
+    "punch hides the caption, dim takes text to 0": """() => {
+      K.pace({keep:false, defaults:'2026-10-17'});
+      const cap = document.getElementById('captions');
+      K.punch('x', 2, 3);
+      const o = K.img(a, pic, {x:300, y:400, w:100, shadow:false}), t = K.tag(a, 'y', {x:300, y:600});
+      K.dim([o, t], 5, .3);
+      for (const [s, v] of [[2.5,0],[1,1],[3.5,1],[2.5,0]]) { K.seek(s); check(near(parseFloat(getComputedStyle(cap).opacity), v), 'caption at ' + s); }
+      K.seek(6); check(near(gsap.getProperty(t,'opacity'),0) && near(gsap.getProperty(o,'opacity'),.3), 'dim levels');
+    }""",
+    "marks size to their target, arrow warns without one": """async () => {
+      K.pace({keep:false, defaults:'2026-10-17'});
+      const t = K.text(a, 'الكلمة', {x:500, y:300, size:60});
+      const ov = K.oval(a, t, {at:1}), ar = K.arrow(a, 100, 700, t, {at:1}), fr = K.frame(t, {at:1});
+      await document.fonts.ready; K.seek(2);
+      const tb = t.getBoundingClientRect(), ob = ov.querySelector('path').getBoundingClientRect();
+      check(ob.left < tb.left - 10 && ob.right > tb.right + 10 && ob.top < tb.top - 10 && ob.bottom > tb.bottom + 10, 'oval not around its target');
+      check([ov, ar, fr].every(m => t.compareDocumentPosition(m) & Node.DOCUMENT_POSITION_PRECEDING), 'mark not behind target');
+      const fb = fr.querySelector('path').getBoundingClientRect();
+      check(Math.abs(fb.left - (tb.left - 16)) < 6 && Math.abs(fb.right - (tb.right + 16)) < 6, 'frame not box + 16');
+      const end = ar.querySelector('path').getAttribute('d').split(' M')[0].trim().split(' ').slice(-2).map(Number);
+      const bot = parseFloat(t.style.top) + t.offsetHeight / 2; // board px
+      check(Math.abs(end[1] - (bot + 16)) < 1, 'arrow does not stop 16 px short: ' + end + ' ' + bot);
+      check(!K.warnings.length, 'warned with a target');
+      K.arrow(a, 1, 2, 3, 4, {at:1}); check(K.warnings.some(w => w.includes('K.arrow without a target')), 'no warning');
     }""",
     "cut and transition preserve guard transform": """() => {
       const w=document.getElementById('camwrap'); w.style.translate='12px 0px';w.style.scale='.9';

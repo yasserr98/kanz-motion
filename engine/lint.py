@@ -15,7 +15,8 @@ Reads the live page (no video render) and reports:
   covered-shape  text hidden by .abs shapes, SVG marks or cards (also included in covered)
   brief    a label fully on screen at opacity >= .95 for less than 0.8 s total (sampled at <= 0.1 s)
   half-built-arrival  fill below --fill or a detectable chart less than half drawn 0.3 s after K.go arrives
-  markup-crossing-text  SVG marks / .kframe / .kmark boxes crossing text; K.strike is exempt
+  markup-crossing-text  SVG marks / .kframe / .kmark boxes crossing text; K.strike and marks sized to an element
+                        (K.oval/K.rect/K.arrow with a target, which clear it by 16 px) are exempt
   structure  K.look without K.pace, missing/non-final K.finish, logo images or slide-counter literals
 Dead findings exclude the simple hook (t < K.captionsFrom) and K.footage face windows.
 Writes out/lint.json and, when there are findings, out/lint.jpg. Exit code defaults to 0.
@@ -94,7 +95,7 @@ PROBE = """(t) => {
       parents: [...(function* () { for (let p = el.parentElement; p; p = p.parentElement)
         if (p.dataset.lid) yield +p.dataset.lid; })()],
       markup: el.matches('svg.mk path, svg.mk polyline, svg.mk rect, .kframe, .kmark') &&
-        !el.closest('[data-lint-strike], [data-lint-chart]'), drawn,
+        !el.closest('[data-lint-strike], [data-lint-chart], [data-lint-sized]'), drawn,
       x0: r.left - st.left, y0: r.top - st.top, x1: r.right - st.left, y1: r.bottom - st.top,
       txt: kind === 'text' || kind === 'caption' ? (el.textContent || '').trim().slice(0, 80) :
         (el.getAttribute('src') || el.getAttribute('class') || el.tagName).toString().split('/').pop() });

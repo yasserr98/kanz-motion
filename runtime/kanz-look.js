@@ -217,8 +217,11 @@
     return d;
   };
   // highlighter (default) or drawn frame ({frame: true}) sweeping right -> left over the spoken phrase
+  // the spot can also be one object: K.docMark(doc, {x, y, w, h}, o). With the `marks` default (2026-10-17) a frame
+  // stands 16 px clear of the phrase instead of 6
   K.docMark = function (doc, x, y, w, h, o = {}) {
-    const m = K.el("div", o.frame ? "kframe" : "kmark", doc), p = o.pad == null ? 6 : o.pad;
+    if (x && typeof x === "object") { o = y || {}; ({ x, y, w, h } = x); }
+    const m = K.el("div", o.frame ? "kframe" : "kmark", doc), p = o.pad == null ? (o.frame && K.D.marks ? 16 : 6) : o.pad;
     const set = () => { const k = doc._k, P = doc._pad; gsap.set(m, { left: P + x * k - p, top: P + y * k - p * 0.6, width: w * k + 2 * p, height: h * k + 1.2 * p }); };
     doc._k ? set() : doc._pending.push(set);
     hide(m);

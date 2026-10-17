@@ -21,6 +21,19 @@
  *                               drift, close framing and snaps get a small extra pan / zoom-out (docs/PACE.md
  *                               "Frame guard"). K.pace({keep: false}) turns it off; K.cam/K.frame(..., {crop: true})
  *                               lets one framing crop on purpose; K.free(el) exempts one element
+ *
+ * Visual defaults (2026-10-17, docs/PACE.md "Visual defaults"): from a visual review of 7 shipped Reels. The template
+ * calls K.pace({defaults: "2026-10-17"}); finished projects call K.pace() without it and render exactly as before.
+ * Each default can be switched off on its own, e.g. K.pace({defaults: "2026-10-17", fly: false}):
+ *   band   the frame guard keeps objects, text and tags out of the caption band (K.CAPBAND, y 1190..1450): pan up
+ *          first, then zoom out (never below 0.8x), starting 0.45 s early
+ *   lead   K.go brings every element of its board scheduled before arrive + 0.5 s forward to g.lead; a chart that
+ *          starts at arrival is ~40 % drawn when the camera lands and finishes within 0.6 s
+ *   punch  K.punch hides the caption while it shows; K.dim takes text, tags and marks to 0 (objects keep `op`)
+ *   fly    enter: "fly" at most 1.4x for objects wider than 500 px, from above in the board's lower half, scale-only
+ *          when the start box would cross the caption band or the headline
+ *   marks  K.oval / K.rect / K.frame(el) / K.arrow sized to a target element (kanz.js); one arrowhead; K.arrow
+ *          without a target warns; K.docMark frames get 16 px padding
  */
 (function () {
   const K = window.K, tl = K.tl;
@@ -29,6 +42,7 @@
   K.PACE = false;
   const moves = []; // {t, end, id, o, to}
   const snaps = []; // {t, end}
+  const goes = []; // {id, lead, arrive, until}: K.go windows for the `lead` default
   let finishPending = false;
   K._reserveFocus = function (t, dur) {
     const m = { t, end: t + dur, pending: true };
@@ -39,8 +53,12 @@
     };
   };
 
+  K.DEFAULTS = "2026-10-17";
+  K.CAPBAND = [1190, 1450];
   K.pace = function (o = {}) {
     K.PACE = true;
+    const on = !!o.defaults && String(o.defaults) >= "2026-10-17";
+    ["band", "lead", "punch", "fly", "marks"].forEach((k) => { K.D[k] = on && o[k] !== false; });
     K.camSmooth = true;
     K.fps = 24; // every frame moves; grain and boil keep their own slower step (see seek below)
     K.mix = 2;
@@ -62,6 +80,8 @@
       stage.insertBefore(w, world);
       w.appendChild(world);
     }
+    K._wrapOY = K.view.y; // the guard scales #camwrap about (540, K.view.y)
+    installDefaults();
   };
 
   // ---------- frame clock: motion at 24 fps, grain at 12, boil at 8 (hand-made texture stays stepped) ----------
@@ -86,7 +106,11 @@
     push0(t, id, scale, dur, o);
     if (K.PACE) moves.push({ t, end: t + dur, id, o: { ...o, scale }, to: K._cam });
   };
-  K.frame = function (t, id, o = {}) { return K.cam(t, id, { sfx: false, dur: 0.55, ...o }); };
+  // K.frame(el, o) (2026-10-17): a hand-drawn frame sized to an element, i.e. K.rect(el.parentNode, el, o)
+  K.frame = function (t, id, o = {}) {
+    if (t instanceof Element) return K.rect(t.parentNode, t, id || {});
+    return K.cam(t, id, { sfx: false, dur: 0.55, ...o });
+  };
 
   // start of the pause before the word at tWord (end of the previous spoken word)
   K.pauseBefore = function (tWord) {
@@ -99,6 +123,7 @@
     let start = Math.max(K.pauseBefore(tWord) + 0.02, tWord - 0.75);
     start = Math.min(start, tWord - 0.3); // land no later than ~0.2 s after the word starts
     K.cam(start, id, { ...o, dur });
+    goes.push({ id, lead: start + 0.15, arrive: start + dur, until: start + dur + 0.5 });
     return { start, arrive: start + dur, lead: start + 0.15, word: tWord };
   };
 
@@ -135,13 +160,18 @@
   const DT = 1 / 12, AHEAD = 0.45, BEHIND = 0.1, EASE = 0.25, SMIN = 0.8, OX = 540;
   K.free = function (el) { [].concat(el).forEach((e) => e.setAttribute("data-free", "")); return el; };
   let keepTab = null, wrap = null;
-  const setFix = (s, dx) => {
+  const setFix = (s, dx, dy = 0) => {
     if (!wrap) return;
-    wrap.style.translate = Math.abs(dx) > 0.01 ? `${dx.toFixed(2)}px 0px` : "";
+    const ty = Math.abs(dy) > 0.01;
+    wrap.style.translate = Math.abs(dx) > 0.01 || ty ? `${dx.toFixed(2)}px ${ty ? dy.toFixed(2) : 0}px` : "";
     wrap.style.scale = s < 0.9999 ? s.toFixed(5) : "";
   };
+  // caption band (visual defaults 2026-10-17): objects, text and tags stay above it while captions can show
+  const BAND_SEL = "img.obj, .t, .tag";
+  const bandAt = (t) => K.D.band && t >= (K.captionsFrom || 0) && t <= (K.captionsTo == null ? 1e9 : K.captionsTo);
   // constraints for the current frame: one {a, b, L, R} per visible element that is at least 30 % inside
-  const measure = () => {
+  // (with the band on, also its y0/y1, and `band` when it reaches more than 8 px into the caption band)
+  const measure = (band) => {
     const st = stage.getBoundingClientRect(), k = st.width / 1080 || 1, S = K.SAFE || {};
     const memo = new Map();
     const eff = (el) => {
@@ -164,26 +194,55 @@
       if (inside < 0.3 * (b - a)) return; // mostly outside: a neighbouring board or a deliberate peek
       if (eff(el) < 0.5) return;
       const lower = (y0 + y1) / 2 > (S.upperBottom || 1000);
-      out.push({ a, b, L: lower ? S.left || 120 : S.upperLeft || 65, R: lower ? S.right || 960 : S.upperRight || 1015 });
+      const c = { a, b, L: lower ? S.left || 120 : S.upperLeft || 65, R: lower ? S.right || 960 : S.upperRight || 1015 };
+      if (band) {
+        c.y0 = y0; c.y1 = y1;
+        if (el.matches(BAND_SEL) && Math.min(y1, K.CAPBAND[1]) - Math.max(y0, K.CAPBAND[0]) > 8) c.band = true;
+      }
+      out.push(c);
     });
     return out;
   };
   // smallest correction (largest scale <= 1, then smallest pan) that puts every element inside its band
   const solve = (cs) => {
-    if (!cs.length) return [1, 0];
+    if (!cs.length) return [1, 0, 0];
     const range = (s) => {
       let lo = -1e9, hi = 1e9;
       cs.forEach((c) => { lo = Math.max(lo, c.L - OX - s * (c.a - OX)); hi = Math.min(hi, c.R - OX - s * (c.b - OX)); });
       return [lo, hi];
     };
+    if (cs.some((c) => c.band)) return solveBand(cs, range);
     let s = 1, [lo, hi] = range(1);
     if (lo > hi) {
       let x = SMIN, y = 1;
       for (let i = 0; i < 18; i++) { const m = (x + y) / 2, r = range(m); if (r[0] <= r[1]) x = m; else y = m; }
       s = x; [lo, hi] = range(s);
-      if (lo > hi) return [s, (lo + hi) / 2]; // too wide even at SMIN: centre it
+      if (lo > hi) return [s, (lo + hi) / 2, 0]; // too wide even at SMIN: centre it
     }
-    return [s, Math.min(Math.max(0, lo), hi)];
+    return [s, Math.min(Math.max(0, lo), hi), 0];
+  };
+  // with something in the caption band: pan up first (no element above the safe top that was not already there),
+  // then zoom out about (540, K.view.y) down to SMIN; the side margins hold at every step
+  const solveBand = (cs, range) => {
+    const OY = K._wrapOY, TOP = (K.SAFE || {}).top || 270, B0 = K.CAPBAND[0];
+    const vrange = (s) => {
+      let lo = -1e9, hi = 0;
+      cs.forEach((c) => {
+        lo = Math.max(lo, Math.min(TOP, c.y0) - OY - s * (c.y0 - OY));
+        if (c.band) hi = Math.min(hi, B0 - OY - s * (c.y1 - OY));
+      });
+      return [lo, hi];
+    };
+    const ok = (s) => { const h = range(s), v = vrange(s); return h[0] <= h[1] && v[0] <= v[1]; };
+    let s = 1;
+    if (!ok(1)) {
+      let x = SMIN, y = 1;
+      if (ok(SMIN)) for (let i = 0; i < 18; i++) { const m = (x + y) / 2; if (ok(m)) x = m; else y = m; }
+      s = x;
+    }
+    const [lo, hi] = range(s), [vlo, vhi] = vrange(s);
+    const dx = lo > hi ? (lo + hi) / 2 : Math.min(Math.max(0, lo), hi);
+    return [s, dx, vlo > vhi ? vlo : vhi]; // vhi <= 0: the smallest pan up that clears the band
   };
   const inAny = (list, t) => list.some((m) => t > m.t && t < m.end);
   let seekBase = null;
@@ -198,7 +257,7 @@
       const mv = sorted.filter((m) => m.t <= t + 1e-6).pop();
       const k = inAny(snaps, t) ? "snap" : inAny(sorted, t) ? "move" : mv && mv.o.crop ? "free" : "settled";
       kind.push(k);
-      if (k === "settled") { seekBase(t); C.push(measure()); } else C.push(null);
+      if (k === "settled") { seekBase(t); C.push(measure(bandAt(t))); } else C.push(null);
     }
     // look ahead / behind inside each settled stretch, so the reframe is under way before an object lands
     const raw = T.map((t, i) => {
@@ -208,27 +267,27 @@
       for (let j = i + 1; j < n && kind[j] === "settled" && T[j] <= t + AHEAD; j++) cs.push(...C[j]);
       return solve(cs);
     });
-    // ease: average over +-EASE inside the stretch, never less zoom-out than this sample needs
+    // ease: average over +-EASE inside the stretch, never less zoom-out (or pan up) than this sample needs
     const half = Math.round(EASE / DT);
     const fix = raw.map((r, i) => {
       if (!r) return null;
-      let s = 0, d = 0, w = 0;
+      let s = 0, d = 0, e = 0, w = 0;
       for (let j = i - half; j <= i + half; j++) {
         const q = raw[Math.min(Math.max(j, 0), n - 1)] || r;
-        s += q[0]; d += q[1]; w++;
+        s += q[0]; d += q[1]; e += q[2]; w++;
       }
-      return [Math.min(s / w, r[0]), d / w];
+      return [Math.min(s / w, r[0]), d / w, Math.min(e / w, r[2])];
     });
     // camera moves blend between the corrections either side; free framings and snaps carry none in the table
     for (let i = 0; i < n; i++) {
       if (fix[i]) continue;
-      if (kind[i] !== "move") { fix[i] = [1, 0]; continue; }
+      if (kind[i] !== "move") { fix[i] = [1, 0, 0]; continue; }
       let a = i; while (a >= 0 && kind[a] === "move") a--;
       let b = i; while (b < n && kind[b] === "move") b++;
-      const fa = a >= 0 ? fix[a] || [1, 0] : [1, 0];
-      const fb = b < n ? raw[b] || [1, 0] : fa;
+      const fa = a >= 0 ? fix[a] || [1, 0, 0] : [1, 0, 0];
+      const fb = b < n ? raw[b] || [1, 0, 0] : fa;
       const u = (i - a) / (b - a);
-      fix[i] = [fa[0] + (fb[0] - fa[0]) * u, fa[1] + (fb[1] - fa[1]) * u];
+      fix[i] = [0, 1, 2].map((c) => fa[c] + (fb[c] - fa[c]) * u);
     }
     keepTab = { T, fix, kind };
   };
@@ -245,11 +304,11 @@
     setFix(1, 0);
     seek2(t);
     if (!keepTab) return;
-    if (inAny(snaps, t)) { const f = solve(measure()); setFix(f[0], f[1]); return; }
+    if (inAny(snaps, t)) { const f = solve(measure(bandAt(t))); setFix(f[0], f[1], f[2]); return; }
     const last = keepTab.T.length - 1, i = Math.max(0, Math.min(Math.floor(t / DT), last));
     const a = keepTab.fix[i], b = keepTab.fix[Math.min(i + 1, last)];
     const u = Math.min(1, Math.max(0, (t - keepTab.T[i]) / DT));
-    setFix(a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u);
+    setFix(a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u);
   };
 
   // ---------- entrances ----------
@@ -260,7 +319,13 @@
     hide(e);
     const fs = o.fromScale || 1.9;
     tl.fromTo(e, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.18, ease: "none", immediateRender: false }, o.at);
-    tl.fromTo(e, { scale: fs, x: o.fromX || 0, y: o.fromY == null ? 170 : o.fromY },
+    let from = { scale: fs, x: o.fromX || 0, y: o.fromY == null ? 170 : o.fromY };
+    if (K.D.fly) { // values resolve on first render, once the image has its size
+      let p = null;
+      const plan = () => p || (p = flyPlan(e, parent, o, K._cam, from));
+      from = { scale: () => plan().scale, x: () => plan().x, y: () => plan().y };
+    }
+    tl.fromTo(e, from,
       { scale: 1, x: 0, y: 0, duration: o.dur || 0.85, ease: "power3.out", immediateRender: false }, o.at);
     K.sfx(o.at, K.cue(o.sfx, "whoosh"), o.gain || 0.22);
     return e;
@@ -284,8 +349,15 @@
     tl.to(el, v, t);
     return el;
   };
+  // with the `punch` default, text, tags and marks go to 0 (a ghost label at 0.3 still reads); objects keep `op`
+  const TEXTISH = ".t, .tag, .card, .kdoc, .kcount, .ksrc, .kpin, .kpointer, .kmark, .kframe, svg";
   K.dim = function (els, t, op = 0.3, dur = 0.4) {
-    tl.to([].concat(els), { opacity: op, duration: dur, ease: "power2.inOut" }, t);
+    const list = [].concat(els);
+    if (!K.D.punch) { tl.to(list, { opacity: op, duration: dur, ease: "power2.inOut" }, t); return; }
+    const text = list.filter((e) => e.matches(TEXTISH) || e.querySelector(".t, .tag, svg.mk"));
+    const objs = list.filter((e) => !text.includes(e));
+    if (text.length) tl.to(text, { opacity: 0, duration: dur, ease: "power2.inOut" }, t);
+    if (objs.length) tl.to(objs, { opacity: op, duration: dur, ease: "power2.inOut" }, t);
   };
 
   // ---------- emphasis ----------
@@ -329,4 +401,75 @@
       out(t) { tl.to(r, { autoAlpha: 0, duration: 0.25 }, t); return this; },
     };
   };
+
+  // ---------- visual defaults (2026-10-17) ----------
+  // fly: cap, direction and a start box that stays out of the caption band and the headline (screen px, at the
+  // camera the scene set last, which is the arriving board's framing after K.go)
+  const heads = []; // {first, out} for every K.headline
+  const headBottom = (t) => {
+    if (!heads.some((h) => t >= h.first && (h.out == null || t < h.out))) return null;
+    const st = stage.getBoundingClientRect(), r = document.getElementById("headline").getBoundingClientRect();
+    return r.height ? (r.bottom - st.top) / (st.width / 1080 || 1) : null;
+  };
+  const flyPlan = (e, parent, o, cam, f0) => {
+    const id = boardOf(parent), bd = id && K.boards[id];
+    let { scale, x, y } = f0;
+    if (o.w > 500) scale = Math.min(scale, 1.4);
+    if (!bd) return { scale, x, y };
+    if (o.fromY == null && o.y > (bd.h || 860) / 2) y = -170; // lower half: from above, away from the captions
+    const c = cam || K.camAt(id), h = o.w * (e.naturalWidth ? e.naturalHeight / e.naturalWidth : 1);
+    const box = (s, dy) => { const cy = c.y + c.scale * (bd.y + o.y + dy), hh = (c.scale * h * s) / 2; return [cy - hh, cy + hh]; };
+    const fin = box(1, 0), cap = o.at >= (K.captionsFrom || 0) ? K.CAPBAND[0] : null, hb = headBottom(o.at);
+    const bad = (b) => (cap != null && b[1] > Math.max(cap, fin[1]) + 1) || (hb != null && b[0] < Math.min(hb, fin[0]) - 1);
+    if (!bad(box(scale, y))) return { scale, x, y };
+    while (scale > 1.05 && bad(box(scale, 0))) scale -= 0.05; // scale-only, and only as big as fits
+    return { scale: Math.max(1, scale), x: 0, y: 0 };
+  };
+
+  // lead: components whose last argument carries `at` are rewritten when that time falls inside a K.go window of
+  // their board (scene order: K.go before the board's elements, as in the recipe). Marks stay on their word.
+  const LEAD = ["text", "tag", "img", "card", "bar", "area", "line", "candles", "axis", "count", "pile", "stack", "doc",
+    "photo", "map", "glow", "shadow", "pin", "fg", "bgObj", "snap35", "flip", "browser", "fold", "fire", "takeaway"];
+  const CHART_DUR = { area: 1.6, line: 1.6, candles: 1.8 };
+  const leadArgs = (name, args) => {
+    const o = args[args.length - 1], parent = args[0];
+    if (!(parent instanceof Element) || !o || typeof o !== "object" || o instanceof Element || Array.isArray(o) ||
+        typeof o.at !== "number") return args;
+    const id = boardOf(parent);
+    const g = id && goes.filter((m) => m.id === id && o.at > m.lead + 1e-6 && o.at < m.until - 1e-6).pop();
+    if (!g) return args;
+    const n = { ...o, at: g.lead };
+    // a chart starting at arrival: ~40 % drawn when the camera lands, done 0.6 s later
+    if (CHART_DUR[name]) n.dur = Math.min(o.dur || CHART_DUR[name], g.arrive + 0.6 - g.lead);
+    if (name === "line" && typeof o.fillAt === "number" && o.fillAt > g.lead && o.fillAt < g.until) n.fillAt = g.lead;
+    return [...args.slice(0, -1), n];
+  };
+  let installed = false, depth = 0;
+  function installDefaults() {
+    if (installed || !Object.values(K.D).some(Boolean)) return;
+    installed = true;
+    LEAD.forEach((name) => {
+      const f = K[name];
+      if (typeof f !== "function") return;
+      K[name] = function (...args) {
+        if (K.D.lead && depth === 0) args = leadArgs(name, args); // nested calls (takeaway -> text) keep their times
+        depth++;
+        try { return f.apply(this, args); } finally { depth--; }
+      };
+    });
+    const punch0 = K.punch, head0 = K.headline;
+    K.punch = function (html, t0, t1, o = {}) {
+      const r = punch0(html, t0, t1, o);
+      if (K.D.punch) { // the caption under the dim read as ghost text
+        const cap = document.getElementById("captions");
+        tl.fromTo(cap, { opacity: 1 }, { opacity: 0, duration: 0.12, ease: "none", immediateRender: false }, t0);
+        tl.fromTo(cap, { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "none", immediateRender: false }, t1);
+      }
+      return r;
+    };
+    K.headline = function (parts, o) {
+      heads.push({ first: Math.min(...parts.map((q) => (q.at == null ? 0 : q.at))), out: o && o.out != null ? o.out : null });
+      return head0(parts, o);
+    };
+  }
 })();
