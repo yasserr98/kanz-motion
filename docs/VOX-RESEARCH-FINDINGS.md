@@ -1,3 +1,7 @@
+> **Historical (marked 2026-10-17).** This is the 2026-10-05 research that started the engine. It is background, not
+> current rules: the look, pace, hook and ending have changed since (`docs/LOOK-V2.md`, `docs/PACE.md`, `AGENTS.md`).
+> Where they differ, those win. Its "awaiting Ahmed's review" status below is the status it had on 2026-10-05.
+
 > Copied from the Kanz repo (`reports/vox-style-research-2026-10-05/FINDINGS.md`). Links to `research/` point to evidence that stays in the Kanz repo.
 
 # Vox style for Kanz: research findings

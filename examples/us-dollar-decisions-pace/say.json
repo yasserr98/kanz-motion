@@ -1,0 +1,6 @@
+{
+ "_why": "Voice-only spelling; captions keep script.md. 'يوصلك' came out stretched ('يوووصلك') at 1:14 in v2 (Ahmed, 2026-10-11). He picked test clip 3, 'يوصل لك' (out/pron/all-versions.mp3, 'the one before the last'); v4 splices that exact take in with splice.py.",
+ "replace": [
+  ["يوصلك", "يوصل لك"]
+ ]
+}

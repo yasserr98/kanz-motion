@@ -9,8 +9,11 @@ at K.fps (12 unique frames per second, written as 24 fps), pipes JPEG frames to 
 voice with the SFX cues the scene registered (library/sfx/manifest.json), and muxes the result.
 """
 import argparse
+import hashlib
+import inspect
 import json
 import random
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -195,6 +198,44 @@ def mix_audio(proj, cues, duration, out, t0=0.0, mix=1, bed=None, resolved=None)
     return sorted(used)
 
 
+MIX_CACHE_KEEP = 3  # newest cached mixes kept per project
+
+
+def mix_key(proj, cues, duration, t0, mix, bed, resolved):
+    """Content hash of everything the mix depends on: the voice, the resolved cues and their files, the timing, the
+    mix settings and the mixing code itself (workflow review M8, 2026-10-17)."""
+    h = hashlib.sha256()
+    h.update((proj / "audio" / "voice.wav").read_bytes())
+    files = sorted({f for _, f in resolved})
+    for f in files:
+        h.update(f.encode() + (ROOT / "library" / "sfx" / f).read_bytes())
+    h.update(json.dumps([[c, f] for c, f in resolved], sort_keys=True).encode())
+    h.update(json.dumps([round(duration, 4), round(t0, 4), mix, bed, BED_UNDER_VOICE, SFX_TARGET, SR]).encode())
+    for fn in (mix_audio, mix_audio_v2, room_tone, decode, env_db, smooth_gain):
+        h.update(inspect.getsource(fn).encode())
+    return h.hexdigest()[:24]
+
+
+def cached_mix(proj, cues, duration, out, t0=0.0, mix=1, bed=None, resolved=None):
+    """mix_audio, reusing out/_mix-cache/<hash>.wav when nothing the mix depends on has changed."""
+    resolved = resolve_cues(cues, t0) if resolved is None else resolved
+    cache = proj / "out" / "_mix-cache"
+    key = mix_key(proj, cues, duration, t0, mix, bed, resolved)
+    wav, meta = cache / f"{key}.wav", cache / f"{key}.json"
+    if wav.is_file() and meta.is_file():
+        shutil.copyfile(wav, out)
+        print(f"  audio mix: cached ({key})")
+        return json.loads(meta.read_text(encoding="utf-8"))
+    used = mix_audio(proj, cues, duration, out, t0, mix, bed, resolved)
+    cache.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(out, wav)
+    meta.write_text(json.dumps(used), encoding="utf-8")
+    for old in sorted(cache.glob("*.wav"), key=lambda f: f.stat().st_mtime)[:-MIX_CACHE_KEEP]:
+        old.unlink()
+        old.with_suffix(".json").unlink(missing_ok=True)
+    return used
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("project")
@@ -324,7 +365,7 @@ def main():
             close_encoder(ff)
         browser.close()
     audio = out_dir / f"_{name}-audio.wav"
-    used = mix_audio(proj, cues, t1, audio, a.t0, mix, bed, resolved)
+    used = cached_mix(proj, cues, t1, audio, a.t0, mix, bed, resolved)
     final = out_dir / f"{name}.mp4"
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(silent), "-i", str(audio), "-c:v", "copy", "-c:a", "aac",
                     "-b:a", "192k", "-shortest", "-movflags", "+faststart", str(final)], check=True)
