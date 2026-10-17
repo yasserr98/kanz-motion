@@ -21,7 +21,6 @@ import urllib.request
 from pathlib import Path
 
 FRED = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={}"
-AR_DIGITS = str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩")
 
 
 def parse(text):
@@ -110,7 +109,7 @@ def main():
     print(f"saved {out} ({len(rows)} points) and a line in {credits}")
     print(f"first {rows[0][0]} = {rows[0][1]:g} | last {rows[-1][0]} = {rows[-1][1]:g} | min {lo[0]} = {lo[1]:g} | max {hi[0]} = {hi[1]:g}")
     print("data: [" + ", ".join(f"{v:g}" for v in vals) + "]")
-    print(f'source: "{label} · {f"{d.day}/{d.month}/{d.year}".translate(AR_DIGITS)}"')
+    print(f'source: "{label} · {d.day}/{d.month}/{d.year}"')  # Western digits (RULES NUM-3, 2026-10-17)
 
 
 if __name__ == "__main__":

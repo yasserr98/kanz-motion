@@ -32,7 +32,7 @@ voice note ─► transcribe (word timings) ─► cut retakes, tighten pauses, 
 - **Shorts from a long video** (2026-10-16): `engine/footage.py` cuts the speaker's face, voice and word timings
   from a long Kanz video into a project; `runtime/kanz-footage.js` (`K.footage`) alternates that face with the motion
   boards, captions running across both, with a clean cut onto an already-built board at every change (`xstyle`); `--tv-until` keeps a styled
-  source opening (the speaker in a TV set) and zooms into the face. Route and rules: `AGENTS.md`, "Shorts cut from a long Kanz video".
+  source opening (the speaker in a TV set) and zooms into the face. Route: [docs/routes/shorts.md](docs/routes/shorts.md).
 - **Photos and Codex images** (2026-10-16): `K.screen()` (`runtime/kanz-snap.js`) fills the frame with a photo of a
   place and darkens the headline and caption bands as much as that photo needs; `K.snap35()` shows a real, licensed
   photo of a person or moment as a disposable-camera print (no date). `engine/codex_assets.py` generates a video's
@@ -50,7 +50,8 @@ cd kanz-motion
 npm ci
 python -m pip install -r requirements.txt
 python -m playwright install chromium
-python engine/make.py review pilot-01 3,20,45   # smoke test: writes projects/pilot-01/out/review.jpg
+python engine/make.py doctor                    # checks tools, fonts, keys, render host, Codex, references
+python engine/make.py review us-dollar-decisions-pace 3,20,45   # smoke test: examples/us-dollar-decisions-pace/out/review.jpg
 ```
 
 For ElevenLabs copy `.env.example` to `.env` and fill in the key (never commit `.env`). With a key,
@@ -69,8 +70,7 @@ python engine/make.py breaths my-video          # sighs/breaths to mute: audio/e
 # 2. correct projects/my-video/script.md (fix recognition slips, mark *keywords*), write scene.js (the visuals)
 python engine/lint.py projects/my-video         # safe zones, dead stretches, thin frames: out/lint.jpg
 python engine/make.py review my-video 2,10,30   # one contact sheet: out/review.jpg
-python engine/make.py render my-video v1
-python engine/make.py check my-video v1         # frames from the MP4 + loudness: out/check-v1.jpg
+python engine/make.py ship my-video v1          # lint --strict, render, MP4 frames, loudness; stops at the first failure
 ```
 
 ## Make a video from a written script (ElevenLabs)
@@ -84,34 +84,36 @@ python engine/make.py retime my-video           # pace: pauses to 0.3 s, 1.08x, 
 # write scene.js, then review / render / check as above
 ```
 
-`projects/pilot-01/` (voice note) and `projects/real-estate-never-loses/` (written script) are the
-worked examples. Their voice audio is not in the repo (Ahmed's voice stays private), so a fresh clone
-can render their stills but not their full MP4. **Before making videos in volume read [docs/EFFICIENCY.md](docs/EFFICIENCY.md)**:
+Worked examples, one per route, all on look v2 + pace: `examples/us-dollar-decisions-pace` (script, and the scene to
+copy for a voice note too), `examples/short-house-always-wins` (shorts) and `examples/what-is-inflation` (the voice-note
+audio steps only). Their voice audio is not in the repo (Ahmed's voice stays private), so a fresh clone can render their
+stills but not their full MP4. Your own videos live in `projects/`, which Git ignores. **Before making videos in volume read [docs/EFFICIENCY.md](docs/EFFICIENCY.md)**:
 which model to use, how to keep each video cheap, and the usage log.
 
 ## Layout
 
 | Path | What |
 | --- | --- |
-| `engine/` | `make.py` (step runner), `transcribe` (Scribe / Whisper), `tts`, `align` (forced alignment), `captions`, `edit_audio`, `breaths` (sighs to mute), `retime` (pace: pauses + tempo), `voicecheck` (TTS failures, `library/voice/lexicon.json`), `render`, `contact` (review sheets), `lint` (pre-render checks), `contrast` (headline contrast over photos), `cover` (Reel cover, style A), `data` (real series for charts, with sources), `codex_assets` (images and icons through Codex, from `shots.json`), `footage` (shorts cut from a long video), `sfx_library`, `sfx_gen` (generated SFX), `eleven` (API client), `provenance` (hashes for voice-derived timings), `console` (UTF-8 output), `vps_render.sh` (render on a server) |
+| `engine/` | `make.py` (step runner), `transcribe` (Scribe / Whisper), `tts`, `align` (forced alignment), `captions`, `edit_audio`, `breaths` (sighs to mute), `retime` (pace: pauses + tempo), `voicecheck` (TTS failures, `library/voice/lexicon.json`), `render`, `contact` (review sheets), `lint` (pre-render checks), `doctor` (setup check), `objects` (object approval status), `contrast` (headline contrast over photos), `cover` (Reel cover, style A), `data` (real series for charts, with sources), `codex_assets` (images and icons through Codex, from `shots.json`), `footage` (shorts cut from a long video), `sfx_library`, `sfx_gen` (generated SFX), `eleven` (API client), `provenance` (hashes for voice-derived timings), `console` (UTF-8 output), `vps_render.sh` (render on a server) |
 | `runtime/` | `kanz.js` (timeline + components) and `kanz.css` (brand tokens, layout); `kanz-look.js/.css` look v2 (safe zones, light, depth, documents, photos, maps, counting numbers, piles), see [docs/LOOK-V2.md](docs/LOOK-V2.md); `kanz-pace.js` pacing layer (arrive built, drift, carry, room tone, frame guard), see [docs/PACE.md](docs/PACE.md); `kanz-3d.js` (`K.flip`, `K.browser`, `K.fold`, worked example `projects/_3d-demo`); `kanz-snap.js` (`K.screen` full-screen photos, `K.snap35` disposable prints); `kanz-footage.js` (`K.footage`, face windows for shorts) |
 | `brand/` | Kanz fonts, logo and colour tokens (copied from the Kanz repo's `assets/kanz-brand-current`) |
-| `library/objects/` | grayscale editorial objects (from the Kanz motion library) and their `PROVENANCE-*.md` generation records |
+| `library/objects/` | grayscale editorial objects (from the Kanz motion library), `manifest.json` (approved / candidate status of each) and their `PROVENANCE-*.md` generation records |
 | `library/backgrounds/` | the approved charcoal grain background |
 | `library/sfx/` | 124 CC0 one-shots + generated effects (register, riser, shutter) (`generated.json`, prompt per file) + `manifest.json` (source page and licence for each file) |
 | `library/voice/` | `lexicon.json`: words the cloned voice gets wrong (`replace` respellings, `watch` flags) |
-| `projects/_template/` | what `make.py new` / `make.py script` copy into a new project |
-| `projects/<name>/` | one video: audio edit list, transcripts, `script.md`, `scene.js`, `shots.json`, `CREDITS.md` (sources, licences, post-caption credits); `out/` (renders) is not committed |
+| `projects/_template/` | what `make.py new` / `make.py script` copy into a new project; `projects/_*-demo/` engine demos (no voice, not for posting) |
+| `projects/<name>/` | one video: audio edit list, transcripts, `script.md`, `scene.js`, `shots.json`, `CREDITS.md` (sources, licences, post-caption credits). Local only: Git ignores your projects |
+| `examples/<name>/` | the curated worked examples (approved for posting, without record ids or receipts) |
 | `shorts/<video>/` | candidate moments and picker pages for shorts cut from a long video; source media, photos and full transcripts stay local |
 | `tests/` | `python -m pytest tests` (engine), `runtime_checks.py` and `golden_stills.py` (runtime), `RUNTIME-REVIEW.md` |
-| `docs/` | `LOOK-V2.md`, `PACE.md` (current look and pace), `HANDOVER-SETUP.md` and `UPDATE.md` (editors), `EFFICIENCY.md` (model choice, usage log), `CODEX-ASSET-REQUESTS.md` (object batches), `VOX-RESEARCH-FINDINGS.md` (2026-10-05 research, historical) |
+| `docs/` | `RULES.md` (rules in force, with ids), `DECISIONS.md` (Ahmed's dated decisions), `routes/` (voice note, script, shorts, image pass), `LOOK-V2.md`, `PACE.md` (look and pace components), `HANDOVER-SETUP.md` and `UPDATE.md` (editors), `EFFICIENCY.md` (model choice, lean sessions), `CODEX-ASSET-REQUESTS.md` (object batches), `VOX-RESEARCH-FINDINGS.md` (2026-10-05 research, historical) |
 | `voice-clone/` | local only (git-ignored) |
 
 ## Rules
 
-Read [AGENTS.md](AGENTS.md) before changing anything. In short: keep the approved Kanz visual
-identity, make new objects only through Codex following the Kanz MD rules, and never put real
-market numbers on screen without a source.
+Read [AGENTS.md](AGENTS.md) (the checklist) and [docs/RULES.md](docs/RULES.md) (the rules in force) before changing
+anything. In short: keep the approved Kanz visual identity, make new objects only through Codex following the Kanz MD
+rules, and never put real market numbers on screen without a source.
 
 ## Licences
 
