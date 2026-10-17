@@ -73,6 +73,17 @@ def sheet(src, out):
     return make_sheet(src, out)
 
 
+def warn_stale_lint(proj):
+    """Review reminder only; never blocks a render."""
+    report, scene = proj / 'out' / 'lint.json', proj / 'scene.js'
+    reason = 'missing' if not report.exists() else (
+        'older than scene.js' if scene.exists() and report.stat().st_mtime_ns < scene.stat().st_mtime_ns else None)
+    if reason:
+        print(f'\nWARNING: VISUAL REVIEW IS STALE — out/lint.json is {reason}.\n'
+              f'Run python engine/lint.py projects/{proj.name} and review its findings. Rendering continues.\n',
+              file=sys.stderr)
+
+
 def main():
     if len(sys.argv) < 3:
         print(__doc__)
@@ -128,6 +139,7 @@ def main():
         run([PY, "engine/render.py", proj, "--stills", arg, "--name", "review"])
         print("review sheet ->", sheet(out / "stills-review", out / "review.jpg"))
     elif step == "render":
+        warn_stale_lint(proj)
         captions(proj)
         run([PY, "engine/render.py", proj, "--name", f"{name}-{arg or 'v1'}"])
     elif step == "check":
