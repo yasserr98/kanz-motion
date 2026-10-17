@@ -414,6 +414,14 @@
       bg = document.createElement("div"); bg.id = "paperworld"; stage.insertBefore(bg, world);
       tl.set(bg, { autoAlpha: 0 }, 0);
     }
+    // explicit charcoal at 0 (the pace layer makes #paperworld itself, so not inside the block above): without it,
+    // seeking back before the first wipe left "paper" on the stage and every text turned ink on charcoal
+    // (2026-10-17, us-dollar-decisions-pace stills: "why is text painted in black")
+    if (!K._worldInit) {
+      K._worldInit = true;
+      stage.setAttribute("data-world", "charcoal");
+      tl.set(stage, { attr: { "data-world": "charcoal" } }, 0);
+    }
     const dur = o.dur || 0.6;
     if (name === "paper") {
       tl.fromTo(bg, { autoAlpha: 1, clipPath: "inset(0 0 0 100%)" }, { autoAlpha: 1, clipPath: "inset(0 0 0 0%)", duration: dur, ease: "power3.inOut", immediateRender: false }, t);
