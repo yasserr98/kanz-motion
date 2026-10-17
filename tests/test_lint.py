@@ -174,3 +174,26 @@ def test_render_warns_and_still_runs(project, monkeypatch, capsys):
     make.main()
     assert calls[0] == 'captions' and 'engine/render.py' in calls[1]
     assert 'WARNING' in capsys.readouterr().err
+
+
+def _item(i, kind, txt, **kw):
+    base = dict(id=i, kind=kind, txt=txt, opacity=1, label=kind == 'text', fs=40, board='1', x0=0, x1=100, y0=0, y1=10)
+    return {**base, **kw}
+
+
+def test_defaults_findings_digits_sizes_crowding_and_caption_echo():
+    import lint
+    frame = {'items': [
+        _item(1, 'caption', 'السعر طلع في عشر سنين'),
+        _item(2, 'text', 'طلع في عشر'),                 # echoes the caption
+        _item(3, 'text', 'نسبة 10%', fs=30),             # Latin % and below 34 px
+        _item(4, 'text', '٣٥'),                          # Arabic-Indic with K.DIGITS = en
+        _item(5, 'text', 'المصدر: FRED', src=True, fs=26),
+        _item(6, 'text', 'واحد'), _item(7, 'text', 'اتنين'),
+    ]}
+    kinds = sorted(h['kind'] for h in lint.defaults_findings(1.0, frame, 'en'))
+    assert kinds == ['caption-repeat', 'crowded-board', 'digits', 'digits', 'small-text', 'small-text']
+    ok = {'items': [_item(1, 'caption', 'السعر طلع'), _item(2, 'text', 'نسبة 10٪'), _item(3, 'text', 'السعر')]}
+    assert lint.defaults_findings(1.0, ok, 'en') == []
+    assert [h['why'] for h in lint.defaults_findings(1.0, {'items': [_item(1, 'text', '35')]}, 'ar')] == \
+        ['digits other than K.DIGITS = ar']

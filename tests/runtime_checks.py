@@ -184,6 +184,26 @@ CHECKS = {
       check(!K.warnings.length, 'warned with a target');
       K.arrow(a, 1, 2, 3, 4, {at:1}); check(K.warnings.some(w => w.includes('K.arrow without a target')), 'no warning');
     }""",
+    "fly start values are numbers": """async () => {
+      K.pace({keep:false, defaults:'2026-10-17'});
+      const e = K.img(a, pic, {x:500, y:300, w:300, at:1, enter:'fly', shadow:false});
+      await Promise.all(Array.from(document.images).map(i => i.decode()));
+      K.seek(1.05); const s = gsap.getProperty(e, 'scaleX');
+      check(typeof s === 'number' && isFinite(s) && s > 1, 'fly start scale ' + s);
+      K.seek(3); check(near(gsap.getProperty(e, 'scaleX'), 1), 'fly did not settle');
+    }""",
+    "one digit system and no snap": """() => {
+      K.pace({keep:false, defaults:'2026-10-17'});
+      const t = K.tag(a, 'نسبة ٣٥% <b style="font-size:40px">١٠</b>', {x:500, y:300});
+      check(t.textContent === 'نسبة 35٪ 10' && t.innerHTML.includes('font-size:40px'), 'digits: ' + t.innerHTML);
+      K.DIGITS = 'ar'; const u = K.tag(a, '35%', {x:500, y:400}); K.DIGITS = 'en';
+      check(u.textContent === '٣٥٪', 'arabic-indic: ' + u.textContent);
+      K.snap(1, 1.3, .5); K.seek(1.2);
+      check(near(gsap.getProperty(document.getElementById('camwrap'), 'scaleX') || 1, 1), 'snap still zooms');
+      check(K.warnings.some(w => w.includes('K.snap is off')), 'no snap warning');
+      K.snap(2, 1.3, .5, {force:true}); K.seek(2.2);
+      check(near(gsap.getProperty(document.getElementById('camwrap'), 'scaleX'), 1.3), 'forced snap missing');
+    }""",
     "cut and transition preserve guard transform": """() => {
       const w=document.getElementById('camwrap'); w.style.translate='12px 0px';w.style.scale='.9';
       K.footage({dir:'test',n:1,windows:[[0,2]],xstyle:window.testStyle,sfx:false});

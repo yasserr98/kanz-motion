@@ -18,6 +18,11 @@ Reads the live page (no video render) and reports:
   markup-crossing-text  SVG marks / .kframe / .kmark boxes crossing text; K.strike and marks sized to an element
                         (K.oval/K.rect/K.arrow with a target, which clear it by 16 px) are exempt
   structure  K.look without K.pace, missing/non-final K.finish, logo images or slide-counter literals
+With the 2026-10-17 defaults on (K.pace({defaults: "2026-10-17"}), review samples approved by Ahmed):
+  digits          on-screen text in the other digit system than K.DIGITS, or a Latin % next to Arabic text
+  small-text      labels under 34 px, source lines under 28 px (board px)
+  crowded-board   more than four labels on one board at once (titles, the headline and source lines not counted)
+  caption-repeat  a label (two words or more) that repeats the caption on screen word for word
 Dead findings exclude the simple hook (t < K.captionsFrom) and K.footage face windows.
 Writes out/lint.json and, when there are findings, out/lint.jpg. Exit code defaults to 0.
 --strict exits 1 for findings not justified by lint-ok.json, a list of
@@ -91,7 +96,11 @@ PROBE = """(t) => {
     const chart = !!el.closest('[data-lint-chart]');
     const drawn = chart && length && cs.strokeDasharray !== 'none' ?
       Math.max(0, Math.min(1, 1 - Math.abs(parseFloat(cs.strokeDashoffset) || 0) / length)) : null;
+    const bd = el.closest('.board');
+    if (bd && !bd.dataset.lkb) bd.dataset.lkb = String((window.__lkb = (window.__lkb || 0) + 1));
     out.push({ id: +el.dataset.lid, kind, opacity: o, label: el.matches(COVERSEL),
+      fs: parseFloat(cs.fontSize) || 0, src: el.matches('.ksrc'), head: !!el.closest('#headline, .head'),
+      board: bd ? bd.dataset.lkb : null,
       parents: [...(function* () { for (let p = el.parentElement; p; p = p.parentElement)
         if (p.dataset.lid) yield +p.dataset.lid; })()],
       markup: el.matches('svg.mk path, svg.mk polyline, svg.mk rect, .kframe, .kmark') &&
@@ -280,6 +289,52 @@ def frame_findings(t, frame):
     return out
 
 
+AR_LETTER = re.compile(r'[\u0621-\u064A]')
+TASHKEEL = re.compile(r'[\u064B-\u065F\u0640*%٪،؟?!.,:؛«»…"()\-]')
+
+
+def norm_words(text):
+    t = TASHKEEL.sub(' ', text)
+    t = re.sub('[إأآ]', 'ا', t).replace('ى', 'ي').replace('ة', 'ه')
+    return t.split()
+
+
+def defaults_findings(t, frame, digits):
+    """Checks for the 2026-10-17 defaults (one digit system, size floors, four labels per board, no caption echo)."""
+    items = [i for i in frame['items'] if i.get('opacity', 1) >= .5 and i['kind'] in ('text', 'caption') and i['txt']]
+    out = []
+    wrong = re.compile('[٠-٩۰-۹]' if digits == 'en' else '[0-9]')
+    for i in items:
+        if wrong.search(i['txt']):
+            out.append(dict(kind='digits', t=t, id=i['id'], what=i['txt'], why=f'digits other than K.DIGITS = {digits}'))
+        if '%' in i['txt'] and AR_LETTER.search(i['txt']):
+            out.append(dict(kind='digits', t=t, id=i['id'], what=i['txt'], why='Latin % next to Arabic text (use ٪)'))
+        if i['kind'] == 'text' and i.get('fs'):
+            floor = 28 if i.get('src') else 34
+            if i['fs'] < floor - .5:
+                out.append(dict(kind='small-text', t=t, id=i['id'], what=i['txt'], why=f"{i['fs']:.0f} px < {floor} px"))
+    labels = [i for i in items if i['kind'] == 'text' and i.get('label') and not i.get('head') and not i.get('src')
+              and i.get('board') and i['x1'] > 0 and i['x0'] < 1080 and i['y1'] > 0 and i['y0'] < 1920]
+    boards = {}
+    for i in labels:
+        boards.setdefault(i['board'], []).append(i)
+    for board, ls in boards.items():
+        if len(ls) > 4:
+            out.append(dict(kind='crowded-board', t=t, id=f'board{board}', what=' | '.join(i['txt'][:20] for i in ls),
+                            why=f'{len(ls)} labels > 4'))
+    caps = [norm_words(i['txt']) for i in items if i['kind'] == 'caption']
+    for i in items:
+        if i['kind'] != 'text' or not i.get('label'):
+            continue
+        w = norm_words(i['txt'])
+        for c in caps:
+            n = len(w)
+            if (n >= 2 or (n == 1 and c == w)) and any(c[k:k + n] == w for k in range(len(c) - n + 1)):
+                out.append(dict(kind='caption-repeat', t=t, id=i['id'], what=i['txt'], why='repeats the caption'))
+                break
+    return out
+
+
 def brief_findings(frames, end, every):
     """Sum visible sample intervals, including separate appearances of the same DOM label."""
     labels = {}
@@ -415,6 +470,10 @@ def main():
         sampled = {t: page.evaluate(probe, t) for t in sorted(set(sample_times + fine_times + arrival_times))}
         frames = [(t, sampled[t]) for t in sample_times]
         new_findings = merge_hits([h for t, f in frames for h in frame_findings(t, f)], a.every)
+        defaults_on = page.evaluate("Object.values(K.D || {}).some(Boolean)")
+        if defaults_on:
+            digits = page.evaluate("K.DIGITS || 'en'")
+            new_findings += merge_hits([h for t, f in frames for h in defaults_findings(t, f, digits)], a.every)
         new_findings += brief_findings([(t, sampled[t]) for t in fine_times], scene_end, step)
         for h in arrivals:
             if h['t'] in sampled:
@@ -569,7 +628,8 @@ def main():
         print(f"  objects past the side margin: {len(edge) or 'none'}")
         for h in edge:
             print(f"    {h['from']:6.2f}-{h['to']:6.2f}s  {h['what']}")
-        for kind in ('text-on-text', 'covered-shape', 'caption-band', 'brief', 'half-built-arrival', 'markup-crossing-text', 'structure'):
+        extra = ('digits', 'small-text', 'crowded-board', 'caption-repeat') if defaults_on else ()
+        for kind in ('text-on-text', 'covered-shape', 'caption-band', 'brief', 'half-built-arrival', 'markup-crossing-text', 'structure') + extra:
             hits = [h for h in new_findings if h['kind'] == kind]
             print(f'  {kind}: {len(hits)} finding(s)')
             for h in hits:

@@ -13,7 +13,8 @@ const OBJ = "../../library/objects/";
 K.look(); // look v2 (docs/LOOK-V2.md): safe zones, light, contact shadows. Call before the first K.cam()
 // pace (docs/PACE.md): smooth camera, 24 fps motion, mix 2, room tone, drift between moves (K.finish).
 // defaults (docs/PACE.md "Visual defaults"): caption band kept clear, boards arrive built, punch hides the caption,
-// capped fly-ins, marks sized to their element. Switch one off with e.g. { defaults: "2026-10-17", fly: false }
+// capped fly-ins, marks sized to their element, one digit system (K.DIGITS), 28/34 px floors, paper contrast, no snap
+// zooms. Switch one off with e.g. { defaults: "2026-10-17", fly: false }
 K.pace({ defaults: "2026-10-17" });
 // snake layout: neighbours 1,100 px apart in a row, rows 1,800 apart (closer rows show under the captions)
 const hook = K.board("hook", 0, 0), b2 = K.board("two", -1100, 0);
@@ -33,7 +34,6 @@ K.settle(hero, 0, { fromScale: 1.45, fromY: 70, dur: 1.2 });
 // K.carry(hero, "two", g2.start, { x: 500, y: 760, w: 260, opacity: 0.3 }); // carry the hero when it returns later
 K.img(b2, OBJ + "kanz-house-v01.png", { x: 760, y: 330, w: 420, at: g2.lead, enter: "fly" });
 // K.frame(N("التالية") - 0.25, "two");                 // pull out to the whole board on the second idea
-// K.snap(N("مهم"), 1.25, 0.6);                         // snap zoom on an emphasis word (a few per video)
 // const word = K.text(b2, "الكلمة", { x: 500, y: 120, size: 80, head: true, at: g2.lead });
 // K.oval(b2, word, { at: N("الكلمة") });                // marks take the element they point at (box + 16 px)
 // K.arrow(b2, word, house2, { at: N("البيت") });        // an arrow names its target

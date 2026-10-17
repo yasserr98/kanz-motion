@@ -253,7 +253,7 @@
     const im = K.el("img", "", p); im.src = src;
     if (o.pos) im.style.objectPosition = o.pos;
     let c;
-    if (o.credit) { c = K.el("div", "ksrc", parent, o.credit); gsap.set(c, { fontSize: 22 }); place(c, o.x, o.y + o.h / 2 + 34); }
+    if (o.credit) { c = K.el("div", "ksrc", parent, o.credit); gsap.set(c, { fontSize: K.D.sizes ? 28 : 22 }); place(c, o.x, o.y + o.h / 2 + 34); }
     if (o.at != null) {
       hide(p);
       tl.fromTo(p, { autoAlpha: 0, scale: 0.95, y: 50 }, { autoAlpha: 1, scale: 1, y: 0, duration: 0.6, ease: "power3.out", immediateRender: false }, o.at);
@@ -317,12 +317,13 @@
     const e = K.el("div", "kcount" + (o.head === false ? "" : " head"), parent);
     gsap.set(e, { fontSize: o.size || 140, color: o.color || "#fff", fontWeight: o.head === false ? 500 : 700 });
     place(e, o.x, o.y);
-    const nf = new Intl.NumberFormat(o.digits === "en" ? "en-US" : "ar-EG",
+    const dg = o.digits || (K.D.digits ? K.DIGITS : "ar");
+    const nf = new Intl.NumberFormat(dg === "en" ? "en-US" : "ar-EG",
       { minimumFractionDigits: o.decimals || 0, maximumFractionDigits: o.decimals || 0, useGrouping: o.group !== false });
     const st = { v: o.from || 0 }, step = o.step || 0;
     const paint = () => {
       const v = step ? Math.round(st.v / step) * step : st.v;
-      e.innerHTML = (o.prefix || "") + `<bdi class="num">${nf.format(v)}</bdi>` + (o.suffix || "");
+      e.innerHTML = K.fmtNum((o.prefix || "") + `<bdi class="num">${nf.format(v)}</bdi>` + (o.suffix || ""));
     };
     paint();
     hide(e);
