@@ -23,6 +23,10 @@ def offline(monkeypatch):
     monkeypatch.setattr(tts, "call", forbidden)
     monkeypatch.setattr(render, "sync_playwright", forbidden)
     monkeypatch.setattr(contrast, "sync_playwright", forbidden)
+    # the machine's own .env must not route test renders to the VPS (tests that need a host set one)
+    import make
+    monkeypatch.delenv("KANZ_RENDER_HOST", raising=False)
+    monkeypatch.setattr(make, "render_host", lambda: None)
 
 
 @pytest.fixture
