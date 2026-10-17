@@ -112,6 +112,7 @@
     const safe = () => { try { measure(); } catch (err) { paint(0.86, 0.82); e.dataset.lift += " (unmeasured)"; } };
     if (img.complete && img.naturalWidth) safe(); else img.addEventListener("load", safe);
     // a soft dark halo behind board text while any photo fills the screen
+    if (screens === 1) { stage.setAttribute("data-screen", "off"); tl.set(stage, { attr: { "data-screen": "off" } }, 0); }
     tl.set(stage, { attr: { "data-screen": "on" } }, at);
     tl.set(stage, { attr: { "data-screen": "off" } }, out);
     stage.insertBefore(e, before);
