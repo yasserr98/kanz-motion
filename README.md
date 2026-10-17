@@ -36,6 +36,7 @@ voice note ─► transcribe (word timings) ─► cut retakes, tighten pauses, 
   place and darkens the headline and caption bands as much as that photo needs; `K.snap35()` shows a real, licensed
   photo of a person or moment as a disposable-camera print (no date). `engine/codex_assets.py` generates a video's
   photos and icons with Codex from `shots.json`; `engine/contrast.py` checks every headline on the rendered frame (4.5:1).
+  The template loads it, so voice-note and script Reels use the same three visual types as the shorts (2026-10-17).
 - **Render on a server** (2026-10-16): `bash engine/vps_render.sh <slug> <name>` with `KANZ_RENDER_HOST` in `.env`.
 
 ## Setup (once, on a new computer)

@@ -49,6 +49,8 @@ repo or a Kanz worktree (worktrees do not contain this folder; use the absolute 
 4. **Breaths and sighs.** `python engine/breaths.py projects/<slug>`; mute real ones via `"mute"` in
    `audio/edl.json` and re-run `engine/edit_audio.py`. Mention any you left in.
 5. **Script and captions.** Voice note: correct `script.md` from the transcript and flag uncertain words.
+   Then the **image pass** ("Images and icons: always ask Codex" below): `shots.json` from the whole script, the visual
+   type per shot, Codex generates, before the scene is written.
 6. **Scene.** New videos use look v2 (`docs/LOOK-V2.md`, `K.look()`; the template has it). Copy the closest finished `scene.js` (pilot-01 for a voice note, real-estate-never-loses
    for a script) and adapt it. Approved `library/objects/` only; new objects go through Codex + Ahmed.
    Defaults since 2026-10-11 (`docs/LOOK-V2.md` section 9): complete first frame, fill the frame, charts with
@@ -115,6 +117,13 @@ note or short, gets an image pass before the scene is written. Do not settle for
    brightest background pixels behind it; raise `dark:` or move the text if one fails.
    Rhythm in a short: face -> place photo -> icon mechanism -> face. Open a board on a place photo when the line sets the
    scene, then cut to charcoal for the mechanism. A real person appears as a print, never as an icon or a generated photo.
+   **Voice-note and script Reels use the same three types (Ahmed 2026-10-17: "can this flow be incorporated in the VNs
+   too").** There is no face, so the rhythm is: hook (the simple-hook rule still holds: headline + one hero) -> place
+   photo -> icon mechanism -> print for a real person, and back to charcoal. The template loads `runtime/kanz-snap.js`.
+   Because the world stays visible over a photo, a place photo gets **a board of its own that holds only text and
+   tags** (`K.go` to it, `K.screen` from `g.start`); never drop a photo behind a board that already has icons. Keep a
+   print in its board's upper two thirds (centre y ≤ ~600 at the board's zoom) so it clears the captions, and keep other
+   board text off it. Check every photo moment with `contrast.py` and every print in the review sheet.
 3. **Generate with Codex, without asking first.** `python engine/codex_assets.py projects/<slug>/shots.json --jobs 4`.
    Set each shot's `modes` to the type above (`free` for places, `kanz` for icons). Outputs and `PROVENANCE.md` land in
    `projects/<slug>/assets/codex/`. Compare icons with the references and regenerate mismatches; check photos for text,
