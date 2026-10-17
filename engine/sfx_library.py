@@ -102,6 +102,14 @@ def split_hits(x, n, max_len):
 
 
 def main():
+    gen = OUT / "generated.json"
+    generated = json.loads(gen.read_text(encoding="utf-8")) if gen.exists() else []
+    sources = [RAW / s[2] for s in SOURCES]
+    sources += [RAW / folder / f for _, _, folder, files in KENNEY for f in files]
+    sources += [OUT / g["file"] for g in generated]
+    missing = [str(p) for p in sources if not p.is_file()]
+    if missing:
+        raise SystemExit("missing SFX sources; library unchanged:\n" + "\n".join(missing))
     manifest = []
     counters = {}
     for cat, name, rel, page, n, max_len in SOURCES:
@@ -136,4 +144,6 @@ def main():
 
 
 if __name__ == "__main__":
+    from console import utf8
+    utf8()
     main()

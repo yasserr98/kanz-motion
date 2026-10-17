@@ -13,9 +13,11 @@ import hashlib
 import json
 import re
 import sys
+import subprocess
 from pathlib import Path
 
 import eleven
+from provenance import current, stamp
 
 
 def spoken_text(md):
@@ -31,22 +33,34 @@ def main():
     proj = Path(a.project).resolve()
     voice, out = proj / "audio" / "voice.wav", proj / "transcript.aligned.json"
     tr = proj / "transcript.json"
-    if tr.exists() and json.loads(tr.read_text(encoding="utf-8")).get("source") == "elevenlabs":
-        print("voice is ElevenLabs TTS: its timings are already exact, no alignment needed")
-        return
     if not voice.exists() or not (proj / "script.md").exists():
         sys.exit(f"align needs {voice} and script.md")
     text = spoken_text((proj / "script.md").read_text(encoding="utf-8"))
+    if tr.exists():
+        data = json.loads(tr.read_text(encoding="utf-8"))
+        if data.get("source") == "elevenlabs" and current(data, voice, "TTS transcript", text):
+            print("voice is ElevenLabs TTS: its timings are already exact, no alignment needed")
+            return
     digest = hashlib.sha256(voice.read_bytes() + text.encode()).hexdigest()
     if out.exists() and not a.force and json.loads(out.read_text(encoding="utf-8")).get("sha256") == digest:
+        current(json.loads(out.read_text(encoding="utf-8")), voice, out.name, text)
         print("alignment up to date")
         return
+    if out.exists():
+        print("alignment changed or forced; regenerating from current voice and script")
     r = eleven.upload("/forced-alignment", {"text": text}, {"file": voice})
     words = [{"w": w["text"].strip(), "start": round(w["start"], 3), "end": round(w["end"], 3),
               "p": round(max(0.0, 1 - w.get("loss", 0)), 3)}
              for w in r["words"] if w["text"].strip()]
-    dur = json.loads(tr.read_text(encoding="utf-8"))["duration"] if tr.exists() else words[-1]["end"]
-    out.write_text(json.dumps({"source": voice.name, "sha256": digest, "engine": "elevenlabs-forced-alignment",
+    if not words:
+        sys.exit("alignment returned no words; existing outputs kept")
+    if tr.exists() and current(data, voice, "transcript.json"):
+        dur = data["duration"]
+    else:
+        dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration",
+                                    "-of", "csv=p=0", str(voice)], capture_output=True, text=True,
+                                   encoding="utf-8", check=True).stdout)
+    out.write_text(json.dumps({"source": voice.name, "sha256": digest, **stamp(voice, text), "engine": "elevenlabs-forced-alignment",
                                "loss": round(r.get("loss", 0), 4), "duration": dur,
                                "segments": [{"start": words[0]["start"], "end": words[-1]["end"], "text": text,
                                              "words": words}]}, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -61,4 +75,6 @@ def main():
 
 
 if __name__ == "__main__":
+    from console import utf8
+    utf8()
     main()

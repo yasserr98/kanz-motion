@@ -38,7 +38,7 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-KANZ = ROOT.parent  # the Kanz repo holds the approved references
+KANZ = Path(os.environ.get("KANZ_REPO", ROOT.parent))  # the Kanz repo holds the approved references
 REFS = KANZ / "reports" / "kanz-motion-system-2026-09-20" / "chatgpt-handoff-ar-v01" / "references"
 ICON_SHEET = REFS / "approved-editorial-batch-01.png"
 NPC_SHEET = REFS / "approved-npc-characters-v04.png"
@@ -115,13 +115,13 @@ def run(shot, mode, context, out):
     args.append("-")
     t0 = time.time()
     with open(p, encoding="utf-8") as fin, open(out / f"{name}.log", "w", encoding="utf-8") as flog:
-        subprocess.run(args, stdin=fin, stdout=flog, stderr=subprocess.STDOUT, shell=os.name == "nt")
+        result = subprocess.run(args, stdin=fin, stdout=flog, stderr=subprocess.STDOUT, shell=os.name == "nt")
     log = (out / f"{name}.log").read_text(encoding="utf-8", errors="replace")
     m = re.search(r"session id: ([0-9a-f-]+)", log)
     sid = m.group(1) if m else None
     imgs = sorted((GEN / sid).glob("*.png"), key=lambda f: f.stat().st_mtime) if sid and (GEN / sid).exists() else []
     secs = round(time.time() - t0)
-    if not imgs:
+    if result.returncode or not imgs:
         return name, mode, "FAILED (no image; see log)", sid, secs
     shutil.copy2(imgs[-1], out / f"{name}.png")
     return name, mode, "ok", sid, secs
@@ -142,20 +142,37 @@ def main():
             continue
         for mode in s.get("modes", [s.get("mode", "kanz")]):
             tasks.append((s, mode, proj / "assets" / "codex" / mode))
+    missing = sorted({str(r) for s, m, _ in tasks for r in refs_for(s, m) if not Path(r).is_file()})
+    if missing:
+        print("missing references:\n" + "\n".join(missing))
+        print(f"assets: 0 succeeded; {len(tasks)} not run (reference preflight failed)")
+        raise SystemExit(1)
     prov = proj / "assets" / "codex" / "PROVENANCE.md"
     prov.parent.mkdir(parents=True, exist_ok=True)
     if not prov.exists():
         prov.write_text("# Codex assets (candidates until Ahmed approves)\n\n| Date | Mode | Name | Status | Codex session | Seconds | "
                         "Prompt |\n| --- | --- | --- | --- | --- | --- | --- |\n", encoding="utf-8")
+    failed = 0
     with cf.ThreadPoolExecutor(a.jobs) as ex:
-        futs = [ex.submit(run, s, m, spec["context"], o) for s, m, o in tasks]
+        futs = {ex.submit(run, s, m, spec["context"], o): (s["name"], m) for s, m, o in tasks}
         for f in cf.as_completed(futs):
-            name, mode, status, sid, secs = f.result()
+            try:
+                name, mode, status, sid, secs = f.result()
+            except Exception as e:
+                name, mode = futs[f]
+                status, sid, secs = f"FAILED ({e})", None, 0
+            failed += status != "ok"
             print(f"{mode:5} {name:28} {status} {sid or ''} {secs}s", flush=True)
             with open(prov, "a", encoding="utf-8") as fp:
                 fp.write(f"| {time.strftime('%Y-%m-%d')} | {mode} | `{name}.png` | {status} | `{sid}` | {secs} | "
                          f"`{mode}/{name}.prompt.txt` |\n")
 
+    print(f"assets: {len(tasks) - failed} succeeded; {failed} failed")
+    if failed:
+        raise SystemExit(1)
+
 
 if __name__ == "__main__":
+    from console import utf8
+    utf8()
     main()

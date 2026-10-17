@@ -14,6 +14,7 @@ Text checks cannot judge accent or tone; the EAR list says where to listen.
 """
 import argparse
 import difflib
+from decimal import Decimal
 import json
 import re
 import subprocess
@@ -24,7 +25,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from captions import norm  # noqa: E402
 from tts import LEXICON, apply_say, spoken_text  # noqa: E402
 
-sys.stdout.reconfigure(encoding="utf-8")  # Arabic in console output on Windows
 ROOT = Path(__file__).resolve().parent.parent
 DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩", "0123456789")
 
@@ -36,6 +36,61 @@ MSA_NUM = re.compile("مائ|مئة|ملايين|آلاف")  # Standard Arabic n
 def key(w):
     k = norm(w).translate(DIGITS) if w else ""
     return SAME.get(k, k)
+
+
+NUMBERS = {
+    "صفر": 0, "واحد": 1, "واحده": 1, "اتنين": 2, "اثنين": 2, "اثنان": 2,
+    "تلاته": 3, "ثلاثه": 3, "اربعه": 4, "خمسه": 5, "سته": 6, "سبعه": 7,
+    "تمانيه": 8, "ثمانيه": 8, "تسعه": 9, "عشره": 10, "عشر": 10,
+    "حداشر": 11, "اتناشر": 12, "تلتاشر": 13, "اربعتاشر": 14, "خمستاشر": 15,
+    "ستاشر": 16, "سبعتاشر": 17, "تمنتاشر": 18, "تسعتاشر": 19,
+    "عشرين": 20, "عشرون": 20, "تلاتين": 30, "ثلاثين": 30, "ثلاثون": 30,
+    "اربعين": 40, "اربعون": 40, "خمسين": 50, "خمسون": 50, "ستين": 60, "ستون": 60,
+    "سبعين": 70, "سبعون": 70, "تمانين": 80, "ثمانين": 80, "ثمانون": 80, "تسعين": 90, "تسعون": 90,
+    "ميه": 100, "مائه": 100, "مئه": 100, "ميتين": 200, "مائتين": 200, "مئتين": 200,
+    "تلتميه": 300, "تلاتميه": 300, "ثلاثمائه": 300, "ربعمية": 400, "اربعمائه": 400,
+    "خمسمية": 500, "خمسمائه": 500, "ستميه": 600, "ستمائه": 600,
+    "سبعميه": 700, "سبعمائه": 700, "تمنميه": 800, "ثمانمائه": 800, "تسعميه": 900, "تسعمائه": 900,
+}
+NUMBERS = {key(k): v for k, v in NUMBERS.items()}
+SCALES = {"الف": 1000, "الاف": 1000, "مليون": 1000000, "ملايين": 1000000}
+
+
+def number_tokens(text):
+    """Conservative number phrases; unknown words stay in the comparison."""
+    out, total, group, active = [], 0, 0, False
+    for raw in text.split():
+        word = key(raw)
+        joined = False
+        if word.startswith("و") and word[1:] in (NUMBERS.keys() | SCALES.keys()):
+            word, joined = word[1:], True
+        if word in NUMBERS:
+            value = NUMBERS[word]
+            additive = joined and (group == 0 or (value < 100 and (
+                group >= 100 or (group < 10 and value % 10 == 0) or (group % 10 == 0 and value < 10))))
+            teen = not joined and value == 10 and 1 <= group <= 9 and total == 0
+            if active and not (additive or teen):
+                out.append(total + group)
+                total, group = 0, 0
+            group += value
+            active = True
+        elif word in SCALES:
+            if active and group == 0:
+                out.append(total)
+                total, active = 0, False
+            total += (group if active else 1) * SCALES[word]
+            group, active = 0, True
+        else:
+            if active:
+                out.append(total + group)
+                total, group, active = 0, 0, False
+            if re.fullmatch(r"[0-9]+(?:[.٫][0-9]+)?", word):
+                out.append(Decimal(word.replace("٫", ".")))
+            else:
+                out.append(word)
+    if active:
+        out.append(total + group)
+    return out
 
 
 def merge_negation(asr):
@@ -70,8 +125,10 @@ def post(proj):
     asr_path = proj / "out" / "voicecheck-asr.json"
     asr_path.parent.mkdir(exist_ok=True)
     subprocess.run([sys.executable, str(ROOT / "engine" / "transcribe.py"), str(wav), str(asr_path)],
-                   check=True, capture_output=True)
+                   check=True, capture_output=True, text=True, encoding="utf-8")
     asr = merge_negation([w for s in json.loads(asr_path.read_text(encoding="utf-8"))["segments"] for w in s["words"]])
+    if not asr:
+        raise SystemExit("voice check: transcription returned no words; existing report kept")
     text = apply_say(spoken_text((proj / "script.md").read_text(encoding="utf-8")), proj)
     paras = [p.split() for p in text.split("\n\n") if p.strip()]
     script = [(w, pi, wi == len(p) - 1) for pi, p in enumerate(paras) for wi, w in enumerate(p)]
@@ -87,10 +144,12 @@ def post(proj):
         said = " ".join(w["w"] for w in asr[j1:j2])
         wrote = " ".join(w for w, _, _ in script[i1:i2])
         t = asr[j1]["start"] if j1 < len(asr) else asr[-1]["end"]
-        if re.search(r"\d", wrote.translate(DIGITS)):  # numbers: only Standard Arabic forms are a problem
+        expected, heard = number_tokens(wrote), number_tokens(said)
+        if any(isinstance(x, (int, Decimal)) for x in expected):
             if MSA_NUM.search(said):
                 found.append(("WORD", t, f"number {wrote!r} heard in Standard Arabic: {said!r}"))
-            continue
+            if expected == heard:
+                continue
         found.append(("WORD", t, f"script {wrote!r} / heard {said!r}"))
     for i, (w, pi, last) in enumerate(script):
         j = at.get(i)
@@ -121,6 +180,8 @@ def post(proj):
 
 
 if __name__ == "__main__":
+    from console import utf8
+    utf8()
     ap = argparse.ArgumentParser()
     ap.add_argument("project")
     ap.add_argument("--pre", action="store_true")

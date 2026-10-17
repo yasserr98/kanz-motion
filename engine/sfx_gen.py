@@ -14,7 +14,7 @@ import datetime
 import json
 
 import eleven
-from sfx_library import OUT, decode, finish, write
+from sfx_library import OUT, SOURCES, KENNEY, decode, finish, write
 
 GEN = OUT / "generated.json"
 LICENCE = "ElevenLabs sound effects, generated on a paid plan (commercial use)"
@@ -31,13 +31,11 @@ def main():
     a = ap.parse_args()
     gen = json.loads(GEN.read_text(encoding="utf-8")) if GEN.exists() else []
     man = json.loads((OUT / "manifest.json").read_text(encoding="utf-8"))
-    (OUT / "raw" / "generated").mkdir(parents=True, exist_ok=True)
     taken = {m["file"] for m in man} | {g["file"] for g in gen}
-    # render.py picks a cue's file by position within its category, so a new file in a CC0 category
-    # would silently change the sounds of finished videos on re-render: generated sounds get their own
-    builtin = {m["category"] for m in man if m["file"] not in {g["file"] for g in gen}}
-    if a.category in builtin:
-        raise SystemExit(f'"{a.category}" is a built-in CC0 category; use a new one, e.g. the object name')
+    categories = {m["category"] for m in man + gen} | {s[0] for s in SOURCES + KENNEY}
+    if a.category in categories or (OUT / a.category).exists():
+        raise SystemExit(f'"{a.category}" is an existing category; always use a new category')
+    (OUT / "raw" / "generated").mkdir(parents=True, exist_ok=True)
     for _ in range(a.takes):
         k = 1
         while f"{a.category}/{a.name}-{k:02d}.wav" in taken:
@@ -57,4 +55,6 @@ def main():
 
 
 if __name__ == "__main__":
+    from console import utf8
+    utf8()
     main()

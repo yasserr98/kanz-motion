@@ -14,6 +14,7 @@ import hashlib
 import json
 import math
 import subprocess
+from provenance import stamp
 from pathlib import Path
 
 
@@ -79,6 +80,8 @@ def main():
         segs, events, dur, meta = scribe(a.audio, a.lang)
     else:
         segs, events, dur, meta = whisper(a.audio, a.lang, a.model)
+    if not any(s["words"] for s in segs):
+        raise SystemExit("transcription returned no words; existing outputs kept")
     for s in segs:
         print(f"[{s['start']:7.2f} → {s['end']:7.2f}] {s['text']}")
     for e in events:
@@ -86,10 +89,12 @@ def main():
     out = {
         "source": Path(a.audio).name,
         "sha256": hashlib.sha256(Path(a.audio).read_bytes()).hexdigest(),
-        **meta, "language": a.lang, "duration": dur, "segments": segs, "events": events,
+        **stamp(Path(a.audio)), **meta, "language": a.lang, "duration": dur, "segments": segs, "events": events,
     }
     Path(a.out).write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
 if __name__ == "__main__":
+    from console import utf8
+    utf8()
     main()

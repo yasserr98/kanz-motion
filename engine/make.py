@@ -136,7 +136,7 @@ def main():
         if not mp4.exists():  # renders named by hand, e.g. kanz-pilot-01-v2.mp4
             mp4 = max(out.glob(f"*-{version}.mp4"), key=lambda f: f.stat().st_mtime)
         dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(mp4)],
-                                   capture_output=True, text=True, check=True).stdout)
+                                   capture_output=True, text=True, encoding="utf-8", check=True).stdout)
         cd = out / f"check-{version}"
         cd.mkdir(exist_ok=True)
         for f in cd.glob("*.*"):
@@ -146,7 +146,7 @@ def main():
             subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(t), "-i", str(mp4), "-frames:v", "1",
                             str(cd / f"f{i:02d}-{t:05.1f}s.jpg")], check=True)
         log = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(mp4), "-af", "ebur128", "-f", "null", "-"],
-                             capture_output=True, text=True).stderr
+                             capture_output=True, text=True, encoding="utf-8").stderr
         lufs = re.findall(r"I:\s+(-?[\d.]+) LUFS", log)
         print(f"{mp4.name}: {dur:.1f}s, integrated loudness {lufs[-1] if lufs else '?'} LUFS (target -16)")
         print("check sheet ->", sheet(cd, out / f"check-{version}.jpg"))
@@ -155,4 +155,6 @@ def main():
 
 
 if __name__ == "__main__":
+    from console import utf8
+    utf8()
     main()

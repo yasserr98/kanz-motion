@@ -16,6 +16,7 @@ then prints the frame count for K.footage({n}). Burned-in text in the source sta
 import argparse
 import json
 import subprocess
+from provenance import stamp
 from pathlib import Path
 
 
@@ -59,6 +60,8 @@ def main():
     ap.add_argument("--tv-until", type=float)
     ap.add_argument("--fps", type=int, default=24)
     a = ap.parse_args()
+    if a.video_from is not None and a.tv_until is not None:
+        ap.error("--video-from and --tv-until cannot be combined; choose a held opening or the TV opening")
     proj = Path(a.project)
     face = proj / "assets" / "face"
     face.mkdir(parents=True, exist_ok=True)
@@ -88,7 +91,9 @@ def main():
         if ws:
             segs.append({"start": ws[0]["start"], "end": ws[-1]["end"], "text": " ".join(w["w"] for w in ws), "words": ws})
     out = {k: v for k, v in tr.items() if k not in ("segments", "events")}
-    out.update({"cut_from": {"source": a.source, "start": a.start, "end": a.end, "video_from": v0},
+    out.pop("sha256", None)
+    out.pop("script_sha256", None)
+    out.update({**stamp(proj / "audio" / "voice.wav"), "cut_from": {"source": a.source, "start": a.start, "end": a.end, "video_from": v0},
                 "duration": round(dur, 3), "segments": segs, "events": []})
     (proj / "transcript.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     n = len(list(face.glob("*.jpg")))
@@ -96,4 +101,6 @@ def main():
 
 
 if __name__ == "__main__":
+    from console import utf8
+    utf8()
     main()
