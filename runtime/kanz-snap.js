@@ -72,6 +72,14 @@
   // types). It fills the 1080x1920 frame whatever the camera does, sits under the world (board text, tags and prints
   // stay on top) and under the face layer and captions; darkened top and bottom so the headline and captions read.
   let screens = 0;
+  const screenTimes = [];
+  const seek0 = K.seek;
+  K.seek = function (t) {
+    const result = seek0(t);
+    const q = Math.floor(t * K.fps + 1e-6) / K.fps;
+    if (screens) document.getElementById("stage").dataset.screen = screenTimes.some(([a, b]) => q >= a && q < b) ? "on" : "off";
+    return result;
+  };
   K.screen = function (src, at, out, o = {}) {
     const stage = document.getElementById("stage");
     const before = document.getElementById("camwrap") || document.getElementById("world");
@@ -84,6 +92,7 @@
     e.innerHTML = `<img src="${src}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform-origin:50% 45%` +
       `${o.pos ? ";object-position:" + o.pos : ""}"><div class="kscrim" style="position:absolute;inset:0"></div>`;
     const img = e.querySelector("img"), scrim = e.querySelector(".kscrim");
+    stage.insertBefore(e, before.parentNode === stage ? before : before.parentNode);
     const paint = (top, low) => {
       scrim.style.background = `linear-gradient(180deg,rgba(8,7,11,${top}) 0%,rgba(8,7,11,${top * 0.9}) 16%,` +
         `rgba(8,7,11,${top * 0.45}) 32%,rgba(8,7,11,${low * 0.35}) 52%,rgba(8,7,11,${low}) 72%,rgba(8,7,11,${Math.min(0.95, low + 0.12)}) 100%)`;
@@ -95,27 +104,46 @@
       const W = 54, H = 96, c = document.createElement("canvas"); c.width = W; c.height = H;
       const g = c.getContext("2d"), r = Math.max(W / img.naturalWidth, H / img.naturalHeight);
       const dw = img.naturalWidth * r, dh = img.naturalHeight * r;
-      g.drawImage(img, (W - dw) / 2, (H - dh) / 2, dw, dh); // same crop as object-fit: cover
-      const px = g.getImageData(0, 0, W, H).data;
+      // CSS resolves keywords/edge offsets to percentages, lengths or calc(percent +/- length).
+      const pos = getComputedStyle(img).objectPosition.match(/calc\([^)]*\)|\S+/g) || [];
+      const offset = (v = "", space) => {
+        const value = v.replace(/^calc\((.*)\)$/, "$1").replace(/\s+/g, "");
+        const terms = value.match(/[+-]?(?:\d*\.)?\d+(?:%|px)/g);
+        if (!terms || terms.join("") !== value) return NaN;
+        return terms.reduce((sum, term) => sum + parseFloat(term) * (term.endsWith("%") ? space / 100 : W / 1080), 0);
+      };
+      const dx = offset(pos[0], W - dw), dy = offset(pos[1], H - dh);
+      if (pos.length !== 2 || !Number.isFinite(dx + dy)) return paint(0.94, 0.94);
       const band = (y0, y1) => { // mean luminance and its spread (busyness) in rows y0..y1
-        const v = [];
-        for (let y = Math.floor(y0 * H); y < y1 * H; y++) for (let x = 0; x < W; x++) {
-          const i = (y * W + x) * 4; v.push((0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]) / 255);
-        }
-        const m = v.reduce((a, b) => a + b, 0) / v.length;
-        return [m, Math.sqrt(v.reduce((a, b) => a + (b - m) ** 2, 0) / v.length)];
+        // Inverse-transform both ends of the Ken Burns animation about its displayed 50%/45% origin.
+        // The bounding union includes all intermediate crops, including pixels outside the initial band.
+        const boxes = [1.02, o.kb || 1.1].map((s) => [
+          (W * 0.5 * (1 - 1 / s) - dx) / r,
+          (H * 0.45 + (y0 * H - H * 0.45) / s - dy) / r,
+          (W * 0.5 + W * 0.5 / s - dx) / r,
+          (H * 0.45 + (y1 * H - H * 0.45) / s - dy) / r,
+        ]);
+        const x0 = Math.max(0, Math.min(...boxes.map((b) => b[0]))), a = Math.max(0, Math.min(...boxes.map((b) => b[1])));
+        const x1 = Math.min(img.naturalWidth, Math.max(...boxes.map((b) => b[2]))), b = Math.min(img.naturalHeight, Math.max(...boxes.map((b) => b[3])));
+        const crops = [[x0, a, x1, b], ...boxes];
+        return crops.map(([x0, y0, x1, y1]) => {
+          g.clearRect(0, 0, W, H);
+          g.drawImage(img, x0, y0, x1 - x0, y1 - y0, 0, 0, W, H);
+          const px = g.getImageData(0, 0, W, H).data, v = [];
+          for (let i = 0; i < px.length; i += 4) v.push((0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]) / 255);
+          const m = v.reduce((a, b) => a + b, 0) / v.length;
+          return [m, Math.sqrt(v.reduce((a, b) => a + (b - m) ** 2, 0) / v.length)];
+        });
       };
       // white text needs the scrimmed band near or below ~0.18 luminance; dark the band until it gets there
       const need = ([m, sd]) => Math.max(0.55, Math.min(0.94, 1 - 0.18 / Math.max(0.2, m + 1.2 * sd)));
-      paint(need(band(0.04, 0.3)), need(band(0.6, 0.8)));
+      paint(Math.max(...band(0.04, 0.3).map(need)), Math.max(...band(0.6, 0.8).map(need)));
     };
     const safe = () => { try { measure(); } catch (err) { paint(0.86, 0.82); e.dataset.lift += " (unmeasured)"; } };
     if (img.complete && img.naturalWidth) safe(); else img.addEventListener("load", safe);
     // a soft dark halo behind board text while any photo fills the screen
-    if (screens === 1) { stage.setAttribute("data-screen", "off"); tl.set(stage, { attr: { "data-screen": "off" } }, 0); }
-    tl.set(stage, { attr: { "data-screen": "on" } }, at);
-    tl.set(stage, { attr: { "data-screen": "off" } }, out);
-    stage.insertBefore(e, before);
+    if (screens === 1) stage.setAttribute("data-screen", "off");
+    screenTimes.push([at, out]);
     tl.set(e, { autoAlpha: 0 }, 0);
     tl.fromTo(e, { autoAlpha: 0 }, { autoAlpha: 1, duration: o.fade || 0.12, immediateRender: false }, at);
     tl.fromTo(e.querySelector("img"), { scale: 1.02 }, { scale: o.kb || 1.1, duration: Math.max(0.5, out - at), ease: "none", immediateRender: false }, at);

@@ -1,0 +1,32 @@
+{
+  "short-house-always-wins": {
+    "6.1455": {
+      "sha256": "3e4b0f888c48fc818e1960437e3bd3541409f4bcbb06e4c2f92b24f11a70ab47",
+      "reason": "Finding 8: scrim measures object-position and the union of Ken Burns crops."
+    },
+    "21.5091": {
+      "sha256": "5043c29b63ed573535f6c5fd300d81124c06c01c5e764ac80ed4effe9de78d9e",
+      "reason": "Finding 8: scrim measures object-position and the union of Ken Burns crops."
+    },
+    "33.8": {
+      "sha256": "7267535123b27812ae8c259b5d499cff21ebadbe35e4fb9be48b957064a16be7",
+      "reason": "Finding 8: scrim measures object-position and the union of Ken Burns crops."
+    },
+    "12.2909": {
+      "sha256": "5510e58a2093fef36281a15e57bcd831a28e4e50b256d283784a12ee1fb6d9e2",
+      "reason": "Finding 3: clean cuts preserve the frame-guard correction on camwrap."
+    },
+    "15.3636": {
+      "sha256": "e02ca0167e518e33133ecd3fab523e34074ca06d07887deacb10fb90d176036d",
+      "reason": "Finding 3: clean cuts preserve the frame-guard correction on camwrap."
+    },
+    "18.4364": {
+      "sha256": "649c0bfd1e16014c190c7a799ecb5f2938efc83d646d33d1c276fe54ec64aaa6",
+      "reason": "Finding 3: clean cuts preserve the frame-guard correction on camwrap."
+    },
+    "30.7273": {
+      "sha256": "b116c614036f191d7ffe2e614c0c50adac8dbcf3ed9b0ac0456facc623f95ea1",
+      "reason": "Finding 3: clean cuts preserve the frame-guard correction on camwrap."
+    }
+  }
+}
