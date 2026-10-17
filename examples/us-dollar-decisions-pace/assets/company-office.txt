@@ -1,0 +1,7 @@
+Attachments: image 1 = the APPROVED Kanz editorial icon sheet (style authority). Image 2 = an approved Kanz library icon (finish, material, perspective, scale and framing authority).
+
+Create ONE Kanz explainer icon: a COMPANY HEAD OFFICE, a modern mid-rise corporate office building (about six storeys) with a regular grid of glass windows, a flat roof and a glass entrance at the base, seen in the same three-quarter view from slightly above as image 2. It must read as a company office, not a bank (no columns, no pediment) and not a factory (no chimneys).
+Lavender accent: one blank rectangular sign panel above the entrance only (no text on it).
+Treatment identical to the references: photographic grayscale editorial cutout with real material texture and the same fine tactile grain, same lighting from upper left; restrained lavender #D5ADEF only on the detail named; neutral grayscale everything else. The Kanz icon style is fixed for every topic: match line weight, shapes, perspective, dimensionality, shading, texture and palette treatment exactly; no topic-specific style, no glossy colours, no cartoon.
+Output: one centered subject on a SQUARE canvas (1254x1254 if available, else highest native square), comfortable transparent margins. TRUE RGBA PNG TRANSPARENCY everywhere outside the subject. No background, no floor, no drop shadow, no fake checkerboard, no text, letters, numbers, logos, flags or watermark.
+Return only the image.
