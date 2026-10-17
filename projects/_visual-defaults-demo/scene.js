@@ -53,5 +53,29 @@ if (OLD) {
   K.arrow(B.marks, word, house, { at: 19.2, width: 8 });
 }
 
-K.duration = 21;
+// 6-9. review-sample defaults Ahmed approved (2026-10-17). One digit system: Western digits with ٪ (K.DIGITS);
+// source lines 28 px / labels 34 px; no snap zooms (old: the snap at 23.6 s zooms 1.3x)
+const B2 = { nums: K.board("nums", 0, 1800), paper: K.board("paper", 0, 3600), crowd: K.board("crowd", -1100, 3600) };
+const g6 = K.go(21.6, "nums");
+K.tag(B2.nums, "الفايدة 35%", { x: 760, y: 120, size: 46, lav: true, at: g6.lead });
+K.count(B2.nums, { x: 300, y: 130, to: 65, suffix: "%", size: 120, at: g6.lead });
+K.area(B2.nums, { x: 500, y: 520, w: 760, h: 380, data: [4, 5, 4.5, 6, 7, 6.5, 8, 10], min: 3, max: 10.5, at: g6.lead,
+  source: "FRED · FEDFUNDS · ١٧/١٠/٢٠٢٦" });
+K.snap(23.6, 1.3, 0.6);
+
+// paper world: objects and figures keep their contrast
+const g7 = K.go(25.0, "paper");
+K.world(g7.start, "paper");
+K.img(B2.paper, OBJ + "kanz-house-v01.png", { x: 300, y: 420, w: 380, at: g7.lead });
+K.img(B2.paper, OBJ + "kanz-npc-m01-neutral-v01.png", { x: 720, y: 440, w: 380, at: g7.lead });
+K.text(B2.paper, "عالم الورق", { x: 500, y: 110, size: 84, head: true, at: g7.lead });
+
+// lint only: five labels on one board and a label that repeats the caption (crowded-board, caption-repeat)
+const g8 = K.go(28.6, "crowd");
+K.world(g8.start, "charcoal");
+K.img(B2.crowd, OBJ + "kanz-wallet-v01.png", { x: 500, y: 420, w: 360, at: g8.lead });
+[["خمس حاجات", 500, 120], ["محفظة", 230, 300], ["كارت", 780, 300], ["فلوس", 230, 600], ["فاتورة", 780, 600]].forEach(([h, x, y]) =>
+  K.tag(B2.crowd, h, { x, y, size: 44, at: g8.lead }));
+
+K.duration = 31.5;
 K.finish();

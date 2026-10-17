@@ -1,6 +1,6 @@
 // stub timing for the visual-defaults demo (2026-10-17): no voice, fixed seconds. Not an audience-facing video.
 // Captions run the whole time so the caption band is occupied, as in a real Reel.
-window.DURATION = 21;
+window.DURATION = 31.5;
 window.TOKENS = [];
 window.CAPTIONS = [
   { start: 0.3, end: 2.4, words: [{ w: "البيت" }, { w: "ده" }, { w: "تحت" }, { w: "الكابشن", key: true }] },
@@ -12,4 +12,7 @@ window.CAPTIONS = [
   { start: 13.5, end: 16.4, words: [{ w: "الدهب", key: true }, { w: "داخل" }, { w: "الصورة" }] },
   { start: 16.5, end: 19.0, words: [{ w: "شوف" }, { w: "الكلمة" }, { w: "دي", key: true }] },
   { start: 19.1, end: 21.0, words: [{ w: "والسهم" }, { w: "رايح" }, { w: "للبيت" }] },
+  { start: 21.1, end: 24.4, words: [{ w: "الفايدة" }, { w: "10%", key: true }, { w: "في" }, { w: "السنة" }] },
+  { start: 24.5, end: 28.4, words: [{ w: "على" }, { w: "الورق", key: true }, { w: "الصورة" }, { w: "تفضل" }, { w: "واضحة" }] },
+  { start: 28.5, end: 31.5, words: [{ w: "خمس" }, { w: "حاجات", key: true }, { w: "على" }, { w: "البورد" }] },
 ];

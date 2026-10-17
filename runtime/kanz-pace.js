@@ -34,6 +34,13 @@
  *          when the start box would cross the caption band or the headline
  *   marks  K.oval / K.rect / K.frame(el) / K.arrow sized to a target element (kanz.js); one arrowhead; K.arrow
  *          without a target warns; K.docMark frames get 16 px padding
+ * Added the same day from the review samples Ahmed approved ("do everything except for the colors of the charts"):
+ *   digits one digit system: K.DIGITS = "en" (0-9 with ٪) or "ar" (٠-٩ with ٪), applied to every K.el html,
+ *          K.count and the captions (kanz.js)
+ *   sizes  source lines 28 px, labels 34 px by default (lint flags anything smaller)
+ *   paper  objects and figures keep their contrast on the paper world (kanz-look.css)
+ *   nosnap K.snap does nothing (one warning); K.snap(t, f, hold, {force: true}) or {nosnap: false} brings it back
+ * Chart colours are deliberately unchanged (Ahmed 2026-10-17: "leave them with different colors I like it").
  */
 (function () {
   const K = window.K, tl = K.tl;
@@ -58,7 +65,9 @@
   K.pace = function (o = {}) {
     K.PACE = true;
     const on = !!o.defaults && String(o.defaults) >= "2026-10-17";
-    ["band", "lead", "punch", "fly", "marks"].forEach((k) => { K.D[k] = on && o[k] !== false; });
+    ["band", "lead", "punch", "fly", "marks", "digits", "sizes", "paper", "nosnap"].forEach((k) => { K.D[k] = on && o[k] !== false; });
+    stage.classList.toggle("kd-sizes", !!K.D.sizes);
+    stage.classList.toggle("kd-paper", !!K.D.paper);
     K.camSmooth = true;
     K.fps = 24; // every frame moves; grain and boil keep their own slower step (see seek below)
     K.mix = 2;
@@ -297,7 +306,17 @@
     Array.from(document.images).every((i) => i.complete && i.naturalWidth > 0);
   const seek2 = K.seek;
   seekBase = seek2;
+  const flyQ = [];
+  const flushFly = () => {
+    for (let i = 0; i < flyQ.length; i++) {
+      const q = flyQ[i];
+      if (!(q.e.complete && q.e.naturalWidth > 0)) continue;
+      Object.assign(q.tw.vars.startAt, flyPlan(q.e, q.parent, q.o, q.cam, q.from));
+      q.tw.invalidate(); flyQ.splice(i--, 1);
+    }
+  };
   K.seek = function (t) {
+    if (flyQ.length) flushFly();
     if (!K.PACE || !K.keep) return seek2(t);
     wrap = wrap || document.getElementById("camwrap");
     if (!keepTab && ready()) build();
@@ -319,14 +338,12 @@
     hide(e);
     const fs = o.fromScale || 1.9;
     tl.fromTo(e, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.18, ease: "none", immediateRender: false }, o.at);
-    let from = { scale: fs, x: o.fromX || 0, y: o.fromY == null ? 170 : o.fromY };
-    if (K.D.fly) { // values resolve on first render, once the image has its size
-      let p = null;
-      const plan = () => p || (p = flyPlan(e, parent, o, K._cam, from));
-      from = { scale: () => plan().scale, x: () => plan().x, y: () => plan().y };
-    }
-    tl.fromTo(e, from,
+    const from = { scale: fs, x: o.fromX || 0, y: o.fromY == null ? 170 : o.fromY };
+    tl.fromTo(e, { ...from },
       { scale: 1, x: 0, y: 0, duration: o.dur || 0.85, ease: "power3.out", immediateRender: false }, o.at);
+    // fly default: the start is planned on the first seek once the image has its size (function-based start values
+    // came out as the string "NaN=> plan().scale" and broke every entrance, found by the review samples 2026-10-17)
+    if (K.D.fly) flyQ.push({ tw: tl.recent(), e, parent, o, cam: K._cam, from });
     K.sfx(o.at, K.cue(o.sfx, "whoosh"), o.gain || 0.22);
     return e;
   };
@@ -362,7 +379,15 @@
 
   // ---------- emphasis ----------
   let snapSets = [];
-  K.snap = function (t, f = 1.3, hold = 0.7) {
+  K.snap = function (t, f = 1.3, hold = 0.7, o = {}) {
+    if (K.D.nosnap && !o.force) { // nosnap default (2026-10-17): snap zooms are off in new videos
+      if (!K._snapWarned) {
+        K._snapWarned = true;
+        const m = "K.snap is off by default since 2026-10-17: K.snap(t, f, hold, {force: true}) or K.pace({..., nosnap: false})";
+        K.warnings.push(m); console.warn(m);
+      }
+      return;
+    }
     const w = document.getElementById("camwrap");
     if (!w) return;
     snaps.push({ t, end: t + hold, until: t + hold, f });

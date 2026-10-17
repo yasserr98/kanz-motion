@@ -34,10 +34,24 @@
   K.N.at = (t) => { K.cursor = t; };
 
   // ---------- small DOM helpers ----------
+  // ---------- one digit system (2026-10-17, `digits` default) ----------
+  // K.DIGITS = "en": 0-9 with the Arabic percent sign ٪ (the default); "ar": ٠-٩ with ٪. Switching is this one line.
+  // With the default on, every html passed to K.el (text, tags, cards, sources, headline, punch), K.count and the
+  // captions are converted; finished projects (K.D.digits unset) keep their text untouched.
+  K.DIGITS = "en";
+  const AR_DIGITS = "٠١٢٣٤٥٦٧٨٩", FA_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
+  const convDigits = (t) => {
+    t = t.replace(/%/g, "٪");
+    if (K.DIGITS === "ar") return t.replace(/[0-9]/g, (d) => AR_DIGITS[d]).replace(/[۰-۹]/g, (d) => AR_DIGITS[FA_DIGITS.indexOf(d)]);
+    return t.replace(/[٠-٩]/g, (d) => AR_DIGITS.indexOf(d)).replace(/[۰-۹]/g, (d) => FA_DIGITS.indexOf(d)).replace(/٬/g, ",");
+  };
+  // text outside tags and entities only (attributes such as style="font-size:40px" stay as written)
+  K.fmtNum = (html) => (K.D.digits && typeof html === "string"
+    ? html.replace(/(<[^>]*>|&#?\w+;)|([^<&]+)/g, (m, tag, txt) => (tag ? tag : convDigits(txt))) : html);
   K.el = function (tag, cls, parent, html) {
     const e = document.createElement(tag);
     if (cls) e.className = cls;
-    if (html != null) e.innerHTML = html;
+    if (html != null) e.innerHTML = K.D.digits ? K.fmtNum(String(html)) : html;
     (parent || stage).appendChild(e);
     return e;
   };
@@ -222,6 +236,31 @@
     const w = el.offsetWidth, h = el.offsetHeight;
     return { x, y, w, h, cx: x + w / 2, cy: y + h / 2 };
   }
+  // the visible (alpha) part of an image inside its layout box, as fractions; the whole box when unreadable
+  const inkMemo = {};
+  function ink(img) {
+    if (img.tagName !== "IMG") return null;
+    if (inkMemo[img.src] !== undefined) return inkMemo[img.src];
+    let r = null;
+    try {
+      const W = 160, H = Math.max(1, Math.round((W * img.naturalHeight) / img.naturalWidth));
+      const c = document.createElement("canvas"); c.width = W; c.height = H;
+      const g = c.getContext("2d"); g.drawImage(img, 0, 0, W, H);
+      const d = g.getImageData(0, 0, W, H).data;
+      let x0 = W, y0 = H, x1 = -1, y1 = -1;
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 40) {
+        if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+      }
+      if (x1 >= 0) r = { l: x0 / W, t: y0 / H, r: (x1 + 1) / W, b: (y1 + 1) / H };
+    } catch (e) { r = null; } // a tainted canvas: fall back to the layout box
+    return (inkMemo[img.src] = r);
+  }
+  function inkBox(el, parent) {
+    const b = boxIn(el, parent), f = ink(el);
+    if (!f) return b;
+    const x = b.x + f.l * b.w, y = b.y + f.t * b.h, w = (f.r - f.l) * b.w, h = (f.b - f.t) * b.h;
+    return { x, y, w, h, cx: x + w / 2, cy: y + h / 2, ink: true };
+  }
   // point on the padded box edge on the way from its centre to (px, py)
   function edge(b, px, py, pad) {
     const dx = px - b.cx, dy = py - b.cy;
@@ -249,9 +288,10 @@
     if (isEl(cx)) {
       const el = cx; o = cy || {};
       return markOn(parent, [el], { dur: 0.6, ...o }, () => {
-        // the smallest oval of the box's proportions (+pad) that still clears its corners
-        const b = boxIn(el, parent), P = o.pad == null ? 16 : o.pad, a = b.w / 2 + P, c = b.h / 2 + P;
-        const k = Math.max(1, Math.hypot(b.w / 2 / a, b.h / 2 / c));
+        // text: the smallest oval of the box's proportions (+pad) that still clears its corners; an image: its
+        // visible pixels + pad (a cutout's corners are empty, review samples 2026-10-17). `pad` may be negative
+        const b = inkBox(el, parent), P = o.pad == null ? 16 : o.pad, a = Math.max(4, b.w / 2 + P), c = Math.max(4, b.h / 2 + P);
+        const k = b.ink || el.tagName === "IMG" ? 1 : Math.max(1, Math.hypot(b.w / 2 / a, b.h / 2 / c));
         return ovalD(b.cx, b.cy, a * k, c * k, o.seed || 1);
       });
     }
@@ -275,13 +315,14 @@
     if (isEl(x1) || isEl(x2)) { // (parent, fromEl, toEl, o) or (parent, x1, y1, toEl, o): stops `pad` px short
       const from = isEl(x1) ? x1 : null, to = from ? y1 : x2, opt = (from ? x2 : y2) || {}, P = opt.pad == null ? 16 : opt.pad;
       return markOn(parent, [to].concat(from ? [from] : []), { dur: 0.5, ...opt }, () => {
-        const B = boxIn(to, parent);
-        const a = from ? edge(boxIn(from, parent), B.cx, B.cy, P) : [x1, y1];
+        const B = inkBox(to, parent);
+        const a = from ? edge(inkBox(from, parent), B.cx, B.cy, P) : [x1, y1];
         const b = edge(B, a[0], a[1], P);
         return arrowD(a[0], a[1], b[0], b[1], opt);
       });
     }
-    if (K.D.marks) {
+    if (K.D.marks && !K._arrowWarned) { // once per video
+      K._arrowWarned = true;
       const w = "K.arrow without a target element points at hand-entered coordinates: pass the element it points to";
       K.warnings.push(w); console.warn(w);
     }
@@ -295,7 +336,7 @@
     if (isEl(x)) {
       const el = x; o = y || {};
       return markOn(parent, [el], { dur: 0.8, width: 5, ...o }, () => {
-        const b = boxIn(el, parent), P = o.pad == null ? 16 : o.pad;
+        const b = inkBox(el, parent), P = o.pad == null ? 16 : o.pad;
         return rectD(b.x - P, b.y - P, b.w + 2 * P, b.h + 2 * P, o.seed || 7);
       });
     }
@@ -377,7 +418,7 @@
     const top = (q) => (q.down ? q.y + q.h : q.y - q.h);
     const y1 = Math.min(top(A), top(B)), y2 = Math.max(top(A), top(B)), x = o.x, arm = o.arm || 22;
     const s = draw(parent, `M${x - arm} ${y1} L${x} ${y1} L${x} ${y2} L${x - arm} ${y2}`, { width: 5, sfx: "click", gain: 0.2, dur: 0.4, ...o });
-    if (o.label) K.tag(parent, o.label, { x: x + (o.labelDx || 90), y: (y1 + y2) / 2, lav: true, size: o.size || 32, at: o.at != null ? o.at + 0.2 : null, sfx: "click", gain: 0.15 });
+    if (o.label) K.tag(parent, o.label, { x: x + (o.labelDx || 90), y: (y1 + y2) / 2, lav: true, size: o.size || (K.D.sizes ? 34 : 32), at: o.at != null ? o.at + 0.2 : null, sfx: "click", gain: 0.15 });
     return s;
   };
 
@@ -442,7 +483,7 @@
     let src = null;
     if (o.source) {
       src = K.el("div", "ksrc", parent, o.source);
-      gsap.set(src, { fontSize: 24 });
+      gsap.set(src, { fontSize: K.D.sizes ? 28 : 24 }); // sizes default: source lines at least 28 px
       place(src, o.x, Y0 + 48);
       if (o.at != null) { hide(src); tl.fromTo(src, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, immediateRender: false }, o.at + 0.2); }
     }
@@ -573,10 +614,12 @@
     if (t < K.captionsFrom || t > K.captionsTo) idx = -1;
     if (idx === capShown) return;
     capShown = idx;
-    capBox.innerHTML = idx < 0 ? "" : '<span class="box">' + caps[idx].words.map((w) => { const h = numFix(w.w); return w.key ? `<span class="kw">${h}</span>` : h; }).join(" ") + "</span>";
+    const fix = K.D.digits ? (w) => numFix2(convDigits(w)) : numFix;
+    capBox.innerHTML = idx < 0 ? "" : '<span class="box">' + caps[idx].words.map((w) => { const h = fix(w.w); return w.key ? `<span class="kw">${h}</span>` : h; }).join(" ") + "</span>";
   }
   // isolate numbers so "10%." does not render as ".10%" inside right-to-left text
   function numFix(w) { const m = w.match(/^(.*?)([+−-]?[\d.,]*\d%?)(.*)$/); return m ? `${m[1]}<bdi class="num">${m[2]}</bdi>${m[3]}` : w; }
+  function numFix2(w) { const m = w.match(/^(.*?)([+−-]?[\d٠-٩.,٫٬]*[\d٠-٩][%٪]?)(.*)$/); return m ? `${m[1]}<bdi class="num">${m[2]}</bdi>${m[3]}` : w; }
   K.captionsFrom = 0; K.captionsTo = 1e9;
   const grain = document.getElementById("grain");
   const turb = document.querySelectorAll("feTurbulence.boil");

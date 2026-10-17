@@ -24,6 +24,11 @@
   box-shadow:0 30px 60px rgba(0,0,0,.55),0 2px 0 rgba(255,255,255,.4) inset}
 .kdoc>img.shot{display:block;width:100%;height:auto;border-radius:2px}
 .kdoc .kmark{position:absolute;background:rgba(213,173,239,.62);mix-blend-mode:multiply;transform-origin:100% 50%;border-radius:3px}
+/* sizes default (2026-10-17): source lines at least 28 px */
+#stage.kd-sizes .ksrc{font-size:28px}
+/* paper default (2026-10-17): objects and figures keep their contrast on the light paper world (review samples V11);
+   K.fg / K.bgObj keep their own inline filters */
+#stage.kd-paper[data-world=paper] #world img.obj:not([style*="filter"]){filter:contrast(1.5) brightness(.8) drop-shadow(0 0 2px rgba(20,18,23,.75)) drop-shadow(0 16px 20px rgba(20,18,23,.35))}
 .kdoc .kframe{position:absolute;border:5px solid var(--lavender);border-radius:6px;transform-origin:100% 50%}
 .ksrc{position:absolute;white-space:nowrap;font-size:26px;color:#c7c2cc;background:rgba(8,7,11,.72);padding:6px 16px;border-radius:6px}
 
