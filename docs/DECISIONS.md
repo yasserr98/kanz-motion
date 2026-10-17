@@ -106,6 +106,12 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
 
 ## 2026-10-17
 
+- **Workshop/live footage: alternate split screen and full screen.** "all of workshop videos inserts should alternate
+  between the split screen and full"; the split is 50/50 ("yeah 50 50": his tracked face in one half, the board in the
+  other). In shorts cut from his X Live workshops, motion inserts alternate between that split screen and a full-screen
+  board, still with clean cuts in the pauses; the camera tracks him (he moves around the 16:9 frame). Use the shared
+  split/tracking helpers built for `projects/short-volume-doesnt-matter` once they exist; do not build a second version.
+  Rule: SHORT-11.
 - **Voice-note and script Reels use the same three visual types.** "can this flow be incorporated in the VNs too".
   Rule: IMG-5.
 - **Workflow review approved** ("do everything except for the colors of the charts leave them with different colors I

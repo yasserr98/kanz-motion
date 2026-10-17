@@ -24,6 +24,10 @@ scene but not render it).
    - Alternate face and motion: cut in the pauses before a word; face for the lines he delivers to camera, boards for the
      mechanism. Windows can carry a jump zoom `[a, b, 1.16]`, but none by default (PACE-5).
    - The last board runs to the last frame; no cut back to the face, no takeaway tail (SHORT-7).
+   - Workshop/live footage (his X Live workshops): motion inserts alternate between a 50/50 split screen (his tracked
+     face in one half, the board in the other) and a full-screen board, still with clean cuts in the pauses; the camera
+     tracks him around the 16:9 frame. Use the shared split/tracking helpers built for
+     `projects/short-volume-doesnt-matter` once they exist; do not build a second version (SHORT-11).
    - Keep the source's burned-in text (lower-third labels such as "حجم الرهان"); keep the face un-zoomed while a label
      shows, or zoom about it (`faceY`) (SHORT-5).
    - Transitions: the clean cut (`xstyle: "cut"`, the default) in the pause before a word, onto a board that is already

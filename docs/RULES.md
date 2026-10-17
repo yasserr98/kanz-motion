@@ -113,6 +113,7 @@ they were.
 | SHORT-8 | Pay off what the hook promises ("three words" -> three titled beats) | eye |
 | SHORT-9 | Every picture belongs to the line; no decorative props | eye |
 | SHORT-10 | Before delivery, check 12-frame strips around every cut in the final MP4 | eye |
+| SHORT-11 | Workshop/live footage: motion inserts alternate between a 50/50 split screen (tracked face + board) and a full-screen board, clean cuts in the pauses; reuse the shared split/tracking helpers | eye |
 
 ## Review
 
