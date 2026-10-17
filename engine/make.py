@@ -17,12 +17,21 @@ Both routes
                                                     # (script route default; voice notes: tempo 1.0), then captions
     python engine/sfx_gen.py <category> <name> "<prompt>"   # generate a missing sound effect into library/sfx
     python engine/make.py review <name> 2,10,30     # stills -> one contact sheet out/review.jpg
-    python engine/make.py render <name> [version]   # full MP4 in projects/<name>/out/
+    python engine/make.py render <name> [version] [--local]  # full MP4 in projects/<name>/out/; on the render host
+                                                    # (KANZ_RENDER_HOST in .env) when one is set, --local renders here
     python engine/make.py check <name> [version]    # 12 frames pulled from the MP4 -> out/check-<version>.jpg + loudness
+    python engine/make.py ship <name> [version] [--local]  # the gate: lint --strict, render, frame check, loudness;
+                                                    # stops at the first failure
+Setup
+    python engine/make.py doctor [name]             # check tools, fonts, keys, render host, Codex, references
+
+<name> is a folder in projects/ (your videos, never committed) or examples/ (the curated worked examples).
 
 Between steps: write audio/edl.json (voice route), correct script.md (caption text + *keywords*),
 write scene.js (the visuals). See README.md and docs/EFFICIENCY.md.
 """
+import json
+import os
 import re
 import shutil
 import subprocess
@@ -63,7 +72,6 @@ def voice_script_stub(proj):
     md = proj / "script.md"
     if md.exists():
         return False
-    import json
     segs = json.loads((proj / "transcript.json").read_text(encoding="utf-8"))["segments"]
     md.write_text(VOICE_STUB.format(body="\n".join(s["text"] for s in segs if s["text"].strip())), encoding="utf-8")
     return True
@@ -101,19 +109,142 @@ def warn_stale_lint(proj):
         'older than scene.js' if scene.exists() and report.stat().st_mtime_ns < scene.stat().st_mtime_ns else None)
     if reason:
         print(f'\nWARNING: VISUAL REVIEW IS STALE — out/lint.json is {reason}.\n'
-              f'Run python engine/lint.py projects/{proj.name} and review its findings. Rendering continues.\n',
+              f'Run python engine/lint.py {proj.relative_to(ROOT).as_posix() if proj.is_relative_to(ROOT) else proj} and review its findings. Rendering continues.\n',
               file=sys.stderr)
 
 
+def project_dir(name):
+    """projects/<name> (local videos) unless only examples/<name> exists."""
+    proj, example = ROOT / "projects" / name, ROOT / "examples" / name
+    return example if not proj.exists() and example.exists() else proj
+
+
+def render_host():
+    return os.environ.get("KANZ_RENDER_HOST") or eleven.env().get("KANZ_RENDER_HOST") or None
+
+
+def render(proj, name, local=False):
+    """Render the MP4 (workflow review M7): on the render host when KANZ_RENDER_HOST is set, here with --local or without one."""
+    host, bash = render_host(), shutil.which("bash")
+    if host and not local and bash:
+        print(f"render: on {host} (engine/vps_render.sh); --local renders on this machine")
+        run([bash, "engine/vps_render.sh", proj.name, name])
+        return
+    if host and not local:
+        print("render: KANZ_RENDER_HOST is set but bash was not found; rendering locally", file=sys.stderr)
+    run([PY, "engine/render.py", proj, "--name", name])
+
+
+def find_mp4(out, name, version):
+    mp4 = out / f"{name}-{version}.mp4"
+    if not mp4.exists():  # renders named by hand, e.g. kanz-pilot-01-v2.mp4
+        found = sorted(out.glob(f"*-{version}.mp4"), key=lambda f: f.stat().st_mtime)
+        if not found:
+            sys.exit(f"no MP4 for {version} in {out}")
+        mp4 = found[-1]
+    return mp4
+
+
+def frame_stats(mp4, t):
+    """Mean and spread of one frame (54x96 greyscale): a blank or black frame has almost no spread."""
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-ss", str(t), "-i", str(mp4), "-frames:v", "1", "-vf", "scale=54:96",
+                          "-f", "rawvideo", "-pix_fmt", "gray", "-"], capture_output=True, check=True).stdout
+    if not raw:
+        return None
+    vals = list(raw)
+    mean = sum(vals) / len(vals)
+    return mean, (sum((v - mean) ** 2 for v in vals) / len(vals)) ** 0.5
+
+
+LUFS_TOLERANCE = 1.0
+
+
+def check(proj, name, version):
+    """12 frames from the MP4 -> out/check-<version>.jpg, plus loudness. Returns (problems, lufs)."""
+    out = proj / "out"
+    mp4 = find_mp4(out, name, version)
+    dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(mp4)],
+                               capture_output=True, text=True, encoding="utf-8", check=True).stdout)
+    cd = out / f"check-{version}"
+    cd.mkdir(exist_ok=True)
+    for f in cd.glob("*.*"):
+        f.unlink()
+    problems = []
+    for i in range(12):
+        t = round(dur * (i + 0.5) / 12, 1)
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(t), "-i", str(mp4), "-frames:v", "1",
+                        str(cd / f"f{i:02d}-{t:05.1f}s.jpg")], check=True)
+        stats = frame_stats(mp4, t)
+        if stats is None:
+            problems.append(f"no frame at {t}s")
+        elif stats[1] < 2.0:
+            problems.append(f"blank frame at {t}s (mean {stats[0]:.0f}, spread {stats[1]:.1f})")
+    log = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(mp4), "-af", "ebur128", "-f", "null", "-"],
+                         capture_output=True, text=True, encoding="utf-8").stderr
+    found = re.findall(r"I:\s+(-?[\d.]+) LUFS", log)
+    lufs = float(found[-1]) if found else None
+    if lufs is None:
+        problems.append("loudness not measured")
+    elif abs(lufs + 16.0) > LUFS_TOLERANCE:
+        problems.append(f"loudness {lufs} LUFS, outside -16 +/- {LUFS_TOLERANCE}")
+    print(f"{mp4.name}: {dur:.1f}s, integrated loudness {lufs if lufs is not None else '?'} LUFS (target -16)")
+    print("check sheet ->", sheet(cd, out / f"check-{version}.jpg"))
+    return problems, lufs
+
+
+def project_warnings(proj):
+    """Warnings, never failures: a new scene's structure, and objects that still need Ahmed's approval."""
+    import objects
+    warns = []
+    scene = proj / "scene.js"
+    if scene.exists():
+        src = scene.read_text(encoding="utf-8", errors="replace")
+        if "K.look(" in src and "K.pace(" not in src:
+            warns.append("scene.js calls K.look() without K.pace(): new videos use pace (docs/RULES.md PACE-1)")
+        if "K.pace(" in src and "K.finish()" not in src:
+            warns.append("scene.js calls K.pace() without K.finish() as its last line (docs/RULES.md PACE-1)")
+    warns += [f"object {line}" for line in objects.findings(proj)]
+    return warns
+
+
+def ship(proj, name, version, local=False):
+    """The gate before delivery (workflow review M5): every step must pass; stops at the first failure."""
+    def stop(step, why):
+        print(f"\nSHIP STOPPED at {step}: {why}", file=sys.stderr)
+        sys.exit(1)
+    for w in project_warnings(proj):
+        print("WARNING:", w, file=sys.stderr)
+    print("ship 1/4: lint --strict")
+    code = subprocess.run([PY, "engine/lint.py", proj, "--strict"], cwd=ROOT).returncode
+    if code:
+        stop("lint", f"engine/lint.py --strict exited {code}: fix each finding or justify it in lint-ok.json")
+    print("ship 2/4: render")
+    try:
+        captions(proj)
+        render(proj, f"{name}-{version}", local)
+    except subprocess.CalledProcessError as e:
+        stop("render", f"{' '.join(str(c) for c in e.cmd[:3])} exited {e.returncode}")
+    print("ship 3/4 + 4/4: frames from the MP4, loudness")
+    problems, _ = check(proj, name, version)
+    if problems:
+        stop("check", "; ".join(problems))
+    print(f"\nSHIP PASSED: {name}-{version}. Look at out/check-{version}.jpg before delivery; rendered is not approved.")
+
+
 def main():
+    if len(sys.argv) >= 2 and sys.argv[1] == "doctor":
+        import doctor
+        sys.exit(doctor.main(project_dir(sys.argv[2]) if len(sys.argv) > 2 else None))
     if len(sys.argv) < 3:
         print(__doc__)
         return
-    step, name = sys.argv[1], sys.argv[2]
-    arg = sys.argv[3] if len(sys.argv) > 3 else None
-    proj = ROOT / "projects" / name
+    local = "--local" in sys.argv
+    argv = [a for a in sys.argv if a != "--local"]
+    step, name = argv[1], argv[2]
+    arg = argv[3] if len(argv) > 3 else None
+    proj = project_dir(name)
     out = proj / "out"
-    if step in ("captions", "retime", "stills", "review", "render") and not (proj / "transcript.json").exists():
+    if step in ("captions", "retime", "stills", "review", "render", "ship") and not (proj / "transcript.json").exists():
         sys.exit(f"{name} has no voice yet: run `make.py tts {name}` (script route) or `make.py audio {name}` first.")
     if step == "new":
         src = Path(arg)
@@ -143,7 +274,7 @@ def main():
         run([PY, "engine/tts.py", proj, "--sample", "--speed", arg or "1.0"])
     elif step == "tts":
         run([PY, "engine/voicecheck.py", proj, "--pre"])
-        pause = sys.argv[4] if len(sys.argv) > 4 else "0.25"
+        pause = argv[4] if len(argv) > 4 else "0.25"
         run([PY, "engine/tts.py", proj, "--speed", arg or "1.0", "--pause", pause])
         captions(proj)
         run([PY, "engine/voicecheck.py", proj])
@@ -154,7 +285,7 @@ def main():
     elif step == "captions":
         captions(proj)
     elif step == "retime":
-        mp = sys.argv[4] if len(sys.argv) > 4 else "0.3"
+        mp = argv[4] if len(argv) > 4 else "0.3"
         run([PY, "engine/retime.py", proj, "--tempo", arg or "1.08", "--max-pause", mp])
         captions(proj)
     elif step in ("stills", "review"):
@@ -163,28 +294,18 @@ def main():
         print("review sheet ->", sheet(out / "stills-review", out / "review.jpg"))
     elif step == "render":
         warn_stale_lint(proj)
+        for w in project_warnings(proj):
+            print("WARNING:", w, file=sys.stderr)
         captions(proj)
-        run([PY, "engine/render.py", proj, "--name", f"{name}-{arg or 'v1'}"])
+        render(proj, f"{name}-{arg or 'v1'}", local)
     elif step == "check":
-        version = arg or "v1"
-        mp4 = out / f"{name}-{version}.mp4"
-        if not mp4.exists():  # renders named by hand, e.g. kanz-pilot-01-v2.mp4
-            mp4 = max(out.glob(f"*-{version}.mp4"), key=lambda f: f.stat().st_mtime)
-        dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(mp4)],
-                                   capture_output=True, text=True, encoding="utf-8", check=True).stdout)
-        cd = out / f"check-{version}"
-        cd.mkdir(exist_ok=True)
-        for f in cd.glob("*.*"):
-            f.unlink()
-        for i in range(12):
-            t = round(dur * (i + 0.5) / 12, 1)
-            subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", str(t), "-i", str(mp4), "-frames:v", "1",
-                            str(cd / f"f{i:02d}-{t:05.1f}s.jpg")], check=True)
-        log = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(mp4), "-af", "ebur128", "-f", "null", "-"],
-                             capture_output=True, text=True, encoding="utf-8").stderr
-        lufs = re.findall(r"I:\s+(-?[\d.]+) LUFS", log)
-        print(f"{mp4.name}: {dur:.1f}s, integrated loudness {lufs[-1] if lufs else '?'} LUFS (target -16)")
-        print("check sheet ->", sheet(cd, out / f"check-{version}.jpg"))
+        for w in project_warnings(proj):
+            print("WARNING:", w, file=sys.stderr)
+        problems, _ = check(proj, name, arg or "v1")
+        for prob in problems:
+            print("CHECK:", prob, file=sys.stderr)
+    elif step == "ship":
+        ship(proj, name, arg or "v1", local)
     else:
         print(__doc__)
 
