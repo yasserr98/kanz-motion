@@ -11,7 +11,10 @@ const { N, T, num } = K;
 const tl = K.tl;
 const OBJ = "../../library/objects/";
 K.look(); // look v2 (docs/LOOK-V2.md): safe zones, light, contact shadows. Call before the first K.cam()
-K.pace(); // pace (docs/PACE.md): smooth camera, 24 fps motion, mix 2, room tone, drift between moves (K.finish)
+// pace (docs/PACE.md): smooth camera, 24 fps motion, mix 2, room tone, drift between moves (K.finish).
+// defaults (docs/PACE.md "Visual defaults"): caption band kept clear, boards arrive built, punch hides the caption,
+// capped fly-ins, marks sized to their element. Switch one off with e.g. { defaults: "2026-10-17", fly: false }
+K.pace({ defaults: "2026-10-17" });
 // snake layout: neighbours 1,100 px apart in a row, rows 1,800 apart (closer rows show under the captions)
 const hook = K.board("hook", 0, 0), b2 = K.board("two", -1100, 0);
 K.cam(0, "hook");
@@ -31,6 +34,9 @@ K.settle(hero, 0, { fromScale: 1.45, fromY: 70, dur: 1.2 });
 K.img(b2, OBJ + "kanz-house-v01.png", { x: 760, y: 330, w: 420, at: g2.lead, enter: "fly" });
 // K.frame(N("التالية") - 0.25, "two");                 // pull out to the whole board on the second idea
 // K.snap(N("مهم"), 1.25, 0.6);                         // snap zoom on an emphasis word (a few per video)
+// const word = K.text(b2, "الكلمة", { x: 500, y: 120, size: 80, head: true, at: g2.lead });
+// K.oval(b2, word, { at: N("الكلمة") });                // marks take the element they point at (box + 16 px)
+// K.arrow(b2, word, house2, { at: N("البيت") });        // an arrow names its target
 // K.world(g2.start, "paper");  // paper world for chapter turns; K.world(t, "charcoal") to return
 // K.area(b2, { x: 500, y: 470, w: 760, h: 420, data: [100, 104, 103, 110, 120], min: 96, max: 121, at: g2.lead, dur: 1.2 });
 // const S = K.scale(1200000, 390); // one scale per comparison; bars share the zero baseline y

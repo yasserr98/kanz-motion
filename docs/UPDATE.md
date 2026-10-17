@@ -51,6 +51,11 @@ Then (both routes):
 
 Recent changes worth a re-render:
 
+- **2026-10-17, visual defaults** (`docs/PACE.md` "Visual defaults"): new videos from the template keep objects out of
+  the captions, arrive on built boards, hide the caption under `K.punch`, cap fly-ins and size marks to their element.
+  Existing videos are unchanged on re-render; to opt one in, change its `K.pace()` to
+  `K.pace({ defaults: "2026-10-17" })` and review it, since boards and timings move.
+
 - **2026-10-14, frame guard** (`docs/PACE.md` "Frame guard"): on videos using `K.pace()`, the camera no longer pushes
   people, labels, chart marks or arrows past the side of the frame. Re-render a pace video to get it; nothing in its
   scene needs to change.

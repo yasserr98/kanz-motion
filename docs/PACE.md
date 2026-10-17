@@ -119,6 +119,32 @@ reviewed 2026-10-14).
 - Lint and renders use the guard automatically (they call `K.seek`). `K._keepKind(t)` says whether a time is a held
   shot, a move, a snap or a free framing, for review scripts.
 
+## Visual defaults (2026-10-17, new videos)
+
+From a visual review of 7 shipped Reels (2026-10-17). The template calls `K.pace({ defaults: "2026-10-17" })`. Finished
+projects call `K.pace()` without `defaults` and render exactly as before (golden stills of 7 finished projects, byte for
+byte, before/after this change). Each default switches off on its own: `K.pace({ defaults: "2026-10-17", fly: false })`.
+Before/after stills of all five: `projects/_visual-defaults-demo` (`index.html` vs `index.html?old`).
+
+| Key | What it fixes (seen in) | What it does |
+| --- | --- | --- |
+| `band` | objects and labels under the captions (us-dollar-decisions-pace 57 s, gamblers-fallacy 8 / 74 s, portfolio-rebalancing 46 s) | the frame guard keeps `img.obj`, `.t` and `.tag` out of `K.CAPBAND` (screen y 1190..1450) while captions can show: pan up first (never pushing anything above the safe top that was not there), then zoom out, never below 0.8x, starting 0.45 s early |
+| `lead` | the camera lands on a half-built board | every element of the board scheduled after `g.lead` and before `g.arrive + 0.5` is moved to `g.lead`. A chart (`K.area`, `K.line`, `K.candles`) that starts there is ~40 % drawn when the camera lands and finishes 0.6 s later. Marks (`K.oval`, `K.arrow`, highlights) stay on their word. Call `K.go` before the board's elements |
+| `punch` | ghost text (short-biggest-betting-event 30 s, real-estate 46-50 s) | `K.punch` hides the caption for its duration; `K.dim` takes text, tags, cards and marks to 0, objects to `op` (0.3) |
+| `fly` | huge fly-ins across the captions | `enter: "fly"` starts at most 1.4x for objects wider than 500 px, from above when the object sits in the board's lower half, and falls back to scale-only (only as big as fits) when the start box would cross the caption band or the headline |
+| `marks` | rings and frames that miss or cut the text; arrows pointing at guessed coordinates | see below |
+
+Marks sized to an element (the element forms work in every project; only the warning and the arrowhead need `marks`):
+
+- `K.oval(board, el, { at })`: the smallest oval of the element's proportions that clears its box + 16 px.
+- `K.rect(board, el, { at })`, or `K.frame(el, { at })`: the hand-drawn frame at the box + 16 px.
+- `K.arrow(board, fromEl, toEl, { at })` or `K.arrow(board, x1, y1, toEl, { at })`: stops 16 px short of the target's
+  box. With `marks`, an arrow without a target logs a warning (in `K.warnings`), and every arrow uses one arrowhead: an
+  open chevron 3.6x the stroke width (min 22 px) on the curve's tangent.
+- `K.docMark(doc, { x, y, w, h }, { frame: true })`: a frame on a screenshot stands 16 px clear of the phrase.
+- `pad` changes the 16 px. The box is the element's layout (entrance transforms ignored), measured on the first
+  `K.seek` once fonts and images are ready, and the mark is inserted behind the element.
+
 **Rejected (Ahmed 2026-10-13): a ground plane** (a faint floor and horizon under objects). Objects stay on the plain
 charcoal/paper world; don't add floors or horizons.
 
