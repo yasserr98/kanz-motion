@@ -133,3 +133,10 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   - V12 snap zooms off by default (drift and pull-outs only). Rule: PACE-5.
   - V1-V5 visual defaults (caption band, built arrivals, punch hides the caption, capped fly-ins, marks sized to their
     element): in `K.pace({ defaults: "2026-10-17" })`, the template's default. Rule: PACE-2.
+- **Old projects untracked** ("untrack the old projects and the delivery.json receipts from the public kanz-motion repo,
+  keep the files on my disk ... No history rewrite"): 14 finished projects and their 9 receipts left the index in
+  `96606bb`; the files stay on Ahmed's disk, git-ignored. Old commits stay public. Rule: REPO-4.
+- **All library objects approved** ("approve the objects of course"): the 51 candidates in
+  `library/objects/manifest.json` (the 2026-10-10 sheet, batch 2 of 2026-10-11, the 2026-10-13 and casino batches, the
+  2026-10-14 stocks batch) are approved. The hijabi character `kanz-npc-f01-*` stays out of gambling scenes. New Codex
+  objects still start as candidates until Ahmed approves them. Rule: OBJ-2.
