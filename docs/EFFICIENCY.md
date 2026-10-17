@@ -44,10 +44,10 @@ research conversation. The same work in a **fresh session** re-reads far less.
 New Kanz Reel in kanz-motion. Follow AGENTS.md and docs/EFFICIENCY.md.
 Project name: <english-slug>
 Route: script (ElevenLabs voice <name or id>, speed <1.0>)   |   voice note: <path>
-Closest example to copy: projects/real-estate-never-loses
+Example to copy: examples/us-dollar-decisions-pace
 Script (do not rewrite; flag anything doubtful):
 <paste the Arabic copy>
-Deliver: review sheet, then render v1 and check sheet. Log usage at the end.
+Deliver: review sheet, then make.py ship v1 and the check sheet.
 ```
 
 ## Usage log

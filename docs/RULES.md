@@ -75,7 +75,7 @@ they were.
 | LOOK-1 | Charcoal grain background, Thmanyah Display headlines, IBM Plex Sans Arabic text | eye |
 | LOOK-2 | Lavender `#D5ADEF` is the only pointing colour; red only for genuine losses or risk | eye |
 | LOOK-3 | On the paper world, objects and figures keep their contrast (the default darkens them and adds a thin edge) | eye |
-| LOOK-4 | No logo by default; if a video adds it, it contrasts with what is behind it | `structure` |
+| LOOK-4 | No logo by default; if a video adds it, it contrasts with what is behind it (it turns dark on the paper world by itself; check photos, cards and screenshots) | `structure` |
 | LOOK-5 | Chart colours stay varied as they are (one neutral chart style was rejected) | |
 | LOOK-6 | Rejected, do not rebuild: ground plane, coin toss, isometric 3D bars, depth camera | eye |
 | LOOK-7 | No slide counters | `structure` |
@@ -95,7 +95,7 @@ they were.
 | Id | Rule | Check |
 | --- | --- | --- |
 | SND-1 | No music: voice + SFX + room tone only; no generated music | eye |
-| SND-2 | SFX only CC0 or explicitly licensed, each in `engine/sfx_library.py` with its source; generated ones in a new category | `manifest.json` |
+| SND-2 | SFX only CC0 or explicitly licensed, each in `engine/sfx_library.py` with its source; Sonniss/Mixkit files local only, never committed; generated ones (`sfx_gen.py`) always in a new category, so finished videos keep their sounds | `manifest.json` |
 | SND-3 | Room tone under every pause (`K.bed = "room"`); set `K.bedUnder` per video when it is too loud | ear |
 | SND-4 | Loudness -16 LUFS (± 1) | `make.py check/ship` |
 
