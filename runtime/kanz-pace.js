@@ -29,6 +29,15 @@
   K.PACE = false;
   const moves = []; // {t, end, id, o, to}
   const snaps = []; // {t, end}
+  let finishPending = false;
+  K._reserveFocus = function (t, dur) {
+    const m = { t, end: t + dur, pending: true };
+    moves.push(m);
+    return () => {
+      moves.splice(moves.indexOf(m), 1);
+      if (finishPending) K.finish();
+    };
+  };
 
   K.pace = function (o = {}) {
     K.PACE = true;
@@ -95,6 +104,9 @@
 
   K.finish = function () {
     if (!K.PACE) return;
+    // Focus coordinates need the image dimensions. Reserve now; finish drift once they all resolve.
+    finishPending = moves.some((m) => m.pending);
+    if (finishPending) return;
     const end = K.duration;
     moves.sort((a, b) => a.t - b.t);
     moves.forEach((m, i) => {
@@ -277,12 +289,22 @@
   };
 
   // ---------- emphasis ----------
+  let snapSets = [];
   K.snap = function (t, f = 1.3, hold = 0.7) {
     const w = document.getElementById("camwrap");
     if (!w) return;
-    tl.set(w, { scale: f }, t);
-    tl.set(w, { scale: 1 }, t + hold);
-    snaps.push({ t, end: t + hold });
+    snaps.push({ t, end: t + hold, until: t + hold, f });
+    snaps.sort((a, b) => a.t - b.t);
+    snapSets.forEach((s) => s.kill());
+    snapSets = [];
+    const set = (scale, at) => {
+      tl.set(w, { scale }, at); snapSets.push(tl.recent());
+    };
+    set(1, 0);
+    snaps.forEach((s, i) => {
+      s.end = Math.min(s.until, snaps[i + 1] ? snaps[i + 1].t : Infinity);
+      set(s.f, s.t); set(1, s.end);
+    });
     K.sfx(t, "click", 0.25);
   };
   K.pointer = function (parent) {
@@ -299,7 +321,7 @@
           gsap.set(r, { left: x, top: y, width: w, height: h || w });
           tl.fromTo(r, { autoAlpha: 0, scale: 1.4 }, { autoAlpha: 1, scale: 1, duration: 0.3, ease: "power3.out", immediateRender: false }, t);
         } else {
-          tl.to(r, { left: x, top: y, width: w, height: h || w, duration: 0.28, ease: "power2.inOut" }, t);
+          tl.to(r, { left: x, top: y, width: w, height: h || w, autoAlpha: 1, duration: 0.28, ease: "power2.inOut" }, t);
         }
         K.sfx(t, "marker", 0.2);
         return this;
