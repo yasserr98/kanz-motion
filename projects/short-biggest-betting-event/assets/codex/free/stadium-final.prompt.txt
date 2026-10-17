@@ -1,6 +1,0 @@
-Create one image for a vertical short video (9:16, 1080x1920). The video is about: An Egyptian finance explainer: the 2022 World Cup was the real test of Lionel Messi's brand in the US betting market; World Cup betting rose about 65% vs 2018 to about $35 billion (pre-tournament projections), and the Argentina-France final was the biggest betting event in football history.
-This image appears while the narrator says: ماتش واحد، نهائي (one match, the final)
-Show: a packed football stadium at night seen from the upper stands, floodlights, a bright pitch, fireworks above the roof
-A real-looking photograph, crowd too distant to identify anyone.
-No real, identifiable people. No text, letters, numbers, logos or watermark.
-Return only the image.

@@ -1,6 +1,0 @@
-Create one image for a vertical short video (9:16, 1080x1920). The video is about: An Egyptian finance explainer: the 2022 World Cup was the real test of Lionel Messi's brand in the US betting market; World Cup betting rose about 65% vs 2018 to about $35 billion (pre-tournament projections), and the Argentina-France final was the biggest betting event in football history.
-This image appears while the narrator says: كأس العالم 2022 (the 2022 World Cup)
-Show: a generic golden football world-cup-style trophy: two stylised figures spiralling up to hold a globe, on a two-band base (not the exact FIFA design, no text)
-A real-looking studio photograph on a dark background.
-No real, identifiable people. No text, letters, numbers, logos or watermark.
-Return only the image.

@@ -1,6 +1,0 @@
-Create one image for a vertical short video (9:16, 1080x1920). The video is about: An Egyptian finance explainer on how betting houses make money: the 'house' (the betting company) takes a commission on every bet, so win or lose the house always wins; all it needs is a full shop, people walking in and betting.
-This image appears while the narrator says: حجم الرهان ده كل الفلوس اللي الناس حطتها (the handle = all the money people put in)
-Show: a large heap of casino chips pushed together on a curved strip of plain betting felt, a croupier's wooden rake resting against the heap
-A real-looking close-up photograph, shallow depth of field.
-No real, identifiable people. No text, letters, numbers, logos or watermark.
-Return only the image.

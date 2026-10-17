@@ -1,9 +1,0 @@
-{
- "_why": "Voice-only spelling; captions keep script.md. Preventive: digits written out in Egyptian words so the clone does not read Standard Arabic numbers (see lexicon digit rows).",
- "replace": [
-  ["سنة 1913", "سنة ألف تسعمية تلتاشر"],
-  ["15 مرة", "خمستاشر مرة"],
-  ["لـ 26 مرة", "لستة وعشرين مرة"],
-  ["25 مرة", "خمسة وعشرين مرة"]
- ]
-}

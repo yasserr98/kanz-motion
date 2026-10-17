@@ -1,9 +1,0 @@
-Attachments: image 1 = the APPROVED Kanz editorial icon sheet (style authority). Image 2 = an approved Kanz library object (finish, material, perspective, scale and framing authority).
-
-Create ONE Kanz explainer icon for a video about: An Egyptian finance explainer on how betting houses make money: the 'house' (the betting company) takes a commission on every bet, so win or lose the house always wins; all it needs is a full shop, people walking in and betting.
-It illustrates the line: الشركة دي اللي بتستقبل حجم الرهان (the company receives the betting handle)
-Subject: a row of three casino slot machines side by side, three-quarter view, pull levers, blank reels with simple fruit and bell symbols (no digits or words), coin trays
-Lavender accent: the reel windows only.
-Treatment identical to the references: photographic grayscale editorial cutout with real material texture and the same fine tactile grain, same lighting from upper left; restrained lavender #D5ADEF only on the detail named; neutral grayscale everything else. The Kanz icon style is fixed for every topic: match line weight, shapes, perspective, dimensionality, shading, texture and palette treatment exactly; no topic-specific style, no glossy colours, no cartoon.
-Output: one centered subject on a SQUARE canvas (1254x1254 if available, else highest native square), comfortable transparent margins. TRUE RGBA PNG TRANSPARENCY everywhere outside the subject. No background, no floor, no drop shadow, no fake checkerboard, no text, letters, numbers, logos or watermark.
-Return only the image.
