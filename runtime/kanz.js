@@ -10,7 +10,7 @@
   const K = (window.K = {
     fps: 12, W: 1080, H: 1920, view: { x: 540, y: 960 }, zoom: 1.06,
     tl: gsap.timeline({ paused: true, defaults: { ease: "power3.out" } }),
-    cues: [], boards: {}, duration: (window.DURATION || 10) + 1.6,
+    cues: [], warnings: [], boards: {}, duration: (window.DURATION || 10) + 1.6,
   });
   const tl = K.tl;
   const stage = document.getElementById("stage");
@@ -63,12 +63,25 @@
     const cx = b.x + 500 + (o.dx || 0), cy = b.y + 430 + (o.dy || 0);
     return { x: K.view.x - cx * s, y: K.view.y - cy * s, scale: s };
   };
+  const cameraIntervals = [];
+  K._reserveCamera = function (t, dur) {
+    const move = { t, end: t + dur };
+    cameraIntervals.forEach((m) => {
+      if (t < m.end && move.end > m.t) {
+        const warning = `Overlapping camera moves: [${m.t}, ${m.end}] and [${t}, ${move.end}]`;
+        K.warnings.push(warning); console.warn(warning);
+      }
+    });
+    cameraIntervals.push(move);
+    return move;
+  };
   K.cam = function (t, id, o = {}) {
     const to = K.camAt(id, o);
     const from = K._cam || to;
     K._cam = to;
     if (t <= 0) { tl.set(world, to, 0); return; }
     const dur = o.dur || 0.75;
+    K._reserveCamera(t, dur);
     if (o.via) { // pull back half way, over the midpoint of both boards: reveals the world between them
       const centre = (c) => ({ x: (K.view.x - c.x) / c.scale, y: (K.view.y - c.y) / c.scale });
       const a = centre(from), b = centre(to), s = o.via;
@@ -81,6 +94,7 @@
     if (o.sfx !== false) K.sfx(t + 0.05, "whoosh", 0.32);
   };
   K.push = function (t, id, scale, dur = 2.5, o = {}) { // slow push-in on a board
+    if (!o._cameraInterval) K._reserveCamera(t, dur);
     const to = K.camAt(id, { ...o, scale });
     K._cam = to;
     tl.to(world, { ...to, duration: dur, ease: "sine.inOut" }, t);

@@ -37,13 +37,23 @@
     img.style.cssText = "width:1080px;height:1920px;display:block";
     const ctx = img.getContext("2d");
     const name = (i) => `${o.dir}/${String(i).padStart(6, "0")}.jpg`;
-    const draw = (i) => new Promise((res) => {
+    let generation = 0, pending = null;
+    const draw = (i, gen) => new Promise((res, reject) => {
       const x = new XMLHttpRequest();
       x.open("GET", name(i));
       x.responseType = "blob";
-      x.onload = () => createImageBitmap(x.response)
-        .then((b) => { ctx.drawImage(b, 0, 0, 1080, 1920); b.close(); res(); }).catch(() => res());
-      x.onerror = () => res();
+      const fail = () => reject(new Error(`Unable to load footage frame: ${name(i)} (status ${x.status})`));
+      x.onload = () => {
+        if (x.status !== 0 && (x.status < 200 || x.status >= 300)) return fail();
+        createImageBitmap(x.response).then((b) => {
+          try {
+            if (gen === generation) { ctx.drawImage(b, 0, 0, 1080, 1920); img.dataset.i = String(i); }
+            res();
+          } finally { b.close(); }
+        }).catch((err) => reject(new Error(`Unable to decode footage frame: ${name(i)}: ${err.message}`)));
+      };
+      x.onerror = fail;
+      x.onabort = fail;
       x.send();
     });
     img.dataset.i = "0";
@@ -82,8 +92,17 @@
       if (a > 0 && !o.windows.some(([, e]) => Math.abs(e - a) < 0.02)) edges.push([a, -1]);
       if (!touches(b) && (o.end == null || b < o.end - 0.1)) edges.push([b, 1]);
     });
+    // Transition transforms belong to their own layer; camwrap's translate/scale are the frame guard.
+    const motionLayers = new Map();
     const motion = () => [document.getElementById("camwrap") || document.getElementById("world"),
-      ...document.querySelectorAll("#stage > [id^=screen]")].filter(Boolean);
+      ...document.querySelectorAll("#stage [id^=screen]")].filter(Boolean).map((e) => {
+      if (!motionLayers.has(e)) {
+        const w = document.createElement("div");
+        w.style.cssText = "position:absolute;inset:0;z-index:1;transform-origin:540px " + K.view.y + "px";
+        e.parentNode.insertBefore(w, e); w.appendChild(e); motionLayers.set(e, w);
+      }
+      return motionLayers.get(e);
+    });
     let fx = null;
     if (style === "glitch") {
       fx = document.createElement("div");
@@ -133,12 +152,12 @@
     const prev = K.seek;
     K.seek = function (t) {
       prev(t);
-      if (style !== "dissolve") styleMotion(t);
+      if (style !== "cut" && style !== "dissolve") styleMotion(t);
       const win = faceStyled(t);
       const on = !!win;
       box.style.visibility = on ? "visible" : "hidden";
       if (grain) grain.style.opacity = on && win.op > 0.5 ? String(grainOp * 0.45) : grainOp; // light grain on skin
-      if (!on) return;
+      if (!on) { generation++; pending = null; return; }
       box.style.opacity = String(win.op);
       const sliding = style === "whip" && styleFace(t);
       box.style.background = win.op < 1 || sliding ? "transparent" : "#000"; // a slide reveals the board underneath
@@ -146,9 +165,13 @@
       img.style.transform = `translateX(${sf && sf.tx || 0}px) scale(${win.z * (sf && sf.s || 1)})`;
       img.style.filter = sf ? (sf.f || `blur(${sf.blur || 0}px)`) : "";
       const i = Math.max(1, Math.min(o.n, Math.floor(t * fps + 1e-6) + 1));
+      if (pending && pending.i === i) return pending.promise;
+      const gen = ++generation;
+      pending = null;
       if (img.dataset.i === String(i)) return;
-      img.dataset.i = String(i);
-      return draw(i);
+      const promise = draw(i, gen).finally(() => { if (pending && pending.gen === gen) pending = null; });
+      pending = { i, gen, promise };
+      return promise;
     };
   };
 })();
