@@ -41,6 +41,8 @@ def snap(t, rms, win):
 
 def tighten(x, max_pause, pause_to):
     rms = rms_frames(x)
+    if not len(rms):
+        return x
     quiet = rms < max(0.004, np.percentile(rms, 20) * 1.5)
     out, i, n = [], 0, len(quiet)
     keep_frames = int(pause_to * 100)
@@ -89,17 +91,26 @@ def main(proj):
     edl = json.loads((proj / "audio" / "edl.json").read_text(encoding="utf-8"))
     x = decode(proj / "audio" / edl["source"])
     rms = rms_frames(x)
-    fade = int(0.012 * SR)
-    ramp = np.linspace(0, 1, fade, dtype=np.float32)
     parts, snapped = [], []
     for a, b in edl["keep"]:
         a2 = snap(a, rms, edl.get("snap", 0.25)) if a > 0 else 0.0
         b2 = snap(b, rms, edl.get("snap", 0.25)) if b < len(x) / SR else len(x) / SR
+        if a2 >= b2:
+            a2, b2 = max(0.0, a), min(b, len(x) / SR)
+            print(f"warning: snapping collapsed [{a}, {b}]; using original bounds")
         seg = x[int(a2 * SR):int(b2 * SR)].copy()
+        if not len(seg):
+            print(f"warning: dropping empty keep range [{a}, {b}]")
+            continue
+        fade = min(576, len(seg) // 2)
+        ramp = np.linspace(0, 1, fade, dtype=np.float32)
         seg[:fade] *= ramp
-        seg[-fade:] *= ramp[::-1]
+        if fade:
+            seg[-fade:] *= ramp[::-1]
         parts.append(seg)
         snapped.append([round(a2, 2), round(b2, 2)])
+    if not parts:
+        sys.exit("no nonempty keep ranges; existing voice kept")
     y = tighten(np.concatenate(parts), edl.get("max_pause", 0.45), edl.get("pause_to", 0.3))
     tmp = proj / "audio" / "_cut.wav"
     pcm = (np.clip(y, -1, 1) * 32767).astype(np.int16).tobytes()
@@ -112,7 +123,7 @@ def main(proj):
     if edl.get("mute"):
         apply_mutes(out, edl["mute"])
     dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(out)],
-                               capture_output=True, text=True).stdout)
+                               capture_output=True, text=True, encoding="utf-8").stdout)
     (proj / "audio" / "voice-edit.json").write_text(json.dumps(
         {"source_seconds": round(len(x) / SR, 2), "kept": snapped, "cut_seconds": round(len(y) / SR, 2),
          "speed": edl.get("speed", 1.0), "final_seconds": round(dur, 2)}, indent=1), encoding="utf-8")
@@ -120,4 +131,6 @@ def main(proj):
 
 
 if __name__ == "__main__":
+    from console import utf8
+    utf8()
     main(sys.argv[1])

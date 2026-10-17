@@ -21,11 +21,13 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
+from align import spoken_text
+from provenance import audio_hash, current, stamp
 
 
 def silences(wav, floor, min_len):
     err = subprocess.run(["ffmpeg", "-hide_banner", "-i", str(wav), "-af", f"silencedetect=noise={floor}dB:d={min_len}",
-                          "-f", "null", "-"], capture_output=True, text=True).stderr
+                          "-f", "null", "-"], capture_output=True, text=True, encoding="utf-8").stderr
     starts = [float(x) for x in re.findall(r"silence_start: ([\d.]+)", err)]
     ends = [float(x) for x in re.findall(r"silence_end: ([\d.]+)", err)]
     return list(zip(starts, ends))
@@ -42,19 +44,51 @@ def main():
     voice, timing = proj / "audio" / "voice.wav", proj / "build" / "timing.js"
     v0, t0 = proj / "audio" / "voice-pre-retime.wav", proj / "build" / "timing-pre-retime.js"
     trs = [(proj / n, proj / n.replace(".json", "-pre-retime.json")) for n in ("transcript.json", "transcript.aligned.json")]
-    # A transcript without a "retime" stamp means make.py tts/audio wrote a new voice since the last retime: refresh the
-    # originals from it, or the old take would be retimed again (gamblers-fallacy 2026-10-14: a pronunciation fix was lost).
+    state_path = proj / "audio" / "retime.json"
+    state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
     tr_now = proj / "transcript.json"
-    fresh = tr_now.exists() and "retime" not in json.loads(tr_now.read_text(encoding="utf-8"))
+    now = json.loads(tr_now.read_text(encoding="utf-8")) if tr_now.exists() else {}
+    fresh = tr_now.exists() and "retime" not in now
+    if state:
+        fresh = audio_hash(voice) != state["output_sha256"]
+        if fresh:
+            print("voice changed since retime; refreshing originals from the current take")
+        elif not v0.exists() or audio_hash(v0) != state["source_sha256"]:
+            raise SystemExit("retime original is missing or changed; refusing to restore an unverified take")
+    elif v0.exists():
+        print("warning: retime has no voice provenance; using legacy backup detection")
+        if (now.get("audio_sha256") or now.get("sha256")) and not current(now, voice, "retimed transcript", strict_legacy=True):
+            fresh = True
+            print("voice changed since legacy retime; refreshing originals from the current take")
+    text = spoken_text((proj / "script.md").read_text(encoding="utf-8")) if (proj / "script.md").exists() else None
+    timing_meta = proj / "build" / "timing.provenance.json"
+    pre_meta = proj / "build" / "timing-pre-retime.provenance.json"
     if not v0.exists() or fresh:
         shutil.copy(voice, v0)
         if timing.exists():
             shutil.copy(timing, t0)
+        else:
+            t0.unlink(missing_ok=True)
+        if timing_meta.exists():
+            shutil.copy(timing_meta, pre_meta)
+        else:
+            pre_meta.unlink(missing_ok=True)
         for cur, pre in trs:
             if cur.exists():
                 shutil.copy(cur, pre)
+            else:
+                pre.unlink(missing_ok=True)
+    valid_trs = []
+    for cur, pre in trs:
+        if pre.exists():
+            tr = json.loads(pre.read_text(encoding="utf-8"))
+            aligned = cur.name == "transcript.aligned.json"
+            if current(tr, v0, cur.name, text if aligned else None, strict_legacy=True):
+                valid_trs.append((cur, tr))
+    timing_valid = t0.exists() and current(
+        json.loads(pre_meta.read_text(encoding="utf-8")) if pre_meta.exists() else {}, v0, "timing.js", text)
     dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(v0)],
-                               capture_output=True, text=True).stdout)
+                               capture_output=True, text=True, encoding="utf-8").stdout)
 
     # keep-segments: everything except the middle of each long pause (keep max_pause/2 at both edges)
     cuts = []
@@ -85,10 +119,7 @@ def main():
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(v0), "-filter_complex", graph, "-map", "[o]", str(voice)], check=True)
 
     # transcripts (segments -> words with start/end), remapped the same way
-    for cur, pre in trs:
-        if not pre.exists():
-            continue
-        tr = json.loads(pre.read_text(encoding="utf-8"))
+    for cur, tr in valid_trs:
         for seg in tr.get("segments", []):
             for k in ("start", "end"):
                 if k in seg:
@@ -100,13 +131,18 @@ def main():
         if "duration" in tr:
             tr["duration"] = remap(tr["duration"])
         tr["retime"] = {"tempo": a.tempo, "max_pause": a.max_pause, "pauses_cut": len(cuts)}
-        if "sha256" in tr:  # engine/align.py cache key: keep it valid for the retimed voice (same text)
-            text = tr["segments"][0]["text"] if tr.get("segments") else ""
-            tr["sha256"] = hashlib.sha256(voice.read_bytes() + text.encode()).hexdigest()
+        tr.update(stamp(voice))
+        if "sha256" in tr:
+            if cur.name == "transcript.aligned.json":
+                old_text = tr["segments"][0]["text"] if tr.get("segments") else ""
+                tr["sha256"] = hashlib.sha256(voice.read_bytes() + old_text.encode("utf-8")).hexdigest()
+            else:
+                tr["sha256"] = audio_hash(voice)
         cur.write_text(json.dumps(tr, ensure_ascii=False, indent=1), encoding="utf-8")
 
-    if not t0.exists():
-        print(f"voice retimed; no build/timing.js yet (run make.py captions)")
+    state_path.write_text(json.dumps({"source_sha256": audio_hash(v0), "output_sha256": audio_hash(voice)}), encoding="utf-8")
+    if not timing_valid:
+        print(f"voice retimed; no current build/timing.js (run make.py captions)")
         return
     src = t0.read_text(encoding="utf-8")
     tokens = json.loads(re.search(r"window\.TOKENS=(\[.*?\]);", src, re.S).group(1))
@@ -123,9 +159,12 @@ def main():
     new_d = remap(old_d)
     timing.write_text(f"window.TOKENS={json.dumps(tokens, ensure_ascii=False)};\nwindow.CAPTIONS={json.dumps(caps, ensure_ascii=False)};\n"
                       f"window.DURATION={new_d};\n", encoding="utf-8")
+    timing_meta.write_text(json.dumps(stamp(voice, text)), encoding="utf-8")
     removed = sum(e - s for s, e in cuts)
     print(f"{len(cuts)} pauses shortened ({removed:.2f} s removed), tempo {a.tempo}: {old_d:.2f} s -> {new_d:.2f} s")
 
 
 if __name__ == "__main__":
+    from console import utf8
+    utf8()
     main()

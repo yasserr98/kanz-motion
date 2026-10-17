@@ -19,12 +19,16 @@ import argparse
 import base64
 import hashlib
 import json
+import os
+import tempfile
 import re
 import subprocess
 import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
+
+from provenance import stamp
 
 ROOT = Path(__file__).resolve().parent.parent
 API = "https://api.elevenlabs.io/v1"
@@ -63,7 +67,6 @@ def spoken_text(md):
     return re.sub(r"\n{3,}", "\n\n", body.replace("*", "").strip())
 
 
-sys.stdout.reconfigure(encoding="utf-8")  # Arabic in console output on Windows
 LEXICON = Path(__file__).resolve().parent.parent / "library" / "voice" / "lexicon.json"
 
 
@@ -85,11 +88,13 @@ def apply_say(text, proj):
 
 def wav_dur(path):
     return float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)],
-                                capture_output=True, text=True).stdout)
+                                capture_output=True, text=True, encoding="utf-8").stdout)
 
 
 def words_from_alignment(al):
     chars, st, en = al["characters"], al["character_start_times_seconds"], al["character_end_times_seconds"]
+    if not chars or len(chars) != len(st) or len(chars) != len(en):
+        raise ValueError("TTS alignment returned no words or incomplete timings; existing outputs kept")
     words, cur = [], None
     for c, s, e in zip(chars, st, en):
         if c.isspace():
@@ -103,7 +108,32 @@ def words_from_alignment(al):
         cur["end"] = e
     if cur:
         words.append(cur)
+    if not words:
+        raise ValueError("TTS alignment returned no words; existing outputs kept")
     return [{**w, "start": round(w["start"], 3), "end": round(w["end"], 3)} for w in words]
+
+
+def read_cache(path):
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict) or not data.get("audio_base64"):
+            return None
+        words_from_alignment(data.get("alignment") or data["normalized_alignment"])
+        base64.b64decode(data["audio_base64"], validate=True)
+        return data
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+        print(f"cache miss: {path.name} missing or corrupt")
+        return None
+
+
+def write_cache(path, data):
+    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=path.name + ".", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(data, f)
+        os.replace(tmp, path)
+    finally:
+        Path(tmp).unlink(missing_ok=True)
 
 
 def main():
@@ -135,7 +165,10 @@ def main():
     if not voice:
         sys.exit("Pass --voice VOICE_ID or set ELEVENLABS_VOICE_ID in .env (python engine/tts.py --list-voices)")
     model = a.model or pick_model(key)
-    text = apply_say(spoken_text((proj / "script.md").read_text(encoding="utf-8")), proj)
+    script = spoken_text((proj / "script.md").read_text(encoding="utf-8"))
+    text = apply_say(script, proj)
+    if not text.strip():
+        sys.exit("TTS needs nonempty script text; existing outputs kept")
     if a.sample:
         text = "\n\n".join(text.split("\n\n")[:2])
     settings = {"stability": a.stability, "similarity_boost": 0.75, "speed": a.speed}
@@ -171,10 +204,11 @@ def main():
         # keyed on the paragraph only, so fixing one paragraph does not re-roll its neighbours
         sig = hashlib.sha1(json.dumps([para, voice, model, settings], ensure_ascii=False).encode()).hexdigest()
         cache = tmp / f"p{i:02d}.json"  # one cached response per paragraph: re-joins cost no credits
-        res = json.loads(cache.read_text(encoding="utf-8")) if cache.exists() else None
+        res = read_cache(cache) if cache.exists() else None
         if not res or res.get("_sig") != sig:
             res = {**tts(para, *ctx), "_sig": sig}
-            cache.write_text(json.dumps(res), encoding="utf-8")
+            words_from_alignment(res.get("alignment") or res["normalized_alignment"])
+            write_cache(cache, res)
         mp3, wav = tmp / f"p{i:02d}.mp3", tmp / f"p{i:02d}.wav"
         mp3.write_bytes(base64.b64decode(res["audio_base64"]))
         pw = words_from_alignment(res.get("alignment") or res["normalized_alignment"])
@@ -201,7 +235,7 @@ def main():
         print(f"sample -> {out}  (model {model}, speed {a.speed})")
         return
     dur = wav_dur(out)
-    tr = {"source": "elevenlabs", "engine": "elevenlabs-with-timestamps", "model": model, "voice_id": voice,
+    tr = {**stamp(out, script), "source": "elevenlabs", "engine": "elevenlabs-with-timestamps", "model": model, "voice_id": voice,
           "speed": a.speed, "pause": a.pause, "language": "ar", "duration": round(dur, 3),
           "segments": [{"start": words[0]["start"], "end": words[-1]["end"], "text": text, "words": words}]}
     (proj / "transcript.json").write_text(json.dumps(tr, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -209,4 +243,6 @@ def main():
 
 
 if __name__ == "__main__":
+    from console import utf8
+    utf8()
     main()

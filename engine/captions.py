@@ -16,6 +16,9 @@ import re
 import sys
 from pathlib import Path
 
+from align import spoken_text
+from provenance import current, stamp
+
 PUNCT = "،؟?!.,:؛\"«»()…"
 
 
@@ -44,8 +47,20 @@ def main(proj):
     toks = script_tokens((proj / "script.md").read_text(encoding="utf-8"))
     tr = json.loads((proj / "transcript.json").read_text(encoding="utf-8"))
     aligned = proj / "transcript.aligned.json"  # engine/align.py: the script itself, timed against the voice
-    timing = json.loads(aligned.read_text(encoding="utf-8")) if aligned.exists() else tr
+    voice = proj / "audio" / "voice.wav"
+    text = spoken_text((proj / "script.md").read_text(encoding="utf-8"))
+    timing = None
+    if aligned.exists():
+        data = json.loads(aligned.read_text(encoding="utf-8"))
+        if current(data, voice, aligned.name, text):
+            timing = data
+    if timing is None:
+        if not current(tr, voice, "transcript.json"):
+            sys.exit("no current timings: re-transcribe or align the current voice; existing outputs kept")
+        timing = tr
     asr = [w for s in timing["segments"] for w in s["words"] if norm(w["w"])]
+    if not asr or not toks:
+        sys.exit("captions need nonempty script and word timings; existing outputs kept")
     a = [norm(t["w"]) for t in toks]
     b = [norm(w["w"]) for w in asr]
     sm = difflib.SequenceMatcher(a=a, b=b, autojunk=False)
@@ -87,9 +102,13 @@ def main(proj):
     out.mkdir(exist_ok=True)
     (out / "timing.js").write_text(
         "window.TOKENS=" + json.dumps(toks, ensure_ascii=False) + ";\nwindow.CAPTIONS=" +
-        json.dumps(caps, ensure_ascii=False) + ";\nwindow.DURATION=" + str(tr["duration"]) + ";\n", encoding="utf-8")
-    print(f"{len(toks)} script words, {matched} matched to the voice, {len(caps)} caption chunks, {tr['duration']:.1f}s")
+        json.dumps(caps, ensure_ascii=False) + ";\nwindow.DURATION=" + str(timing["duration"]) + ";\n", encoding="utf-8")
+    if voice.exists():
+        (out / "timing.provenance.json").write_text(json.dumps(stamp(voice, text)), encoding="utf-8")
+    print(f"{len(toks)} script words, {matched} matched to the voice, {len(caps)} caption chunks, {timing['duration']:.1f}s")
 
 
 if __name__ == "__main__":
+    from console import utf8
+    utf8()
     main(sys.argv[1])

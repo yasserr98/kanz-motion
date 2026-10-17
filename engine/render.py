@@ -68,7 +68,55 @@ def room_tone(n, seed=7):
     return a * fade[:, None]
 
 
-def mix_audio_v2(proj, cues, duration, out, t0=0.0, bed=None):
+def resolve_cues(cues, t0=0.0):
+    lib = json.loads((ROOT / "library" / "sfx" / "manifest.json").read_text(encoding="utf-8"))
+    by_cat = {}
+    for m in lib:
+        by_cat.setdefault(m["category"], []).append(m["file"])
+    rng, resolved = random.Random(7), []
+    for c in sorted(cues, key=lambda c: c["t"]):
+        files = by_cat.get(c["cat"])
+        if not files or c["t"] < t0:
+            continue
+        f = files[(c["pick"] * 7 + rng.randrange(3)) % len(files)]
+        if not (ROOT / "library" / "sfx" / f).is_file():
+            raise FileNotFoundError(f"missing SFX: {f}")
+        resolved.append((c, f))
+    return resolved
+
+
+def check_video(path, frames, fps):
+    result = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-count_frames",
+                             "-show_entries", "stream=nb_read_frames,duration", "-of", "json", str(path)],
+                            capture_output=True, text=True, encoding="utf-8", check=True)
+    streams = json.loads(result.stdout).get("streams", [])
+    if not streams:
+        raise RuntimeError("encoder produced no video stream")
+    stream = streams[0]
+    expected = frames / fps
+    try:
+        count, duration = int(stream["nb_read_frames"]), float(stream["duration"])
+    except (KeyError, ValueError, TypeError) as e:
+        raise RuntimeError("cannot verify encoded frame count/duration") from e
+    if abs(count - expected * 24) > 2 or abs(duration - expected) > max(2 / 24, 0.01):
+        raise RuntimeError(f"incomplete encoded video: {count} frames, {duration:.3f}s; expected ~{expected * 24:.0f}, {expected:.3f}s")
+
+
+def close_encoder(ff):
+    try:
+        if not ff.stdin.closed:
+            ff.stdin.close()
+    finally:
+        if ff.poll() is None:
+            ff.terminate()
+            try:
+                ff.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                ff.kill()
+                ff.wait()
+
+
+def mix_audio_v2(proj, cues, duration, out, t0=0.0, bed=None, resolved=None):
     """Mix 2 (Ahmed 2026-10-11: "sometimes the sound effects are too loud"). Library files differ by up to
     20 dB inside one category, so every file is levelled first; the SFX bus ducks ~5 dB under speech and
     can never rise above the voice; then the whole mix goes to -16 LUFS with a -1 dBFS peak limit."""
@@ -78,17 +126,9 @@ def mix_audio_v2(proj, cues, duration, out, t0=0.0, bed=None):
     v = voice[int(t0 * SR):][:n]
     vbus[: len(v)] += v
     sbus = np.zeros((n, 2), np.float32)
-    lib = json.loads((ROOT / "library" / "sfx" / "manifest.json").read_text(encoding="utf-8"))
-    by_cat = {}
-    for m in lib:
-        by_cat.setdefault(m["category"], []).append(m["file"])
-    cache, rng, used = {}, random.Random(7), set()
+    cache, used = {}, set()
     w50 = int(0.05 * SR)
-    for c in sorted(cues, key=lambda c: c["t"]):
-        files = by_cat.get(c["cat"])
-        if not files or c["t"] < t0:
-            continue
-        f = files[(c["pick"] * 7 + rng.randrange(3)) % len(files)]
+    for c, f in resolve_cues(cues, t0) if resolved is None else resolved:
         used.add(f)
         if f not in cache:
             a = decode(ROOT / "library" / "sfx" / f)
@@ -117,37 +157,27 @@ def mix_audio_v2(proj, cues, duration, out, t0=0.0, bed=None):
         rdb = 10 * np.log10(np.mean(rt.mean(axis=1) ** 2) + 1e-12)
         bus += rt * np.float32(10 ** (((vref - BED_UNDER_VOICE) - rdb) / 20))
     raw = out.with_name(out.stem + "-raw.wav")
-    pcm = (np.clip(bus, -1, 1) * 32767).astype(np.int16).tobytes()
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "s16le", "-ar", str(SR), "-ac", "2", "-i", "-", str(raw)],
+    pcm = bus.astype("<f4").tobytes()
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "f32le", "-ar", str(SR), "-ac", "2", "-i", "-", "-c:a", "pcm_f32le", str(raw)],
                    input=pcm, check=True)
-    meas = subprocess.run(["ffmpeg", "-i", str(raw), "-af", "ebur128", "-f", "null", "-"], capture_output=True, text=True).stderr
+    meas = subprocess.run(["ffmpeg", "-i", str(raw), "-af", "ebur128", "-f", "null", "-"], capture_output=True, text=True, encoding="utf-8").stderr
     lufs = float(meas.rsplit("I:", 1)[1].split("LUFS")[0])
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(raw), "-af",
-                    f"volume={-16.0 - lufs:.2f}dB,alimiter=limit=0.891:level=false:latency=true", str(out)], check=True)
+                    f"volume={-16.0 - lufs:.2f}dB,alimiter=limit=0.891:level=false:latency=true", "-c:a", "pcm_s16le", str(out)], check=True)
     raw.unlink()
     return sorted(used)
 
 
-def mix_audio(proj, cues, duration, out, t0=0.0, mix=1, bed=None):
+def mix_audio(proj, cues, duration, out, t0=0.0, mix=1, bed=None, resolved=None):
     if mix == 2:
-        return mix_audio_v2(proj, cues, duration, out, t0, bed)
+        return mix_audio_v2(proj, cues, duration, out, t0, bed, resolved)
     voice = decode(proj / "audio" / "voice.wav")
     n = int((duration - t0) * SR) + SR
     bus = np.zeros((n, 2), np.float32)
     v = voice[int(t0 * SR):][:n]
     bus[: len(v)] += v
-    lib = json.loads((ROOT / "library" / "sfx" / "manifest.json").read_text(encoding="utf-8"))
-    by_cat = {}
-    for m in lib:
-        by_cat.setdefault(m["category"], []).append(m["file"])
-    cache = {}
-    rng = random.Random(7)
-    used = set()
-    for c in sorted(cues, key=lambda c: c["t"]):
-        files = by_cat.get(c["cat"])
-        if not files or c["t"] < t0:
-            continue
-        f = files[(c["pick"] * 7 + rng.randrange(3)) % len(files)]
+    cache, used = {}, set()
+    for c, f in resolve_cues(cues, t0) if resolved is None else resolved:
         used.add(f)
         if f not in cache:
             cache[f] = decode(ROOT / "library" / "sfx" / f)
@@ -179,16 +209,31 @@ def main():
     out_dir.mkdir(exist_ok=True)
     with sync_playwright() as p:
         browser = p.chromium.launch(args=["--allow-file-access-from-files"])
-        page = browser.new_page(viewport={"width": 1080, "height": 1920}, device_scale_factor=1)
-        errors = []
-        page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
-        page.on("pageerror", lambda e: errors.append(str(e)))
-        page.goto((proj / "index.html").as_uri())
-        page.wait_for_function("document.fonts && document.fonts.status === 'loaded' && window.K")
-        page.wait_for_function("Array.from(document.images).every(i => i.complete && i.naturalWidth > 0)")
+        errors, page_errors = [], []
+
+        def check_page():
+            if page_errors:
+                raise RuntimeError("PAGE ERRORS:\n  " + "\n  ".join(page_errors))
+
+        def open_page():
+            pg = browser.new_page(viewport={"width": 1080, "height": 1920}, device_scale_factor=1)
+            pg.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
+            pg.on("pageerror", lambda e: page_errors.append(str(e)))
+            pg.goto((proj / "index.html").as_uri())
+            check_page()
+            pg.wait_for_function("document.fonts && document.fonts.status === 'loaded' && window.K")
+            check_page()
+            pg.wait_for_function("Array.from(document.images).every(i => i.complete && i.naturalWidth > 0)")
+            if a.cam24:
+                pg.evaluate("K.camSmooth = true")
+            check_page()
+            return pg
+
+        page = open_page()
         fonts = page.evaluate("Array.from(document.fonts).filter(f => f.status === 'loaded').map(f => f.family)")
         if errors:
-            print("PAGE ERRORS:", *errors, sep="\n  ")
+            print("CONSOLE ERRORS:", *errors, sep="\n  ")
+        check_page()
         duration = page.evaluate("K.duration")
         fps = page.evaluate("K.fps")
         # smooth camera (Ahmed 2026-10-11, new videos): scenes set K.camSmooth = true; capture every 24 fps frame
@@ -203,73 +248,83 @@ def main():
         if a.stills:
             sd = out_dir / ("stills-" + (a.name or "review"))
             sd.mkdir(exist_ok=True)
+            for old in sd.glob("t*.png"):
+                old.unlink()
             for t in [float(x) for x in a.stills.split(",")]:
                 for attempt in range(4):  # same intermittent capture failure as the video loop below
                     try:
+                        check_page()
                         page.evaluate(f"K.seek({t})")
+                        check_page()
                         page.screenshot(path=str(sd / f"t{t:06.2f}.png"), clip=clip)
+                        check_page()
                         break
                     except Exception as e:  # noqa: BLE001
+                        check_page()
                         if attempt == 3:
                             raise
                         print(f"  still {t}: {str(e).splitlines()[0]} -> reopening the page", flush=True)
                         page.close()
-                        page = browser.new_page(viewport={"width": 1080, "height": 1920}, device_scale_factor=1)
-                        page.goto((proj / "index.html").as_uri())
-                        page.wait_for_function("document.fonts && document.fonts.status === 'loaded' && window.K")
-                        page.wait_for_function("Array.from(document.images).every(i => i.complete && i.naturalWidth > 0)")
+                        page = open_page()
             print("fonts:", sorted(set(fonts)), "| stills ->", sd)
             browser.close()
             return
         t1 = a.t1 if a.t1 is not None else duration
         name = a.name or proj.name
         silent = out_dir / f"_{name}-video.mp4"
+        voice = proj / "audio" / "voice.wav"
+        if not voice.is_file():
+            raise FileNotFoundError(f"missing voice: {voice}")
+        cues = page.evaluate("K.cues")
+        resolved = resolve_cues(cues, a.t0)
+        mix = page.evaluate("K.mix || 1")
+        bed = page.evaluate("K.bed || null")
+        under = page.evaluate("K.bedUnder || null")
+        if under:
+            globals()["BED_UNDER_VOICE"] = float(under)
+        check_page()
+        frames = int((t1 - a.t0) * fps)
+        if frames <= 0:
+            raise ValueError("render range contains no frames")
         ff = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "image2pipe", "-framerate", str(fps), "-i", "-",
                                "-r", "24", "-c:v", "libx264", "-preset", "slow", "-crf", "20", "-maxrate", "9M", "-bufsize", "18M",
                                "-pix_fmt", "yuv420p",
                                str(silent)], stdin=subprocess.PIPE)
-        frames = int((t1 - a.t0) * fps)
-        def open_page():
-            pg = browser.new_page(viewport={"width": 1080, "height": 1920}, device_scale_factor=1)
-            pg.goto((proj / "index.html").as_uri())
-            pg.wait_for_function("document.fonts && document.fonts.status === 'loaded' && window.K")
-            pg.wait_for_function("Array.from(document.images).every(i => i.complete && i.naturalWidth > 0)")
-            if cam_smooth:
-                pg.evaluate("K.camSmooth = true")
-            return pg
-
-        cam_smooth = bool(a.cam24)
-        for i in range(frames):
-            # Chromium sometimes fails a screenshot after a few hundred frames when memory is low ("Unable to capture
-            # screenshot", 2026-10-13 at ~7.7 s on a 1.5 GB-free machine). Reopen the page and redo that frame.
-            for attempt in range(4):
-                try:
-                    page.evaluate(f"K.seek({a.t0 + i / fps})")
-                    shot = page.screenshot(type="jpeg", quality=93, clip=clip)
-                    break
-                except Exception as e:  # noqa: BLE001 - playwright raises its own Error type
-                    if attempt == 3:
-                        raise
-                    print(f"  frame {i}: {str(e).splitlines()[0]} -> reopening the page", flush=True)
+        try:
+            for i in range(frames):
+                # Chromium sometimes fails a screenshot after a few hundred frames when memory is low ("Unable to capture
+                # screenshot", 2026-10-13 at ~7.7 s on a 1.5 GB-free machine). Reopen the page and redo that frame.
+                for attempt in range(4):
                     try:
-                        page.close()
-                    except Exception:  # noqa: BLE001
-                        pass
-                    page = open_page()
-            ff.stdin.write(shot)
-            if i % (fps * 10) == 0:
-                print(f"  frame {i}/{frames}", flush=True)
-        ff.stdin.close()
-        ff.wait()
-        cues = page.evaluate("K.cues")
-        mix = page.evaluate("K.mix || 1")
-        bed = page.evaluate("K.bed || null")
-        under = page.evaluate("K.bedUnder || null")  # per-video room-tone level, dB under the voice (Ahmed 2026-10-13: too loud)
-        if under:
-            globals()["BED_UNDER_VOICE"] = float(under)
+                        check_page()
+                        page.evaluate(f"K.seek({a.t0 + i / fps})")
+                        check_page()
+                        shot = page.screenshot(type="jpeg", quality=93, clip=clip)
+                        check_page()
+                        break
+                    except Exception as e:  # noqa: BLE001 - playwright raises its own Error type
+                        check_page()
+                        if attempt == 3:
+                            raise
+                        print(f"  frame {i}: {str(e).splitlines()[0]} -> reopening the page", flush=True)
+                        try:
+                            page.close()
+                        except Exception:  # noqa: BLE001
+                            pass
+                        page = open_page()
+                ff.stdin.write(shot)
+                if i % (fps * 10) == 0:
+                    print(f"  frame {i}/{frames}", flush=True)
+            ff.stdin.close()
+            code = ff.wait()
+            if code:
+                raise RuntimeError(f"video encoder failed (exit {code})")
+            check_video(silent, frames, fps)
+        finally:
+            close_encoder(ff)
         browser.close()
     audio = out_dir / f"_{name}-audio.wav"
-    used = mix_audio(proj, cues, t1, audio, a.t0, mix, bed)
+    used = mix_audio(proj, cues, t1, audio, a.t0, mix, bed, resolved)
     final = out_dir / f"{name}.mp4"
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(silent), "-i", str(audio), "-c:v", "copy", "-c:a", "aac",
                     "-b:a", "192k", "-shortest", "-movflags", "+faststart", str(final)], check=True)
@@ -280,4 +335,6 @@ def main():
 
 
 if __name__ == "__main__":
+    from console import utf8
+    utf8()
     main()

@@ -26,14 +26,27 @@ set -euo pipefail
 
 if [ $# -lt 2 ]; then sed -n '2,8p' "$0"; exit 1; fi
 SLUG=$1; NAME=$2; shift 2
+for value in "$SLUG" "$NAME"; do
+  [[ "$value" =~ ^[A-Za-z0-9._-]+$ && "$value" != . && "$value" != .. ]] || { echo "invalid slug or version name: $value" >&2; exit 1; }
+done
+quote() { printf "'%s'" "${1//\'/\'\\\'\'}"; }
+remote() { ssh "$HOST" "bash -c $(quote "$1")"; }
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 P=projects/$SLUG
 cd "$ROOT"
-envval() { [ -f .env ] && grep -E "^$1=" .env | tail -n 1 | cut -d= -f2- | tr -d '"' || true; }
+envval() { [ -f .env ] && grep -E "^$1=" .env | tail -n 1 | cut -d= -f2- | tr -d '
+"' || true; }
 HOST=${KANZ_RENDER_HOST:-$(envval KANZ_RENDER_HOST)}
 RDIR=${KANZ_RENDER_DIR:-$(envval KANZ_RENDER_DIR)}
 [ -n "$HOST" ] || { echo "set KANZ_RENDER_HOST=<ssh alias> in .env" >&2; exit 1; }
-RDIR=$(ssh "$HOST" "mkdir -p ${RDIR:-kanz-motion-render} && cd ${RDIR:-kanz-motion-render} && pwd")
+RDIR=${RDIR:-kanz-motion-render}
+case "$RDIR" in
+  '~/'*) RQ='"$HOME"/'$(quote "${RDIR:2}") ;;
+  '~') RQ='"$HOME"' ;;
+  *) RQ=$(quote "$RDIR") ;;
+esac
+RDIR=$(remote "mkdir -p -- $RQ && cd -- $RQ && pwd")
+RQ=$(quote "$RDIR")
 [ -f "$P/index.html" ] || { echo "no such project: $P" >&2; exit 1; }
 
 # --- 1. sync ---------------------------------------------------------------------------------------------
@@ -48,48 +61,51 @@ LIST='find $DIRS -type f ! -path "*/out/*" ! -path "*/__pycache__/*" ! -name "*.
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 DIRS=$DIRS bash -s <<< "$LIST" > "$TMP/local"
-ssh "$HOST" "mkdir -p $RDIR && cd $RDIR && DIRS='$DIRS' bash -s" <<< "$LIST" > "$TMP/remote" || true
+remote "mkdir -p -- $RQ && cd -- $RQ && DIRS=$(quote "$DIRS") bash -s" <<< "$LIST" > "$TMP/remote" || true
 LC_ALL=C comm -23 "$TMP/local" "$TMP/remote" | cut -f1 > "$TMP/changed"
 N=$(wc -l < "$TMP/changed")
 if [ "$N" -gt 0 ]; then
   echo "sync: $N changed file(s) -> $HOST:$RDIR"
-  tar czf - -T "$TMP/changed" | ssh "$HOST" "tar xzf - -C $RDIR"
+  tar czf - -T "$TMP/changed" | remote "tar xzf - -C $RQ"
 else
   echo "sync: VPS already up to date"
 fi
 
 # --- 2. render on the VPS --------------------------------------------------------------------------------
-ARGS=$(printf ' %q' "$@")
+ARGS=""
+if [ "$#" -gt 0 ]; then ARGS=$(printf ' %q' "$@"); fi
 LOG="$P/out/$NAME.vps.log"
+LQ=$(quote "$LOG")
+EQ=$(quote "$LOG.exit")
+printf -v RUN '%q ' env "PLAYWRIGHT_BROWSERS_PATH=$RDIR/.browsers" .venv/bin/python engine/render.py "$P" --name "$NAME" "$@"
+RUN+="; echo \$? > $EQ"
 echo "render: $SLUG -> $NAME${ARGS} (on $HOST)"
-ssh "$HOST" "cd $RDIR && mkdir -p $P/out && rm -f $LOG.exit && \
-  nohup bash -c 'PLAYWRIGHT_BROWSERS_PATH=$RDIR/.browsers .venv/bin/python engine/render.py $P --name $NAME$ARGS; echo \$? > $LOG.exit' \
-  > $LOG 2>&1 < /dev/null &"
+remote "cd -- $RQ && mkdir -p -- $(quote "$P/out") && rm -f -- $EQ && nohup bash -c $(quote "$RUN") > $LQ 2>&1 < /dev/null &"
 START=$(date +%s)
 while :; do
   sleep 15
-  STATUS=$(ssh "$HOST" "cd $RDIR && tail -n 1 $LOG 2>/dev/null; cat $LOG.exit 2>/dev/null || true")
+  STATUS=$(remote "cd -- $RQ && { tail -n 1 -- $LQ 2>/dev/null; cat -- $EQ 2>/dev/null || true; }")
   echo "  [$(( $(date +%s) - START ))s] $(printf '%s' "$STATUS" | head -n 1)"
   CODE=$(printf '%s\n' "$STATUS" | sed -n '2p')
   if [ -n "$CODE" ]; then break; fi
 done
 if [ "$CODE" != "0" ]; then
   echo "render failed (exit $CODE). VPS log:" >&2
-  ssh "$HOST" "tail -n 30 $RDIR/$LOG" >&2
+  remote "tail -n 30 -- $(quote "$RDIR/$LOG")" >&2
   exit 1
 fi
 
 # --- 3. copy the result back -----------------------------------------------------------------------------
 mkdir -p "$P/out"
-scp -q "$HOST:$RDIR/$LOG" "$P/out/"
+remote "cat -- $(quote "$RDIR/$LOG")" > "$P/out/$NAME.vps.log"
 if [[ " $* " == *" --stills "* ]]; then
-  scp -q -r "$HOST:$RDIR/$P/out/stills-$NAME" "$P/out/"
+  remote "tar czf - -C $(quote "$RDIR/$P/out") -- $(quote "stills-$NAME")" | tar xzf - -C "$P/out/"
   echo "done -> $P/out/stills-$NAME/"
 else
-  scp -q "$HOST:$RDIR/$P/out/$NAME.mp4" "$HOST:$RDIR/$P/out/$NAME.sfx-used.json" "$P/out/"
-  RSIZE=$(ssh "$HOST" "stat -c %s $RDIR/$P/out/$NAME.mp4")
+  remote "tar czf - -C $(quote "$RDIR/$P/out") -- $(quote "$NAME.mp4") $(quote "$NAME.sfx-used.json")" | tar xzf - -C "$P/out/"
+  RSIZE=$(remote "stat -c %s -- $(quote "$RDIR/$P/out/$NAME.mp4")")
   if [ "$(stat -c %s "$P/out/$NAME.mp4")" = "$RSIZE" ]; then
-    ssh "$HOST" "rm -f $RDIR/$P/out/$NAME.mp4"   # verified local copy; keep the VPS disk lean
+    remote "rm -f -- $(quote "$RDIR/$P/out/$NAME.mp4")"   # verified local copy; keep the VPS disk lean
   fi
   echo "done -> $P/out/$NAME.mp4"
 fi
