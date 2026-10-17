@@ -1,0 +1,26 @@
+{
+  "project": "projects/short-house-always-wins",
+  "context": "An Egyptian finance explainer on how betting houses make money: the 'house' (the betting company) takes a commission on every bet, so win or lose the house always wins; all it needs is a full shop, people walking in and betting.",
+  "shots": [
+    {"name": "casino-exterior", "line": "البيت هاوس دي إشارة لشركة المراهنات نفسها (the house = the betting company itself)",
+     "subject": "a grand casino building facade at night seen from street level at a slight three-quarter angle: tall entrance with a marquee canopy (blank, no letters), rows of bulb lights, revolving glass doors, two short steps",
+     "accent": "the marquee bulb lights", "modes": ["kanz", "free"], "ref": "kanz-company-office-v01.png",
+     "free_style": "A real-looking photograph, cinematic night light."},
+    {"name": "slot-machines", "line": "الشركة دي اللي بتستقبل حجم الرهان (the company receives the betting handle)",
+     "subject": "a row of three casino slot machines side by side, three-quarter view, pull levers, blank reels with simple fruit and bell symbols (no digits or words), coin trays",
+     "accent": "the reel windows", "modes": ["kanz", "free"], "ref": "kanz-atm-v01.png",
+     "free_style": "A real-looking photograph inside a casino, warm light."},
+    {"name": "chips-on-felt", "line": "حجم الرهان ده كل الفلوس اللي الناس حطتها (the handle = all the money people put in)",
+     "subject": "a large heap of casino chips pushed together on a curved strip of plain betting felt, a croupier's wooden rake resting against the heap",
+     "accent": "the chip edge stripes", "modes": ["kanz", "free"], "ref": "kanz-poker-chips-v01.png",
+     "free_style": "A real-looking close-up photograph, shallow depth of field."},
+    {"name": "betting-app-phone", "line": "عملية رهان يعني ترانزاكشن عادي خالص (a bet is just an ordinary transaction)",
+     "subject": "a hand holding a smartphone showing a sports betting app screen made only of simple shapes: two team crest circles, three odds buttons as blank rounded rectangles and a confirm bar (no digits or letters)",
+     "accent": "the confirm bar on the screen", "modes": ["kanz", "free"], "ref": "kanz-phone-trading-v01.png",
+     "free_style": "A real-looking photograph, phone screen glow."},
+    {"name": "casino-floor-crowd", "line": "هدف البيت الأساسي هو إن المحل يكون مليان (the house's goal: a full shop)",
+     "subject": "a busy casino floor packed with anonymous people around roulette and card tables, seen from a slightly raised angle, chandeliers above",
+     "accent": "one roulette table's felt", "modes": ["kanz", "free"], "ref": "kanz-roulette-table-croupier-v01.png", "people": true,
+     "free_style": "A real-looking photograph, people seen from behind or blurred, no identifiable faces."}
+  ]
+}

@@ -38,8 +38,8 @@ Route B (no Git, download the ZIP):
    - everything outside `projects/` (runtime/, engine/, docs/, library/, brand/, AGENTS.md, README.md,
      package.json, package-lock.json, requirements.txt, ...): new and changed files;
    - inside `projects/`: only files that do not exist here yet. Never replace a file inside an existing project
-     folder of mine, except `projects/_template/` and Ahmed's example projects shipped in the download, which are
-     replaced (they are backed up in step 3).
+     folder of mine, except `projects/_template/` and the `projects/_*-demo/` engine demos shipped in the download,
+     which are replaced (they are backed up in step 3). `examples/` is Ahmed's: new and changed files.
    Do not delete any file from this folder, even one that no longer exists upstream.
 5. Delete only the temporary download folder.
 
@@ -48,6 +48,23 @@ Then (both routes):
 7. Re-read AGENTS.md, README.md and the "Recent changes" list in docs/UPDATE.md, then tell me in a few lines what is new
    and which of my videos I should re-render to get a fix.
 ```
+
+Recent workflow changes (2026-10-17, no re-render needed):
+
+- **Rules in one place.** `AGENTS.md` is now a short checklist; the rules in force are `docs/RULES.md` (each with an id,
+  e.g. NUM-3), the routes are in `docs/routes/`, and Ahmed's dated decisions in `docs/DECISIONS.md`.
+- **New rules for new videos:** Western digits with ٪ (`35`, `65٪`), source lines 28 px and labels 34 px minimum, at most
+  four labels on a board, no label that repeats the caption, contrast kept on the paper world, no snap zooms. Chart colours
+  stay as they are. The template turns these on; lint reports `digits`, `small-text`, `crowded-board` and `caption-repeat`.
+- **Worked examples** are in `examples/` (`us-dollar-decisions-pace` to copy for a voice note or script,
+  `short-house-always-wins` for shorts). Don't copy older projects: most predate pace.
+- **New commands:** `python engine/make.py doctor` checks your setup; `python engine/make.py ship <name> v1` lints,
+  renders, checks the frames and the loudness, and stops at the first failure. With `KANZ_RENDER_HOST` in `.env`, renders
+  go to that server (`--local` renders on your machine).
+- **Objects:** `library/objects/manifest.json` says which objects are approved; `make.py check` and `ship` warn when a
+  scene uses a candidate. Ask Ahmed before shipping one.
+- **Your projects stay yours:** Git now ignores `projects/` (except the template and demos), so nothing you make can be
+  committed by accident.
 
 Recent changes worth a re-render:
 

@@ -1,5 +1,8 @@
 # Pace: arrive built, never freeze, carry the hero
 
+> **2026-10-17:** snap zooms are off by default (Ahmed rejected them twice; RULES PACE-5): `K.snap` only warns under the
+> template's defaults, `{ force: true }` overrides one call. Rules in force: [RULES.md](RULES.md).
+
 Built 2026-10-13 from the short-form pacing study (Kanz repo `reports/shorts-pacing-study-2026-10-13/`:
 conversion.doc, Vox Shorts and 0x100x against our 7 Reels). Ahmed asked to "apply all the changes"; the first
 video built with it is `projects/us-dollar-decisions-pace/` (the delivered v4 rebuilt; v4 itself is unchanged).
@@ -30,7 +33,6 @@ const g = K.go(T("word"), "board2", { scale: 1.3, dx: 230, dy: -60 }); // close 
 K.img(B.board2, src, { x, y, w, at: g.lead, enter: "fly" });            // lands with the camera
 K.frame(N("next") - 0.25, "board2");                                    // pull out as the second idea arrives
 K.carry(hero, "board2", g.start, { x, y, w, opacity: 0.3 });            // the hero rides the move, dimmed, until its line
-K.snap(N("emphasis"), 1.25, 0.6);                                       // one-frame snap zoom on an emphasis word
 // ... last line of scene.js:
 K.finish();                                                             // adds the drift between camera moves
 ```
@@ -84,7 +86,7 @@ Use these where the script gives a reason; the aim is that a video uses several 
 | says someone goes somewhere | `K.walk(board, [walkA, walkB], { from, to, at, dur, w, rest })` | right to left reads naturally |
 | names places | `K.img(... kanz-map-usa ...)` / `kanz-globe` + `K.pin` + `K.arrow` | base map: Natural Earth still to download |
 | turns a chapter | `K.wipe(t)` (fixed 2026-10-13: it left a 200 px band) or `K.world` paper | |
-| cites a real series | `K.area({ ..., source })` with data from `engine/data.py` | source line on screen + `assets/SOURCE.md` |
+| cites a real series | `K.area({ ..., source })` with data from `engine/data.py` | source line on screen + `CREDITS.md` |
 | shows a real photo | `K.photo` (now with a camera-shutter sound) | needs a licensed, sourced photo file first |
 
 New objects 2026-10-13 (`library/objects/PROVENANCE-2026-10-13.md`): approved copies from the Kanz explainer library

@@ -33,6 +33,7 @@ quote() { printf "'%s'" "${1//\'/\'\\\'\'}"; }
 remote() { ssh "$HOST" "bash -c $(quote "$1")"; }
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 P=projects/$SLUG
+[ -d "$ROOT/$P" ] || [ ! -d "$ROOT/examples/$SLUG" ] || P=examples/$SLUG   # curated worked examples
 cd "$ROOT"
 envval() { [ -f .env ] && grep -E "^$1=" .env | tail -n 1 | cut -d= -f2- | tr -d '
 "' || true; }

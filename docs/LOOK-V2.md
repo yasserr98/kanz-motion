@@ -3,6 +3,9 @@
 > **Pace (2026-10-13, default for new videos, [PACE.md](PACE.md))** changes four things below: the hook hero settles from
 > oversized instead of `K.push` (section 7); the paper world is used at chapter turns, not only 1-2 per video; the ending
 > cuts back to the hook on the last word with a ~1.3 s tail instead of a ~2 s hold; boards sit 1,100 px apart in a snake.
+> **2026-10-17:** Western digits with ٪ everywhere (`K.DIGITS = "en"` under the template's defaults; section 6), source
+> lines 28 px and labels 34 px minimum, contrast kept on the paper world. The rules in force are in [RULES.md](RULES.md).
+> `projects/_sample-real-estate-v3/` below is local to Ahmed's copy (not in the public repo).
 
 Approved by Ahmed 2026-10-10 for **new videos only** (finished Reels are not re-timed or re-rendered).
 No music: that was his decision on 2026-10-10, so sound stays voice + SFX.
@@ -87,7 +90,7 @@ the-cost-of-a-mistake v5 (old look) scores: median fill 31%, 4 dead stretches, 6
 ## 5. Evidence on screen (Vox's credibility device, Kanz version)
 
 - `K.doc(board, src, { x, y, w, at, out, rot, source })`: a **genuine** screenshot on paper with tape.
-  `source` is the line under it, e.g. `"رويترز · ٥/١٠/٢٠٢٦"`. Record URL + capture date in `assets/SOURCE.md`.
+  `source` is the line under it, e.g. `"رويترز · 5/10/2026"`. Record URL + capture date in `CREDITS.md`.
   Crop the screenshot to the relevant paragraph or headline. A full page is unreadable on a phone even when zoomed.
 - `K.docMark(doc, x, y, w, h, { at })`: a lavender highlighter sweeps right → left over the phrase
   **as it is spoken**. Coordinates are in the screenshot's own pixels. `{ frame: true }` draws a box instead.
@@ -109,7 +112,8 @@ Only numbers the voice says. No "مثال افتراضي" tag when the voice fra
 ("خلينا نقول", "لو"...): Ahmed, 2026-10-11, all videos.
 
 - `K.count(board, { x, y, from, to, at, dur, size, digits: "ar" | "en", step, prefix, suffix })`:
-  counts up with soft clicks and lands on a coin sound. Arabic-Indic digits by default.
+  counts up with soft clicks and lands on a coin sound. New videos use Western digits (`K.DIGITS = "en"`, RULES NUM-3);
+  older scenes keep Arabic-Indic, the old default.
 - `K.pile(board, src, { x, y, n, w, at })`: n copies drop into a heap, bottom row first, with coin sounds.
 - `K.stack(board, src, { x, y, n, w, at })`: a bar built from objects (banknotes, coins), growing upward.
   Use two stacks of different n for a comparison at true relative scale.

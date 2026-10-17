@@ -1,0 +1,7 @@
+Edit the attached photo of a crowded casino floor. Remove every woman from it: replace each woman with a man
+(dark suit or smart shirt, seen from behind or in profile, no identifiable faces), or fill the space with more of
+the same casino floor. The large woman with long hair in the bottom-right foreground must be gone completely;
+put a man in a dark suit jacket seen from behind in her place. Keep everything else the same: the same camera angle,
+the warm chandelier light, the roulette wheel in the lower left, the green tables, the croupier in the waistcoat, the
+busy crowd. Vertical 9:16. No woman anywhere, no hijab, no text, letters, numbers, logos or watermark.
+Return only the image.
