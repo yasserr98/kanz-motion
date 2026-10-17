@@ -1,6 +1,6 @@
 # How US Dollar Decisions Affect Your Money (إزاي قرارات الدولار بتأثر على فلوسك)
 
-Source: Airtable Content `recuuRJ8eXF5mSCD4` ("How US Dollar Decisions Affect Your Money", Status Approved,
+Source: Airtable Content ("How US Dollar Decisions Affect Your Money", Status Approved,
 Type Video, Bucket Education), Brief read 2026-10-11. Voice: ElevenLabs (`engine/make.py tts`). The text between
 the markers is spoken exactly as written and is also the caption source; `*word*` marks the caption keyword
 (stripped before TTS). Blank lines are paragraph pauses; single line breaks keep lines of one beat together.

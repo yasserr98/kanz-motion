@@ -1,4 +1,4 @@
-/* "خسرت فلوس في البورصة؟" (Emotional Trading and Investment Strategy): Airtable recN49BA2awknaqVF Brief,
+/* "خسرت فلوس في البورصة؟" (Emotional Trading and Investment Strategy): Airtable Brief,
  * voiced by the Ahmed Shaaban clone (ElevenLabs v4, 1.15). Look v2 + the 2026-10-11 defaults (LOOK-V2 section 9):
  * complete first frame, paper world for the definition and the strategy, takeaway ending, no logo/wipe.
  * The only real figures (2005, five weeks) come from the study on screen: Lo, Repin & Steenbarger, NBER w11243

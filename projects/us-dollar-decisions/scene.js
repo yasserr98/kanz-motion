@@ -1,5 +1,5 @@
 /* "ليه قرار زي رفع سعر الفايدة في أمريكا ممكن يأثّر على فلوسك؟" (How US Dollar Decisions Affect Your Money):
- * Airtable recuuRJ8eXF5mSCD4 Brief, voiced by the Ahmed Shaaban clone (ElevenLabs v4, 1.15). Look v2 + the
+ * Airtable Brief, voiced by the Ahmed Shaaban clone (ElevenLabs v4, 1.15). Look v2 + the
  * 2026-10-11 defaults (LOOK-V2 section 9): complete first frame, paper world for the key idea, takeaway ending,
  * smooth camera, sound mix 2, no logo. The voice says no figures, so nothing on screen carries a number: the
  * demand line is a shape with no axis values. USD objects copied from the approved Kanz explainer library.

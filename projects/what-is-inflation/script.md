@@ -13,7 +13,7 @@ Numbers on screen:
 - 10,000 جنيه saved for a year: hypothetical, tagged "مثال افتراضي".
 
 Uncertain, please check:
-- The year in the first line: resolved as 2024 from the approved Airtable Brief (recHajI6mdY5zuXfT); ASR heard "20-20"/"20-25".
+- The year in the first line: resolved as 2024 from the approved Airtable Brief; ASR heard "20-20"/"20-25".
   Sources found show tomatoes at ~22-30 جنيه in 2024 (30 in Upper Egypt, 2024-10-06, https://almalnews.com/1864301/) and 40 جنيه
   in 2026, so the on-screen source line carries no year. Flagged to Ahmed 2026-10-07.
 - "بنسبة مقبولة" (ASR heard "بالنسبة مقاوية" / "مقوية" in all passes).

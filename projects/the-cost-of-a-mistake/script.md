@@ -2,7 +2,7 @@
 
 Source: Ahmed's voice note `audio_message (8).m4a` (2026-10-07), trimmed to the last clean take of each line, one breath
 muted, sped to 1.25x (`audio/edl.json`). Wording follows the approved Airtable Brief of
-"Risk Management: Why the Same Loss Hits People Differently" (reckSAsWW9V2vu1rS) where the voice matches it, and the voice
+"Risk Management: Why the Same Loss Hits People Differently" where the voice matches it, and the voice
 where it differs (e.g. "طيب يا سيدي", "بالمناسبة" without و). `*word*` marks the caption keyword shown in lavender.
 No market numbers are spoken; the 1000 جنيه prize is part of a thought experiment.
 

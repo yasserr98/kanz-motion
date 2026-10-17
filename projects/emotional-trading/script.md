@@ -1,6 +1,6 @@
 # Emotional Trading and Investment Strategy (التداول العاطفي والاستراتيجية)
 
-Source: Airtable Content `recN49BA2awknaqVF` ("Emotional Trading and Investment Strategy", Status Approved,
+Source: Airtable Content ("Emotional Trading and Investment Strategy", Status Approved,
 Type Video), Brief read 2026-10-11. Voice: ElevenLabs (`engine/make.py tts`). The text between the markers is
 spoken exactly as written and is also the caption source; `*word*` marks the caption keyword (stripped
 before TTS). Blank lines are paragraph pauses; single line breaks keep lines of one beat together.

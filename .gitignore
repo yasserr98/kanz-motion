@@ -27,3 +27,18 @@ shorts/*/work/*.png
 shorts/*/work/*.jpg
 .pytest_cache/
 tests/.tmp*/
+
+# Projects are local (2026-10-17, workflow review M1): this repo is public, so new videos, scripts and delivery receipts
+# never go here. Tracked: the template, the engine demos (no voice, not for posting) and the curated examples/ folder.
+# Receipts and the usage log live in Ahmed's private Kanz repo (reports/kanz-motion-deliveries/).
+projects/*
+!projects/_template/
+!projects/_*-demo/
+**/delivery.json
+examples/*/out/
+examples/*/audio/*.wav
+examples/*/audio/*.mp3
+examples/*/audio/source.*
+examples/*/audio/_tts/
+examples/*/assets/face/
+examples/*/assets/codex/**/*.log
