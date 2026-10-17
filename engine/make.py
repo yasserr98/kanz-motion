@@ -78,7 +78,7 @@ def voice_script_stub(proj):
 
 
 def run(cmd):
-    print("+", " ".join(str(c) for c in cmd))
+    print("+", " ".join(str(c) for c in cmd), flush=True)
     subprocess.run(cmd, check=True, cwd=ROOT)
 
 
@@ -127,7 +127,7 @@ def render(proj, name, local=False):
     """Render the MP4 (workflow review M7): on the render host when KANZ_RENDER_HOST is set, here with --local or without one."""
     host, bash = render_host(), shutil.which("bash")
     if host and not local and bash:
-        print(f"render: on {host} (engine/vps_render.sh); --local renders on this machine")
+        print(f"render: on {host} (engine/vps_render.sh); --local renders on this machine", flush=True)
         run([bash, "engine/vps_render.sh", proj.name, name])
         return
     if host and not local:
@@ -214,17 +214,17 @@ def ship(proj, name, version, local=False):
         sys.exit(1)
     for w in project_warnings(proj):
         print("WARNING:", w, file=sys.stderr)
-    print("ship 1/4: lint --strict")
+    print("ship 1/4: lint --strict", flush=True)
     code = subprocess.run([PY, "engine/lint.py", proj, "--strict"], cwd=ROOT).returncode
     if code:
         stop("lint", f"engine/lint.py --strict exited {code}: fix each finding or justify it in lint-ok.json")
-    print("ship 2/4: render")
+    print("ship 2/4: render", flush=True)
     try:
         captions(proj)
         render(proj, f"{name}-{version}", local)
     except subprocess.CalledProcessError as e:
         stop("render", f"{' '.join(str(c) for c in e.cmd[:3])} exited {e.returncode}")
-    print("ship 3/4 + 4/4: frames from the MP4, loudness")
+    print("ship 3/4 + 4/4: frames from the MP4, loudness", flush=True)
     problems, _ = check(proj, name, version)
     if problems:
         stop("check", "; ".join(problems))
