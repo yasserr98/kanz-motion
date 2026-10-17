@@ -6,7 +6,7 @@
 `fred` downloads https://fred.stlouisfed.org/graph/fredgraph.csv?id=<SERIES> (public, no key). `csv` reads a file you
 already have (for example a Central Bank of Egypt export saved by hand): first column a date (YYYY-MM-DD, YYYY-MM or
 YYYY), second a number; header rows and blanks are skipped. Either way the series is saved as
-projects/<slug>/assets/data-<name>.csv and a line with the URL and capture date is added to assets/SOURCE.md, so every
+projects/<slug>/assets/data-<name>.csv and a line with the URL and capture date is added to projects/<slug>/CREDITS.md, so every
 number on screen stays traceable (Kanz rule: real market figures need a source on screen and in the project notes).
 
 Prints the `data:` array for K.area, the first/last/min/max points with their dates, and a suggested `source:` line.
@@ -100,13 +100,14 @@ def main():
         w = csv.writer(f)
         w.writerow(["date", "value"])
         w.writerows(rows)
-    with (assets / "SOURCE.md").open("a", encoding="utf-8") as f:
+    credits = proj / "CREDITS.md"  # one credits file per project (older projects: assets/SOURCE.md)
+    with credits.open("a", encoding="utf-8") as f:
         f.write(f"- `{out.name}`: {label}, {url}, captured {today}, {rows[0][0]} to {rows[-1][0]}, every {a.every}\n")
 
     vals = [v for _, v in rows]
     lo, hi = min(rows, key=lambda r: r[1]), max(rows, key=lambda r: r[1])
     d = dt.date.fromisoformat(today)
-    print(f"saved {out} ({len(rows)} points) and a line in {assets / 'SOURCE.md'}")
+    print(f"saved {out} ({len(rows)} points) and a line in {credits}")
     print(f"first {rows[0][0]} = {rows[0][1]:g} | last {rows[-1][0]} = {rows[-1][1]:g} | min {lo[0]} = {lo[1]:g} | max {hi[0]} = {hi[1]:g}")
     print("data: [" + ", ".join(f"{v:g}" for v in vals) + "]")
     print(f'source: "{label} · {f"{d.day}/{d.month}/{d.year}".translate(AR_DIGITS)}"')

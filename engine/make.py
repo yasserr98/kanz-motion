@@ -46,6 +46,27 @@ before TTS). Blank lines are paragraph pauses.
 <!-- captions:start -->
 <!-- captions:end -->
 """
+VOICE_STUB = """# Title (Arabic title)
+
+Source: voice note, date. The text between the markers is the caption source, prefilled from the raw
+transcript: correct recognition slips (never change what was said), mark one `*keyword*` per line,
+and list uncertain words here for Ahmed.
+
+<!-- captions:start -->
+{body}
+<!-- captions:end -->
+"""
+
+
+def voice_script_stub(proj):
+    """Voice-note route: script.md with the caption markers, prefilled from transcript.json. Never overwrites."""
+    md = proj / "script.md"
+    if md.exists():
+        return False
+    import json
+    segs = json.loads((proj / "transcript.json").read_text(encoding="utf-8"))["segments"]
+    md.write_text(VOICE_STUB.format(body="\n".join(s["text"] for s in segs if s["text"].strip())), encoding="utf-8")
+    return True
 
 
 def run(cmd):
@@ -111,7 +132,9 @@ def main():
     elif step == "audio":
         run([PY, "engine/edit_audio.py", proj])
         run(TRANSCRIBE + [proj / "audio" / "voice.wav", proj / "transcript.json"])
-        print(f"\nNext: write {proj / 'script.md'} from transcript.json (fix recognition slips, mark *keywords*)")
+        wrote = voice_script_stub(proj)
+        print(f"\nNext: correct {proj / 'script.md'}" + (" (prefilled from transcript.json between the caption markers)"
+              if wrote else " (kept as it was)") + ": fix recognition slips, mark *keywords*")
     elif step == "script":
         scaffold(proj)
         (proj / "script.md").write_text(SCRIPT_STUB, encoding="utf-8")
