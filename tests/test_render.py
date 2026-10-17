@@ -253,3 +253,20 @@ def test_contrast_includes_captions_and_computed_colour(project, monkeypatch, ca
     monkeypatch.setattr(contrast, "sync_playwright", lambda: Playwright([ContrastPage()]))
     contrast.main(project, [1])
     assert "LOW " in capsys.readouterr().out
+
+
+def test_mix_cache_reuses_until_inputs_change(project, monkeypatch):
+    calls = []
+    def mix(proj, cues, duration, out, *args):
+        calls.append(duration)
+        out.write_bytes(b"mix%d" % len(calls))
+        return ["a.mp3"]
+    monkeypatch.setattr(render, "mix_audio", mix)
+    out = project / "out/audio.wav"
+    assert render.cached_mix(project, [], 2.0, out, resolved=[]) == ["a.mp3"]
+    assert render.cached_mix(project, [], 2.0, out, resolved=[]) == ["a.mp3"]
+    assert len(calls) == 1 and out.read_bytes() == b"mix1"
+    (project / "audio/voice.wav").write_bytes(b"voice two")
+    render.cached_mix(project, [], 2.0, out, resolved=[])
+    render.cached_mix(project, [], 3.0, out, resolved=[])
+    assert len(calls) == 3
