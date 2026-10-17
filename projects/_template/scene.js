@@ -36,6 +36,16 @@ K.img(b2, OBJ + "kanz-house-v01.png", { x: 760, y: 330, w: 420, at: g2.lead, ent
 // const S = K.scale(1200000, 390); // one scale per comparison; bars share the zero baseline y
 // const a = K.bar(b2, { x: 560, y: 720, w: 190, value: 1100000, scale: S, at: g2.lead });
 
+// ---------- visual types (AGENTS.md, "Images and icons: always ask Codex"; shots.json -> engine/codex_assets.py) ----------
+// PLACE -> full-screen photo on a board of its own that holds only text/tags (board icons would sit on the photo):
+// const gPlace = K.go(T("الكازينو"), "place");
+// K.screen("assets/codex/free/casino-exterior.png", gPlace.start, T("التالية"));
+// K.text(K.boards.place.el, "عنوان", { x: 500, y: 130, size: 80, head: true, at: gPlace.lead });
+// REAL PERSON or MOMENT -> disposable print of a licensed photo (never generated); credit goes to CREDITS.md, not the frame.
+// Keep it in the board's upper two thirds so it clears the captions; tags on it sit on top:
+// K.snap35(b2, "assets/photos/person.jpg", { x: 500, y: 560, w: 520, h: 640, rot: -4, at: g2.lead, flash: false });
+// CONCEPT, MECHANISM or NUMBER -> Kanz icon on charcoal (Codex `kanz` or library/objects), as above.
+
 // ---------- ending: cut back to the hook on the last word, the thesis big, ~1.3 s after the voice ----------
 const tLast = (window.TOKENS || []).slice(-1)[0]?.end || 4;
 K.cam(tLast - 0.15, "hook", { dur: 0.04, sfx: false });
