@@ -20,8 +20,16 @@ import eleven
 from provenance import current, stamp
 
 
+def caption_body(md):
+    """The text between the caption markers; a clear stop instead of an IndexError when they are missing."""
+    if "<!-- captions:start -->" not in md or "<!-- captions:end -->" not in md:
+        sys.exit("script.md has no <!-- captions:start --> / <!-- captions:end --> markers: put the caption text "
+                 "between them (make.py script and make.py audio write a stub with both)")
+    return md.split("<!-- captions:start -->")[1].split("<!-- captions:end -->")[0]
+
+
 def spoken_text(md):
-    body = md.split("<!-- captions:start -->")[1].split("<!-- captions:end -->")[0]
+    body = caption_body(md)
     return re.sub(r"\n{3,}", "\n\n", body.replace("*", "").strip())
 
 

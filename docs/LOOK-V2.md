@@ -87,7 +87,7 @@ the-cost-of-a-mistake v5 (old look) scores: median fill 31%, 4 dead stretches, 6
 ## 5. Evidence on screen (Vox's credibility device, Kanz version)
 
 - `K.doc(board, src, { x, y, w, at, out, rot, source })`: a **genuine** screenshot on paper with tape.
-  `source` is the line under it, e.g. `"رويترز · ٥/١٠/٢٠٢٦"`. Record URL + capture date in `assets/SOURCE.md`.
+  `source` is the line under it, e.g. `"رويترز · ٥/١٠/٢٠٢٦"`. Record URL + capture date in `CREDITS.md`.
   Crop the screenshot to the relevant paragraph or headline. A full page is unreadable on a phone even when zoomed.
 - `K.docMark(doc, x, y, w, h, { at })`: a lavender highlighter sweeps right → left over the phrase
   **as it is spoken**. Coordinates are in the screenshot's own pixels. `{ frame: true }` draws a box instead.

@@ -32,8 +32,11 @@ repo or a Kanz worktree (worktrees do not contain this folder; use the absolute 
    - Voice note: write `audio/edl.json` (keep the last clean take of each retake, reasons in `_why`),
      then `make.py audio <slug>`; read the new transcript through.
    - **Voice (Ahmed 2026-10-11, every script video):** the instant clone "Ahmed Shaaban Shorts" `UeQ9UTIKgN2rsbnqHH5w`
-     (the `.env` default). Never use the professional clone "Ahmed Shaaban" `zb1ukG6KkE2RYSjMU6b3`: compared on
+     (the `.env` default in Ahmed's copy). Never use the professional clone "Ahmed Shaaban" `zb1ukG6KkE2RYSjMU6b3`: compared on
      us-dollar-decisions, Ahmed said the old one "was way better".
+     **Editors' copies:** both clones live in Ahmed's ElevenLabs account, so these ids work only with his key. With your
+     own key, `python engine/tts.py --list-voices` shows the voices you can use; put the one Ahmed approved for you in
+     `.env` as `ELEVENLABS_VOICE_ID`, and ask him if he has not named one.
    - Script: paste the copy verbatim into `script.md` (never rewrite; flag doubts), mark `*keywords*`,
      `make.py sample <slug> 1.0` and `1.15` for Ahmed to pick, then `make.py tts <slug> <speed>`.
      `tts` runs the voice checks itself: before generating, `voicecheck.py --pre` lists script patterns
@@ -48,7 +51,8 @@ repo or a Kanz worktree (worktrees do not contain this folder; use the absolute 
      `make.py retime <slug> 1.0` to tighten pauses only.
 4. **Breaths and sighs.** `python engine/breaths.py projects/<slug>`; mute real ones via `"mute"` in
    `audio/edl.json` and re-run `engine/edit_audio.py`. Mention any you left in.
-5. **Script and captions.** Voice note: correct `script.md` from the transcript and flag uncertain words.
+5. **Script and captions.** Voice note: `make.py audio` writes `script.md` prefilled from the transcript between the
+   caption markers (it never overwrites one); correct it there and flag uncertain words.
    Then the **image pass** ("Images and icons: always ask Codex" below): `shots.json` from the whole script, the visual
    type per shot, Codex generates, before the scene is written.
 6. **Scene.** New videos use look v2 (`docs/LOOK-V2.md`, `K.look()`; the template has it). Copy the closest finished `scene.js` (pilot-01 for a voice note, real-estate-never-loses
@@ -129,11 +133,12 @@ note or short, gets an image pass before the scene is written. Do not settle for
    `projects/<slug>/assets/codex/`. Compare icons with the references and regenerate mismatches; check photos for text,
    logos and identifiable faces.
 4. **Real people and real events use real photos.** Never generate a real person (Messi, a CEO). Source an openly
-   licensed photo (Wikimedia Commons: CC0/CC BY/CC BY-SA, credit line recorded in a `SOURCES.md`) and show it as a
+   licensed photo (Wikimedia Commons: CC0/CC BY/CC BY-SA, source URL, licence and credit line recorded in `CREDITS.md`) and show it as a
    disposable print (`K.snap35`, untouched). The OpenAI image tool refuses to edit public figures (Messi, 2026-10-16);
    `K.photo()`'s CSS grade is the Kanz-look fallback. No credit line on screen: write each photo's credit to
    `projects/<slug>/CREDITS.md` for the post caption (the CC BY licences still need attribution), and keep CC BY-SA
-   edits under CC BY-SA.
+   edits under CC BY-SA. `CREDITS.md` is the one credits file per project: photos, screenshots (URL + capture date)
+   and data series (`engine/data.py` appends to it). Older projects keep theirs in `assets/SOURCE.md`.
 5. Use several Codex jobs in parallel and dispatch agents for sourcing; record what was generated in the backlog.
    New objects still need Ahmed's approval before they move into `library/objects/`.
 
@@ -185,10 +190,10 @@ audio/frames before changing anything, and say where it really was if it differs
 
 ## Before a new video
 
-1. Read `README.md` and `docs/VOX-RESEARCH-FINDINGS.md` (what to keep, adapt and drop).
-   Then `docs/LOOK-V2.md` (safe zones, light, depth, evidence and number components; Ahmed 2026-10-10)
+1. Read `README.md`, then `docs/LOOK-V2.md` (safe zones, light, depth, evidence and number components; Ahmed 2026-10-10)
    and `projects/_look-demo/scene.js`, which uses each one.
-2. Read `projects/pilot-01/scene.js` as the worked example.
+2. Read `projects/pilot-01/scene.js` as the worked example. `docs/VOX-RESEARCH-FINDINGS.md` (2026-10-05) is
+   historical background, not required reading: where it differs, this file, `docs/LOOK-V2.md` and `docs/PACE.md` win.
 3. If the Kanz repo is available alongside, follow its brand authority:
    `docs/21-kanz-visual-identity.md`, `brand/explainer-icons/README.md`,
    `brand/image-treatment/CREATE-A-BRANDED-IMAGE.md`, `brand/KANZ-CONTENT-DELIVERY.md`.
@@ -217,7 +222,7 @@ audio/frames before changing anything, and say where it really was if it differs
   objects are made with **Codex** following the Kanz MD rules (open the approved references,
   match the fixed icon style exactly) and need Ahmed's approval before use. Never invent a new
   illustration style for a topic.
-- **Websites** shown on screen must be genuine screenshots (source URL + capture date).
+- **Websites** shown on screen must be genuine screenshots (source URL + capture date in `CREDITS.md`).
 - **SFX**: only CC0 or explicitly licensed sounds; add each to `engine/sfx_library.py` with its
   source page so `library/sfx/manifest.json` stays complete. Sonniss/Mixkit files may be used
   locally but must not be committed. When the library lacks a sound, generate it with

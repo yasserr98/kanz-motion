@@ -16,7 +16,7 @@ import re
 import sys
 from pathlib import Path
 
-from align import spoken_text
+from align import caption_body, spoken_text
 from provenance import current, stamp
 
 PUNCT = "،؟?!.,:؛\"«»()…"
@@ -32,7 +32,7 @@ def norm(t):
 
 
 def script_tokens(md):
-    body = md.split("<!-- captions:start -->")[1].split("<!-- captions:end -->")[0]
+    body = caption_body(md)
     toks = []
     for line in [l.strip() for l in body.strip().splitlines() if l.strip()]:
         words = line.split()

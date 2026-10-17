@@ -84,7 +84,7 @@ Use these where the script gives a reason; the aim is that a video uses several 
 | says someone goes somewhere | `K.walk(board, [walkA, walkB], { from, to, at, dur, w, rest })` | right to left reads naturally |
 | names places | `K.img(... kanz-map-usa ...)` / `kanz-globe` + `K.pin` + `K.arrow` | base map: Natural Earth still to download |
 | turns a chapter | `K.wipe(t)` (fixed 2026-10-13: it left a 200 px band) or `K.world` paper | |
-| cites a real series | `K.area({ ..., source })` with data from `engine/data.py` | source line on screen + `assets/SOURCE.md` |
+| cites a real series | `K.area({ ..., source })` with data from `engine/data.py` | source line on screen + `CREDITS.md` |
 | shows a real photo | `K.photo` (now with a camera-shutter sound) | needs a licensed, sourced photo file first |
 
 New objects 2026-10-13 (`library/objects/PROVENANCE-2026-10-13.md`): approved copies from the Kanz explainer library

@@ -5,8 +5,9 @@
 Turns a voice note into a Kanz-branded, Vox-style explainer Reel (1080×1920), using Kanz's
 approved fonts, colours and editorial objects, with timed Arabic captions and sound effects.
 
-The visual system comes from the 2026-10-05 research on how Vox builds its explainers:
-[docs/VOX-RESEARCH-FINDINGS.md](docs/VOX-RESEARCH-FINDINGS.md).
+The visual system started from the 2026-10-05 research on how Vox builds its explainers
+([docs/VOX-RESEARCH-FINDINGS.md](docs/VOX-RESEARCH-FINDINGS.md), historical: where it differs, `docs/LOOK-V2.md`,
+`docs/PACE.md` and `AGENTS.md` win).
 
 ## What it does
 
@@ -63,9 +64,9 @@ generated sound effects. Without one it falls back to local faster-whisper. A Fr
 python engine/make.py new my-video "path/to/voice-note.m4a"
 python engine/make.py clean my-video            # optional, noisy notes: isolated voice to compare
 # 1. read projects/my-video/transcript.raw.json, write projects/my-video/audio/edl.json (keep last good takes)
-python engine/make.py audio my-video
+python engine/make.py audio my-video            # also writes script.md, prefilled from the transcript
 python engine/make.py breaths my-video          # sighs/breaths to mute: audio/edl.json "mute"
-# 2. write projects/my-video/script.md (fix recognition slips, mark *keywords*) and scene.js (the visuals)
+# 2. correct projects/my-video/script.md (fix recognition slips, mark *keywords*), write scene.js (the visuals)
 python engine/lint.py projects/my-video         # safe zones, dead stretches, thin frames: out/lint.jpg
 python engine/make.py review my-video 2,10,30   # one contact sheet: out/review.jpg
 python engine/make.py render my-video v1
@@ -92,13 +93,19 @@ which model to use, how to keep each video cheap, and the usage log.
 
 | Path | What |
 | --- | --- |
-| `engine/` | make (step runner), transcribe (Scribe / Whisper), tts, align (forced alignment), edit_audio, captions, render, sfx_library, sfx_gen (generated SFX), eleven (API client), contact (review sheets), lint (pre-render checks), data (real series for charts, with sources) |
-| `runtime/` | `kanz.js` (timeline + components) and `kanz.css` (brand tokens, layout); `kanz-look.js/.css` look v2 for new videos (safe zones, light, depth, documents, photos, maps, counting numbers, piles), see [docs/LOOK-V2.md](docs/LOOK-V2.md); `kanz-pace.js` pacing layer (arrive built, drift, carry, snap zooms, room tone, frame guard that keeps objects inside the frame), see [docs/PACE.md](docs/PACE.md); `kanz-3d.js` 3D components `K.flip` (card turns over), `K.browser` (genuine screenshot tilted in a browser frame, marks on the page) and `K.fold` (folded note opens), worked example `projects/_3d-demo` |
+| `engine/` | `make.py` (step runner), `transcribe` (Scribe / Whisper), `tts`, `align` (forced alignment), `captions`, `edit_audio`, `breaths` (sighs to mute), `retime` (pace: pauses + tempo), `voicecheck` (TTS failures, `library/voice/lexicon.json`), `render`, `contact` (review sheets), `lint` (pre-render checks), `contrast` (headline contrast over photos), `cover` (Reel cover, style A), `data` (real series for charts, with sources), `codex_assets` (images and icons through Codex, from `shots.json`), `footage` (shorts cut from a long video), `sfx_library`, `sfx_gen` (generated SFX), `eleven` (API client), `provenance` (hashes for voice-derived timings), `console` (UTF-8 output), `vps_render.sh` (render on a server) |
+| `runtime/` | `kanz.js` (timeline + components) and `kanz.css` (brand tokens, layout); `kanz-look.js/.css` look v2 (safe zones, light, depth, documents, photos, maps, counting numbers, piles), see [docs/LOOK-V2.md](docs/LOOK-V2.md); `kanz-pace.js` pacing layer (arrive built, drift, carry, room tone, frame guard), see [docs/PACE.md](docs/PACE.md); `kanz-3d.js` (`K.flip`, `K.browser`, `K.fold`, worked example `projects/_3d-demo`); `kanz-snap.js` (`K.screen` full-screen photos, `K.snap35` disposable prints); `kanz-footage.js` (`K.footage`, face windows for shorts) |
 | `brand/` | Kanz fonts, logo and colour tokens (copied from the Kanz repo's `assets/kanz-brand-current`) |
-| `library/objects/` | approved grayscale editorial objects used so far (from the Kanz motion library) |
+| `library/objects/` | grayscale editorial objects (from the Kanz motion library) and their `PROVENANCE-*.md` generation records |
+| `library/backgrounds/` | the approved charcoal grain background |
 | `library/sfx/` | 124 CC0 one-shots + generated effects (register, riser, shutter) (`generated.json`, prompt per file) + `manifest.json` (source page and licence for each file) |
-| `projects/<name>/` | one video: audio edit list, transcripts, script, scene; `out/` (renders) is not committed |
-| `docs/` | Vox research findings, efficiency guide and usage log |
+| `library/voice/` | `lexicon.json`: words the cloned voice gets wrong (`replace` respellings, `watch` flags) |
+| `projects/_template/` | what `make.py new` / `make.py script` copy into a new project |
+| `projects/<name>/` | one video: audio edit list, transcripts, `script.md`, `scene.js`, `shots.json`, `CREDITS.md` (sources, licences, post-caption credits); `out/` (renders) is not committed |
+| `shorts/<video>/` | candidate moments and picker pages for shorts cut from a long video; source media, photos and full transcripts stay local |
+| `tests/` | `python -m pytest tests` (engine), `runtime_checks.py` and `golden_stills.py` (runtime), `RUNTIME-REVIEW.md` |
+| `docs/` | `LOOK-V2.md`, `PACE.md` (current look and pace), `HANDOVER-SETUP.md` and `UPDATE.md` (editors), `EFFICIENCY.md` (model choice, usage log), `CODEX-ASSET-REQUESTS.md` (object batches), `VOX-RESEARCH-FINDINGS.md` (2026-10-05 research, historical) |
+| `voice-clone/` | local only (git-ignored) |
 
 ## Rules
 

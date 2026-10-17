@@ -133,3 +133,23 @@ bash engine/vps_render.sh slug v1 --extra "apostrophe ' ; \\$(touch INJECTED)"
     assert (tmp_path / "projects/slug/out/v1.mp4").read_bytes() == b"video"
     assert "apostrophe ' ; $(touch INJECTED)" in (rdir / "args.txt").read_text()
     assert not (rdir / "projects/slug/out/v1.mp4").exists()
+
+
+def test_audio_step_writes_caption_marker_stub(tmp_path):
+    import make
+    import captions
+    (tmp_path / "transcript.json").write_text(json.dumps({"segments": [
+        {"text": "تخيل معايا شركة"}, {"text": " "}, {"text": "بتكسب كل سنة"}]}, ensure_ascii=False), encoding="utf-8")
+    assert make.voice_script_stub(tmp_path) is True
+    md = (tmp_path / "script.md").read_text(encoding="utf-8")
+    assert [t["w"] for t in captions.script_tokens(md)] == "تخيل معايا شركة بتكسب كل سنة".split()
+    (tmp_path / "script.md").write_text("corrected by hand", encoding="utf-8")
+    assert make.voice_script_stub(tmp_path) is False
+    assert (tmp_path / "script.md").read_text(encoding="utf-8") == "corrected by hand"
+
+
+def test_missing_caption_markers_stop_clearly():
+    import captions
+    with pytest.raises(SystemExit) as exc:
+        captions.script_tokens("no markers here")
+    assert "captions:start" in str(exc.value)
