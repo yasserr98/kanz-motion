@@ -202,3 +202,8 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   `K.under`, `tight-gap` (TXT-5); effects stacking -> `sfx-overlap`, `sfx-orphan` (SND-5); dead air in workshops ->
   `tighten_footage.py` by default (SHORT-13); notes reported fixed without a picture -> the notes ledger (REV-7).
   Runtime changes switch on with `K.pace({ defaults: "2026-10-18" })` (the template); finished projects render as before.
+- **(c) and (d) confirmed** (asked again here because the coordinating chat relayed different answers): press photos
+  of real moments stay a standing yes (IMG-8). Remixing delivered reels: "nah its ok", then confirmed here: the new mix
+  is for new renders only; a delivered reel keeps its sound unless Ahmed asks for that reel. **Replaces** (d) above
+  ("only when a reel is touched again"). The five delivered reels remixed earlier today on his morning request stay as
+  they are. Rule: SND-5.
