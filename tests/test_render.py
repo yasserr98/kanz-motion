@@ -208,26 +208,60 @@ def test_cue_selection_matches_old_algorithm(tmp_path, monkeypatch):
         assert render.resolve_cues(cues, t0) == expected
 
 
+LOUDNORM_JSON = ('[Parsed_loudnorm_0]\n{\n "input_i" : "-20.00", "input_tp" : "-3.00", "input_lra" : "4.00",\n'
+                 ' "input_thresh" : "-30.00", "target_offset" : "0.10"\n}\n')
+
+
 @pytest.mark.parametrize("level", [.1, 1.5])
-def test_mix2_float_until_limiter_same_target(tmp_path, monkeypatch, level):
+def test_mix2_float_until_master_two_pass(tmp_path, monkeypatch, level):
     monkeypatch.setattr(render, "SR", 100)
-    monkeypatch.setattr(render, "decode", lambda p: np.ones((100, 2), np.float32) * level)
     calls = []
     def run(cmd, **kwargs):
         calls.append((cmd, kwargs))
         if "input" in kwargs:
             Path(cmd[-1]).touch()
-        return SimpleNamespace(stderr="I: -20.0 LUFS")
+        voice = (np.ones((100, 2)) * min(level, 0.99) * 32768).astype(np.int16).tobytes()
+        return SimpleNamespace(stdout=voice, stderr=LOUDNORM_JSON)
     monkeypatch.setattr(render.subprocess, "run", run)
     render.mix_audio_v2(tmp_path, [], 1, tmp_path / "mix.wav", resolved=[])
-    cmd, kwargs = calls[0]
+    assert render.VOICE_CHAIN in calls[0][0]  # the voice is high-passed and compressed before the mix
+    cmd, kwargs = next(c for c in calls if "input" in c[1])
     assert cmd[cmd.index("-f") + 1] == "f32le"
     assert cmd[cmd.index("-c:a") + 1] == "pcm_f32le"
     pcm = np.frombuffer(kwargs["input"], dtype="<f4")
-    assert pcm.max() == pytest.approx(level)
+    assert pcm.max() == pytest.approx(min(level, 0.99), abs=1e-3)  # float bus, no clipping before the master
     final = calls[-1][0]
-    assert "volume=4.00dB,alimiter=limit=0.891:level=false:latency=true" in final
+    af = final[final.index("-af") + 1]
+    assert "loudnorm=I=-16.0:TP=-1.5" in af and "measured_I=-20.00" in af and "linear=true" in af
     assert final[final.index("-c:a") + 1] == "pcm_s16le"
+
+
+def test_schedule_sfx_one_effect_at_a_time():
+    cue = lambda t, g=1.0: ({"t": t, "gain": g}, f"f{t}")
+    plan = render.schedule_sfx([cue(1.0), cue(1.1, 0.5), cue(1.2, 2.0), cue(2.0), cue(2.29), cue(2.6)])
+    assert [c["t"] for c, _ in plan] == [1.2, 2.0, 2.6]  # 1.0-1.2: the loudest wins; 2.29 is within 0.3 s of 2.0
+
+
+def test_mix2_chokes_overlapping_effects(tmp_path, monkeypatch):
+    monkeypatch.setattr(render, "SR", 1000)
+    long = np.ones((3000, 2), np.float32) * 0.1  # a 3 s effect
+    monkeypatch.setattr(render, "decode", lambda p: long)
+    monkeypatch.setattr(render, "env_db", lambda x, w: np.full(len(x), render.SFX_TARGET, np.float32))
+    buses = []
+    def run(cmd, **kwargs):
+        if "input" in kwargs:
+            buses.append(np.frombuffer(kwargs["input"], dtype="<f4").reshape(-1, 2))
+            Path(cmd[-1]).touch()
+        return SimpleNamespace(stdout=np.zeros((5000, 2), np.int16).tobytes(), stderr=LOUDNORM_JSON)
+    monkeypatch.setattr(render.subprocess, "run", run)
+    resolved = [({"t": 0.0, "gain": 1}, "a.wav"), ({"t": 1.0, "gain": 1}, "b.wav")]
+    render.mix_audio_v2(tmp_path, [], 4, tmp_path / "mix.wav", resolved=resolved)
+    bus = buses[0][:, 0]
+    one = bus[500]                                           # the first effect alone (ducked: the mock reads all as speech)
+    assert one > 0
+    assert bus[1100] == pytest.approx(one, rel=1e-3)         # after the choke: never two stacked
+    assert bus[2100] == pytest.approx(one, rel=1e-3)         # second effect, before its tail fade (2.2-2.4 s)
+    assert abs(bus[2500]) < 1e-6                             # capped at SFX_MAX_LEN (1.4 s after 1.0 s)
 
 
 def test_contrast_actual_lavender():

@@ -17,6 +17,7 @@
 #   3. Copies <name>.mp4 + <name>.sfx-used.json (or the stills-<name>/ folder) back into projects/<slug>/out/,
 #      then deletes the VPS copy of the MP4 to keep the VPS disk lean.
 #
+# Renders queue on the VPS: one at a time, in start order (the log says "queued" while waiting).
 # If this script is interrupted, the render continues; the log is out/<name>.vps.log on the VPS. Fetch later with:
 #   scp <host>:<server folder>/projects/<slug>/out/<name>.mp4 projects/<slug>/out/
 #
@@ -29,8 +30,9 @@ SLUG=$1; NAME=$2; shift 2
 for value in "$SLUG" "$NAME"; do
   [[ "$value" =~ ^[A-Za-z0-9._-]+$ && "$value" != . && "$value" != .. ]] || { echo "invalid slug or version name: $value" >&2; exit 1; }
 done
-quote() { printf "'%s'" "${1//\'/\'\\\'\'}"; }
-remote() { ssh "$HOST" "bash -c $(quote "$1")"; }
+quote() { local q="'\''"; printf "'%s'" "${1//\'/$q}"; }   # safe for embedded single quotes
+# Keepalives (2026-10-17): a dropped connection used to hang the poll or copy-back forever after the render had finished.
+remote() { ssh -o ConnectTimeout=20 -o ServerAliveInterval=15 -o ServerAliveCountMax=4 "$HOST" "bash -c $(quote "$1")"; }
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 P=projects/$SLUG
 [ -d "$ROOT/$P" ] || [ ! -d "$ROOT/examples/$SLUG" ] || P=examples/$SLUG   # curated worked examples
@@ -72,13 +74,34 @@ else
   echo "sync: VPS already up to date"
 fi
 
+# --remix <mp4>: the VPS deleted its copy after the copy-back, so send the approved MP4 up when it is missing there
+PREV=""
+for arg in "$@"; do
+  if [ "$PREV" = "--remix" ]; then
+    SRC=$(basename -- "$arg")
+    [ -f "$P/out/$SRC" ] || { echo "--remix: no $P/out/$SRC" >&2; exit 1; }
+    RS=$(remote "stat -c %s -- $(quote "$RDIR/$P/out/$SRC") 2>/dev/null || true")
+    if [ "$RS" != "$(stat -c %s "$P/out/$SRC")" ]; then
+      echo "remix: sending $SRC ($(( $(stat -c %s "$P/out/$SRC") / 1048576 )) MB) to the VPS"
+      remote "mkdir -p -- $(quote "$RDIR/$P/out")"
+      tar czf - -C "$P/out" -- "$SRC" | remote "tar xzf - -C $(quote "$RDIR/$P/out")"
+    fi
+  fi
+  PREV=$arg
+done
+
 # --- 2. render on the VPS --------------------------------------------------------------------------------
 ARGS=""
 if [ "$#" -gt 0 ]; then ARGS=$(printf ' %q' "$@"); fi
 LOG="$P/out/$NAME.vps.log"
 LQ=$(quote "$LOG")
 EQ=$(quote "$LOG.exit")
-printf -v RUN '%q ' env "PLAYWRIGHT_BROWSERS_PATH=$RDIR/.browsers" .venv/bin/python engine/render.py "$P" --name "$NAME" "$@"
+printf -v INNER '%q ' env "PLAYWRIGHT_BROWSERS_PATH=$RDIR/.browsers" .venv/bin/python engine/render.py "$P" --name "$NAME" "$@"
+# One render at a time on the VPS (Ahmed 2026-10-17: two at once ran Chromium out of memory on the 7 GB server).
+# flock queues renders started by this script; the pgrep wait also covers any render already running without it.
+# The [x] keeps the wait loop from matching its own command line.
+WAIT='echo "queued: waiting for the VPS render slot"; while pgrep -f chrome-headless-shell-linu[x]64 >/dev/null; do sleep 10; done; echo "slot free: rendering"; '
+RUN="flock $(quote "$RDIR/.render.lock") bash -c $(quote "$WAIT$INNER")"
 RUN+="; echo \$? > $EQ"
 echo "render: $SLUG -> $NAME${ARGS} (on $HOST)"
 remote "cd -- $RQ && mkdir -p -- $(quote "$P/out") && rm -f -- $EQ && nohup bash -c $(quote "$RUN") > $LQ 2>&1 < /dev/null &"

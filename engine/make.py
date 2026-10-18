@@ -22,6 +22,8 @@ Both routes
     python engine/make.py check <name> [version]    # 12 frames pulled from the MP4 -> out/check-<version>.jpg + loudness
     python engine/make.py ship <name> [version] [--local]  # the gate: lint --strict, render, frame check, loudness;
                                                     # stops at the first failure
+    python engine/make.py remix <name> <from> <to> [--local]  # sound only: copy <from>'s picture bit for bit, redo the
+                                                    # mix with the current engine (scene and voice unchanged), check
 Setup
     python engine/make.py doctor [name]             # check tools, fonts, keys, render host, Codex, references
 
@@ -137,8 +139,8 @@ def render(proj, name, local=False):
 
 def find_mp4(out, name, version):
     mp4 = out / f"{name}-{version}.mp4"
-    if not mp4.exists():  # renders named by hand, e.g. kanz-pilot-01-v2.mp4
-        found = sorted(out.glob(f"*-{version}.mp4"), key=lambda f: f.stat().st_mtime)
+    if not mp4.exists():  # renders named by hand, e.g. kanz-pilot-01-v2.mp4 or just v5.mp4
+        found = sorted([*out.glob(f"*-{version}.mp4"), *out.glob(f"{version}.mp4")], key=lambda f: f.stat().st_mtime)
         if not found:
             sys.exit(f"no MP4 for {version} in {out}")
         mp4 = found[-1]
@@ -231,6 +233,25 @@ def ship(proj, name, version, local=False):
     print(f"\nSHIP PASSED: {name}-{version}. Look at out/check-{version}.jpg before delivery; rendered is not approved.")
 
 
+def remix(proj, name, src_version, version, local=False):
+    """Redo only the sound of an approved render (Ahmed 2026-10-18: "mix and master all videos properly ... even the
+    ones you're uploading now fix it then re-upload"): the picture is copied, so it stays exactly what he approved."""
+    src = find_mp4(proj / "out", name, src_version)
+    newest = max([proj / "scene.js", proj / "audio" / "voice.wav"], key=lambda f: f.stat().st_mtime)
+    if newest.stat().st_mtime > src.stat().st_mtime:
+        sys.exit(f"{newest.name} changed after {src.name} was rendered: its cues may not match the picture. Ship a new version instead.")
+    out_name = f"{name}-{version}"
+    host, bash = render_host(), shutil.which("bash")
+    if host and not local and bash:
+        run([bash, "engine/vps_render.sh", proj.name, out_name, "--remix", src.name])
+    else:
+        run([PY, "engine/render.py", proj, "--name", out_name, "--remix", src.name])
+    problems, _ = check(proj, name, version)
+    if problems:
+        sys.exit("REMIX CHECK FAILED: " + "; ".join(problems))
+    print(f"\nREMIX PASSED: {out_name} (picture of {src.name}, new mix). Rendered is not approved.")
+
+
 def main():
     if len(sys.argv) >= 2 and sys.argv[1] == "doctor":
         import doctor
@@ -306,6 +327,10 @@ def main():
             print("CHECK:", prob, file=sys.stderr)
     elif step == "ship":
         ship(proj, name, arg or "v1", local)
+    elif step == "remix":
+        if len(argv) < 5:
+            sys.exit("usage: make.py remix <name> <from-version> <to-version>")
+        remix(proj, name, arg, argv[4], local)
     else:
         print(__doc__)
 
