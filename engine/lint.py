@@ -23,7 +23,19 @@ With the 2026-10-17 defaults on (K.pace({defaults: "2026-10-17"}), review sample
   small-text      labels under 34 px, source lines under 28 px (board px)
   crowded-board   more than four labels on one board at once (titles, the headline and source lines not counted)
   caption-repeat  a label (two words or more) that repeats the caption on screen word for word
-Dead findings exclude the simple hook (t < K.captionsFrom) and K.footage face windows.
+Shorts cut from a long video (review hardening 2026-10-18, engine/guards.py):
+  on-face         the title, a headline, overlay text or the subtitles over his eyes or mouth (window.FACES boxes)
+  freeze          a face or split window showing a frozen source picture (window.FREEZES)
+  title           a footage short without K.title (SHORT-4)
+  end-cut         K.duration ends before the voice (the last word cut off)
+  face-share      a workshop short where his face shows under 50% of the runtime (SHORT-15)
+  mid-word-cut    a face/split/board change inside a spoken word (SHORT-16)
+  caption-switch  subtitles not on the seam exactly while the split shows (SHORT-12)
+Every scene: sfx-overlap (cues under 0.3 s apart), sfx-orphan (a cue on no visual event), stray-currency (a $ not on
+the left of its digits), and with the 2026-10-17 defaults or later tight-gap (a subheadline under K.GAP px below its
+headline).
+Dead and fill findings exclude the simple hook (t < K.captionsFrom) and K.footage / K.split windows. lint-ok.json cannot
+excuse a dead or fill stretch of more than 1.5 s outside the 0-3 s title window.
 Writes out/lint.json and, when there are findings, out/lint.jpg. Exit code defaults to 0.
 --strict exits 1 for findings not justified by lint-ok.json, a list of
 {kind, t, why} or {kind, range: [start, end], why}. Ranges must contain the entire finding;
@@ -41,6 +53,7 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "engine"))
 from contact import sheet  # noqa: E402
+import guards  # noqa: E402
 
 SAFE = {"top": 270, "bottom": 1440, "left": 120, "right": 960, "upperLeft": 65, "upperRight": 1015, "upperBottom": 1000}
 TEXT = "#world .t, #world .tag, #world .card, #world .kcount, #world .ksrc, #headline .w, #overlay .t"
@@ -98,7 +111,27 @@ PROBE = """(t) => {
       Math.max(0, Math.min(1, 1 - Math.abs(parseFloat(cs.strokeDashoffset) || 0) / length)) : null;
     const bd = el.closest('.board');
     if (bd && !bd.dataset.lkb) bd.dataset.lkb = String((window.__lkb = (window.__lkb || 0) + 1));
-    out.push({ id: +el.dataset.lid, kind, opacity: o, label: el.matches(COVERSEL),
+    let currency = null;
+    if (kind !== 'obj' && (el.textContent || '').includes('$')) {  // where the $ glyph really landed (stray-currency)
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      let node, dollar = null, digit = null;
+      while ((node = walker.nextNode()) && !digit) {
+        const tx = node.textContent;
+        for (let i = 0; i < tx.length; i++) {
+          if (!dollar && tx[i] === '$') { dollar = [node, i]; continue; }
+          if (dollar && /[0-9٠-٩]/.test(tx[i])) { digit = [node, i]; break; }
+        }
+      }
+      const rect = (n, i) => { const rg = document.createRange(); rg.setStart(n, i); rg.setEnd(n, i + 1); return rg.getBoundingClientRect(); };
+      if (dollar && digit) {
+        const a = rect(...dollar), b = rect(...digit);
+        const same = Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2) < 0.5 * Math.max(b.height, 1);
+        currency = { ok: same && a.right <= b.left + 3, where: !same ? 'on another line than its digits' : 'on the right of its digits' };
+      }
+    }
+    out.push({ id: +el.dataset.lid, kind, opacity: o, label: el.matches(COVERSEL), currency,
+      sc: el.offsetHeight ? r.height / el.offsetHeight : 1,
+      over_face: !!el.closest('#headline, #overlay, #captions'),
       fs: parseFloat(cs.fontSize) || 0, src: el.matches('.ksrc'), head: !!el.closest('#headline, .head'),
       board: bd ? bd.dataset.lkb : null,
       parents: [...(function* () { for (let p = el.parentElement; p; p = p.parentElement)
@@ -106,7 +139,7 @@ PROBE = """(t) => {
       markup: el.matches('svg.mk path, svg.mk polyline, svg.mk rect, .kframe, .kmark') &&
         !el.closest('[data-lint-strike], [data-lint-chart], [data-lint-sized]'), drawn,
       x0: r.left - st.left, y0: r.top - st.top, x1: r.right - st.left, y1: r.bottom - st.top,
-      txt: kind === 'text' || kind === 'caption' ? (el.textContent || '').trim().slice(0, 80) :
+      txt: kind === 'text' || kind === 'caption' || kind === 'title' ? (el.textContent || '').trim().slice(0, 80) :
         (el.getAttribute('src') || el.getAttribute('class') || el.tagName).toString().split('/').pop() });
   });
   TAKE
@@ -142,7 +175,7 @@ PROBE = """(t) => {
   const cap = document.getElementById('captions'), cr = cap?.getBoundingClientRect();
   const captionBand = cap && cap.textContent.trim() && eff(cap) >= 0.5 ?
     (cr && cr.height ? {y0: cr.top - st.top, y1: cr.bottom - st.top} : {y0:1190,y1:1450}) : null;
-  return { items: out, covered, captionBand,
+  return { items: out, covered, captionBand, face: K.faceAt ? K.faceAt(t) : null,
     cam: [gsap.getProperty(w, 'x'), gsap.getProperty(w, 'y'), gsap.getProperty(w, 'scaleX')] };
 }"""
 
@@ -382,6 +415,8 @@ def static_scene_findings(source):
     out = []
     def add(why, **extra):
         out.append(dict(kind='structure', t=0, why=why, **extra))
+    if 'footage' in calls and 'title' not in calls:
+        out.append(dict(kind='title', t=0, why='a footage short without K.title (SHORT-4: the first 3 s carry the title)'))
     if 'look' in calls:
         if 'pace' not in calls:
             add('K.look() without K.pace()')
@@ -397,7 +432,10 @@ def static_scene_findings(source):
 
 
 def justified(finding, allowances):
-    """Require a reason, exact kind and full time containment (no partial-range waivers)."""
+    """Require a reason, exact kind and full time containment (no partial-range waivers). An empty stretch over 1.5 s
+    outside the title window cannot be excused (guards.excusable)."""
+    if not guards.excusable(finding):
+        return False
     start = finding.get('from', finding.get('t', 0))
     end = finding.get('to', start)
     for allowance in allowances:
@@ -426,6 +464,60 @@ def legacy_findings(report, fill, hook_limit):
     if report['first_fill'] < fill:
         out.append(dict(kind='hook', t=0, why='first frame below fill threshold'))
     return out
+
+
+SHORT_INFO = """() => ({ faces: (K.faceWindows || []).map(w => w.slice(0, 2)), splits: (K.splitWindows || []).map(w => w.slice(0, 2)),
+  cut: window.CUT || null, fps: K.fps, freezes: (window.FREEZES || {}).runs || [], duration: K.duration, voice: window.DURATION || 0,
+  live: !!(((window.FACES || {}).kind === 'live') || (K.splitWindows || []).length), gap: K.GAP || 40,
+  cues: (K.cues || []).map(c => ({ t: c.t, cat: c.cat })),
+  words: (window.TOKENS || []).filter(t => !t.tr && t.start != null).map(t => ({ w: t.w, start: t.start, end: t.end })) })"""
+SEAM = """(t) => { K.seek(t); const f = document.getElementById('splitface'), c = document.getElementById('captions');
+  return [!!f && f.style.visibility === 'visible', c && c.style.top ? parseFloat(c.style.top) : null]; }"""
+
+
+def visual_events(frames, info, every):
+    """Times something visibly changes: a new element, a camera move, a face/split change (sfx-orphan)."""
+    ev, seen, cam = [], set(), None
+    for t, f in frames:
+        ids = {it["id"] for it in f["items"] if it["kind"] != "caption"}
+        c = f["cam"]
+        if ids - seen or (cam and (abs(c[0] - cam[0]) > 8 or abs(c[1] - cam[1]) > 8 or abs(c[2] - cam[2]) > 0.006)):
+            ev += [t - every, t]  # it started during the step before this sample
+        seen, cam = ids, c
+    for a, b in info["faces"] + info["splits"]:
+        ev += [a, b]
+    return ev
+
+
+def short_findings(page, frames, fine, step, every, defaults_on):
+    """The 2026-10-18 checks (engine/guards.py) that need the page."""
+    got = page.evaluate(SHORT_INFO)
+    info = {"faces": [], "splits": [], "cut": None, "freezes": [], "duration": 0, "voice": 0, "live": False, "gap": 40,
+            "cues": [], "words": [], **(got if isinstance(got, dict) else {})}
+    out = []
+    face_hits = [h for t, f in frames for h in guards.on_face_findings(t, f, f.get("face"))]
+    out += [h for h in merge_hits(face_hits, every) if h["frames"] >= 2]
+    out += merge_hits([h for t, f in frames for h in guards.currency_findings(t, f)], every)
+    if defaults_on:
+        out += merge_hits([h for t, f in frames for h in guards.tight_gap_findings(t, f, info["gap"])], every)
+    out += guards.sfx_findings(info["cues"], visual_events(fine, info, step))
+    if info["cut"]:
+        out += guards.freeze_findings(info["faces"], info["splits"], info["freezes"])
+        out += guards.end_cut_findings(info["duration"], info["voice"], info["cut"])
+        out += guards.face_share_findings(info["faces"], info["splits"], info["duration"], info["live"])
+        edges = guards.window_edges(info["faces"], info["splits"], info["duration"])
+        out += guards.mid_word_findings(edges, info["words"])
+        seam = []
+        for a, b in info["splits"]:
+            for x in (a, b):
+                for dt in (-1 / 24, 0.0, 1 / 24):
+                    t = round(x + dt + 1e-4, 4)
+                    if 0 < t < info["duration"]:
+                        shown, top = page.evaluate(SEAM, t)
+                        seam.append((t, shown, top))
+        out += guards.caption_switch_findings(seam)
+    return out, {"faces": info["faces"], "splits": info["splits"], "duration": info["duration"], "fps": info.get("fps") or 24,
+                 "cut": bool(info["cut"])}
 
 
 def main():
@@ -460,7 +552,7 @@ def main():
         scene_end = max(voice_end, page.evaluate('K.duration'))
         look2 = page.evaluate("!!K.LOOK")
         probe = PROBE.replace("TAKE", f"take({json.dumps(TEXT)}, 'text'); take({json.dumps(OBJS)}, 'obj');"
-                                      " take('#captions .box', 'caption');").replace("COVERSEL", json.dumps(COVER)).replace("OCCLUDERSEL", json.dumps(OCCLUDERS))
+                                      " take('#captions .box', 'caption'); take('#overlay .ktitle span', 'title');").replace("COVERSEL", json.dumps(COVER)).replace("OCCLUDERSEL", json.dumps(OCCLUDERS))
         # start one sample in: GSAP does not render zero-duration sets on a seek to exactly 0
         step = min(a.every, .1)  # short labels need finer sampling than the general review
         sample_times = [round(i * a.every, 6) for i in range(1, int(voice_end / a.every) + 1)]
@@ -479,6 +571,8 @@ def main():
             if h['t'] in sampled:
                 new_findings += arrival_findings(h['t'], sampled[h['t']], a.fill, h['board'])
         new_findings += static_scene_findings((proj / 'scene.js').read_text(encoding='utf-8'))
+        found, short = short_findings(page, frames, [(t, sampled[t]) for t in fine_times], step, a.every, defaults_on)
+        new_findings += found
 
         times = [t for t, _ in frames]
         # 1. safe zones
@@ -520,14 +614,14 @@ def main():
         for e0, e1 in zip(events, events[1:] + [voice_end]):
             if e1 - e0 > a.dead:
                 dead.append((round(e0, 2), round(e1, 2)))
-        windows = page.evaluate('[[0, K.captionsFrom || 0], ...(K.faceWindows || []).map(w => w.slice(0,2))]')
+        windows = page.evaluate('[[0, K.captionsFrom || 0], ...(K.faceWindows || []).map(w => w.slice(0,2)), ...(K.splitWindows || []).map(w => w.slice(0,2))]')
         dead = exclude_windows(dead, windows, a.dead)
 
         # 3. frame fill (captions excluded)
         cov = []
         for t, f in frames:
             cov.append(round(coverage(f["items"]), 3))
-        thin = runs(times, [c < a.fill for c in cov], 1.5)
+        thin = exclude_windows(runs(times, [c < a.fill for c in cov], 1.5), windows[1:], 1.5)
 
         # 4. hook
         first = next((t for t, f in frames if any(it["kind"] != "caption" for it in f["items"])), None)
@@ -582,7 +676,7 @@ def main():
         report = {"project": proj.name, "look2": look2, "every": a.every, "voice_end": voice_end,
                   "safe": safe, "dead": dead, "thin": thin, "hook_late": hook, "first_fill": first_fill, "bars": bars,
                   "covered": covered, "under_captions": under, "edge": edge,
-                  "fill_median": sorted(cov)[len(cov) // 2] if cov else 0}
+                  "fill_median": sorted(cov)[len(cov) // 2] if cov else 0, "short": short}
         findings = legacy_findings(report, a.fill, a.hook) + new_findings
         if errors:
             findings.append(dict(kind='structure', t=0, why='page errors', detail=errors))
@@ -629,6 +723,8 @@ def main():
         for h in edge:
             print(f"    {h['from']:6.2f}-{h['to']:6.2f}s  {h['what']}")
         extra = ('digits', 'small-text', 'crowded-board', 'caption-repeat') if defaults_on else ()
+        extra += ('on-face', 'freeze', 'title', 'end-cut', 'face-share', 'mid-word-cut', 'caption-switch', 'sfx-overlap',
+                  'sfx-orphan', 'stray-currency', 'tight-gap')
         for kind in ('text-on-text', 'covered-shape', 'caption-band', 'brief', 'half-built-arrival', 'markup-crossing-text', 'structure') + extra:
             hits = [h for h in new_findings if h['kind'] == kind]
             print(f'  {kind}: {len(hits)} finding(s)')

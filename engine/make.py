@@ -19,11 +19,15 @@ Both routes
     python engine/make.py review <name> 2,10,30     # stills -> one contact sheet out/review.jpg
     python engine/make.py render <name> [version] [--local]  # full MP4 in projects/<name>/out/; on the render host
                                                     # (KANZ_RENDER_HOST in .env) when one is set, --local renders here
-    python engine/make.py check <name> [version]    # 12 frames pulled from the MP4 -> out/check-<version>.jpg + loudness
+    python engine/make.py check <name> [version]    # 12 frames pulled from the MP4 -> out/check-<version>.jpg + loudness,
+                                                    # then engine/shipcheck.py: ending, cut strips (out/cuts-<version>.jpg),
+                                                    # notes stills; for cut-out shorts leak, title, freezes, fps, track
     python engine/make.py ship <name> [version] [--local]  # the gate: lint --strict, render, frame check, loudness;
                                                     # stops at the first failure
     python engine/make.py remix <name> <from> <to> [--local]  # sound only: copy <from>'s picture bit for bit, redo the
                                                     # mix with the current engine (scene and voice unchanged), check
+    python engine/make.py note <name> <seconds> "<his words>" [version]   # add a review note (notes.json, open)
+    python engine/make.py note <name> fixed <n>    # mark note n fixed; ship then shows it with a still from the MP4
 Setup
     python engine/make.py doctor [name]             # check tools, fonts, keys, render host, Codex, references
 
@@ -93,7 +97,8 @@ def scaffold(proj):
 
 def captions(proj):
     # forced alignment first (cached by hash, so unchanged script + voice costs no API call)
-    if eleven.has_key() and (proj / "script.md").exists() and (proj / "audio" / "voice.wav").exists():
+    synthetic = '"no_align": true' in ((proj / "transcript.json").read_text(encoding="utf-8") if (proj / "transcript.json").exists() else "")
+    if eleven.has_key() and not synthetic and (proj / "script.md").exists() and (proj / "audio" / "voice.wav").exists():
         run([PY, "engine/align.py", proj])
     run([PY, "engine/captions.py", proj])
 
@@ -161,7 +166,7 @@ def frame_stats(mp4, t):
 LUFS_TOLERANCE = 1.0
 
 
-def check(proj, name, version):
+def check(proj, name, version, picture=True):
     """12 frames from the MP4 -> out/check-<version>.jpg, plus loudness. Returns (problems, lufs)."""
     out = proj / "out"
     mp4 = find_mp4(out, name, version)
@@ -191,7 +196,39 @@ def check(proj, name, version):
         problems.append(f"loudness {lufs} LUFS, outside -16 +/- {LUFS_TOLERANCE}")
     print(f"{mp4.name}: {dur:.1f}s, integrated loudness {lufs if lufs is not None else '?'} LUFS (target -16)")
     print("check sheet ->", sheet(cd, out / f"check-{version}.jpg"))
+    import shipcheck  # review hardening 2026-10-18: ending, cut strips, notes; leak, title, freezes, fps for shorts
+    more, warns, info = shipcheck.run(proj, mp4, version, lint_allowances(proj), picture)
+    for line in info:
+        print(line)
+    for w in warns:
+        print("WARNING:", w, file=sys.stderr)
+    problems += more
     return problems, lufs
+
+
+def lint_allowances(proj):
+    try:
+        data = json.loads((proj / "lint-ok.json").read_text(encoding="utf-8"))
+        return data if isinstance(data, list) else []
+    except (OSError, ValueError):
+        return []
+
+
+def note(proj, args):
+    """The notes ledger: projects/<slug>/notes.json, one entry per review note (Ahmed's words, time, status)."""
+    f = proj / "notes.json"
+    items = json.loads(f.read_text(encoding="utf-8")) if f.exists() else []
+    if args and args[0] == "fixed":
+        i = int(args[1]) - 1
+        items[i]["status"] = "fixed"
+        items[i].pop("checked_in", None)  # shown fixed only once ship has a still of it from a new version
+        print(f"note {i + 1} marked fixed: ship shows it with a still before it can be reported fixed")
+    elif len(args) >= 2:
+        items.append({"t": float(args[0]), "note": args[1], "status": "open", **({"version": args[2]} if len(args) > 2 else {})})
+        print(f"note {len(items)} at {float(args[0]):.1f}s added (open)")
+    else:
+        sys.exit('usage: make.py note <name> <seconds> "<his words>" [version] | make.py note <name> fixed <n>')
+    f.write_text(json.dumps(items, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
 def project_warnings(proj):
@@ -220,6 +257,12 @@ def ship(proj, name, version, local=False):
     code = subprocess.run([PY, "engine/lint.py", proj, "--strict"], cwd=ROOT).returncode
     if code:
         stop("lint", f"engine/lint.py --strict exited {code}: fix each finding or justify it in lint-ok.json")
+    import shortinfo
+    if shortinfo.cut_from(proj):  # SHORT-4 cannot be excused in lint-ok.json
+        import shipcheck
+        title = shipcheck.title_problems(proj)
+        if title:
+            stop("title", "; ".join(title))
     print("ship 2/4: render", flush=True)
     try:
         captions(proj)
@@ -246,7 +289,7 @@ def remix(proj, name, src_version, version, local=False):
         run([bash, "engine/vps_render.sh", proj.name, out_name, "--remix", src.name])
     else:
         run([PY, "engine/render.py", proj, "--name", out_name, "--remix", src.name])
-    problems, _ = check(proj, name, version)
+    problems, _ = check(proj, name, version, picture=False)  # the picture is the approved one: sound checks only
     if problems:
         sys.exit("REMIX CHECK FAILED: " + "; ".join(problems))
     print(f"\nREMIX PASSED: {out_name} (picture of {src.name}, new mix). Rendered is not approved.")
@@ -327,6 +370,8 @@ def main():
             print("CHECK:", prob, file=sys.stderr)
     elif step == "ship":
         ship(proj, name, arg or "v1", local)
+    elif step == "note":
+        note(proj, argv[3:])
     elif step == "remix":
         if len(argv) < 5:
             sys.exit("usage: make.py remix <name> <from-version> <to-version>")
