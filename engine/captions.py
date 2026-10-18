@@ -31,14 +31,28 @@ def norm(t):
     return t
 
 
+TRANS = re.compile(r"^(.*?)\s*\{\{(.*?)\}\}\s*$")
+
+
 def script_tokens(md):
+    """Caption tokens. A line `Arabic translation {{what he actually says}}` (SHORT-14: subtitles are Egyptian Arabic
+    even where he speaks English) is timed on the spoken words: those become hidden tokens (hid) for the aligner and for
+    K.T(), the translation words (tr) are spread over their span and are the only ones shown."""
     body = caption_body(md)
     toks = []
-    for line in [l.strip() for l in body.strip().splitlines() if l.strip()]:
+    for n, line in enumerate(l.strip() for l in body.strip().splitlines() if l.strip()):
+        m = TRANS.match(line)
+        if m:
+            for w in m.group(2).split():
+                toks.append({"w": w, "key": False, "eol": False, "hid": True, "line": n})
+            line = m.group(1)
         words = line.split()
         for i, w in enumerate(words):
             key = "*" in w
-            toks.append({"w": w.replace("*", ""), "key": key, "eol": i == len(words) - 1})
+            t = {"w": w.replace("*", ""), "key": key, "eol": i == len(words) - 1}
+            if m:
+                t["tr"], t["line"] = True, n
+            toks.append(t)
     return toks
 
 
@@ -61,10 +75,11 @@ def main(proj):
     asr = [w for s in timing["segments"] for w in s["words"] if norm(w["w"])]
     if not asr or not toks:
         sys.exit("captions need nonempty script and word timings; existing outputs kept")
-    a = [norm(t["w"]) for t in toks]
+    core = [t for t in toks if not t.get("tr")]
+    a = [norm(t["w"]) for t in core]
     b = [norm(w["w"]) for w in asr]
     sm = difflib.SequenceMatcher(a=a, b=b, autojunk=False)
-    times = [None] * len(toks)
+    times = [None] * len(core)
     for blk in sm.get_opcodes():
         tag, i1, i2, j1, j2 = blk
         if tag == "equal" or (tag == "replace" and i2 - i1 == j2 - j1):
@@ -80,11 +95,18 @@ def main(proj):
             span = (nxt_i - i + 1) if nxt_i is not None else 1
             step = (nxt - prev) / span
             times[i] = (prev, prev + step)
-    for t, (s, e) in zip(toks, times):
+    for t, (s, e) in zip(core, times):
         t["start"], t["end"] = round(s, 3), round(e, 3)
+    for ln in {t["line"] for t in toks if t.get("tr")}:  # translation words spread over the spoken span
+        sp = [t for t in core if t.get("hid") and t["line"] == ln]
+        tr_ = [t for t in toks if t.get("tr") and t["line"] == ln]
+        a0, b0 = sp[0]["start"], sp[-1]["end"]
+        step = (b0 - a0) / len(tr_)
+        for i, t in enumerate(tr_):
+            t["start"], t["end"] = round(a0 + i * step, 3), round(a0 + (i + 1) * step, 3)
 
     chunks, cur = [], []
-    for t in toks:
+    for t in (x for x in toks if not x.get("hid")):
         cur.append(t)
         text = " ".join(x["w"] for x in cur)
         if t["eol"] or t["w"][-1] in "،,؟?:." or len(cur) >= 4 or len(text) >= 24:

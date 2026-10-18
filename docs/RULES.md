@@ -58,6 +58,7 @@ they were.
 | IMG-2 | Generate with Codex without asking first (`codex_assets.py --jobs 4`); compare icons with the references, regenerate mismatches | eye |
 | IMG-3 | Icons follow the approved Kanz icon style whatever the topic; no topic-specific aesthetic | eye |
 | IMG-4 | Place or setting -> full-screen photo; real person or moment -> disposable print (`K.snap35`); concept, mechanism or number -> Kanz icon on charcoal | eye |
+| IMG-11 | Disposable prints (`K.snap35`) use the slim frame, `slim: true`: a thin border all round and only a modest strip underneath, not the wide Polaroid margins; the photo stays untouched | eye |
 | IMG-5 | Voice-note and script Reels use the same three types; a place photo gets a board of its own with only text and tags | eye |
 | IMG-6 | No date stamp or credit line on screen; credits for the post caption go in `projects/<slug>/CREDITS.md` | eye |
 | IMG-7 | Text over a photo reaches 4.5:1 against its brightest background pixels | `contrast.py` |
@@ -98,6 +99,7 @@ they were.
 | SND-2 | SFX only CC0 or explicitly licensed, each in `engine/sfx_library.py` with its source; Sonniss/Mixkit files local only, never committed; generated ones (`sfx_gen.py`) always in a new category, so finished videos keep their sounds | `manifest.json` |
 | SND-3 | Room tone under every pause (`K.bed = "room"`); set `K.bedUnder` per video when it is too loud | ear |
 | SND-4 | Loudness -16 LUFS (± 1) | `make.py check/ship` |
+| SND-5 | Mix and master: one sound effect at a time (cues under 0.3 s apart keep the louder; the next effect chokes the last; none longer than 1.4 s), the voice high-passed and gently compressed, effects ducked under speech and kept 6 dB under it, two-pass loudness to -16 LUFS with a -1.5 dBTP ceiling. An approved render gets new sound with `make.py remix <name> <from> <to>` (picture copied bit for bit) | `render.py` mix 2 |
 
 ## Shorts cut from a long video
 
@@ -106,7 +108,7 @@ they were.
 | SHORT-1 | Source media, photos, face frames and full transcripts stay local (git-ignored) | `.gitignore` |
 | SHORT-2 | Leave out passages that attack people by religion or repeat unproven allegations; say why | eye |
 | SHORT-3 | Start on a word, drop lines that point back to the long video, end before the next sentence (trim the trailing second) | eye |
-| SHORT-4 | The first 3 s always show his face; no headline hook over it; captions from 0 | eye |
+| SHORT-4 | The first 3 s always show his face with a title over it: `K.title(text)`, a white sticker, no purple; text from `shorts/_titles.json` (3 options per reel, Ahmed picks, option 1 until he does); no subtitles while it shows (`K.title` sets `K.captionsFrom`); long-video (YouTube) shorts: middle of the frame just above the subtitle band (default `y` 1150); workshop/live shorts: at the top under the platform bar, `{ y: 330 }` (as live A v3), never over his eyes or mouth; Ahmed edits the text and approves on the review page | eye |
 | SHORT-5 | Keep a styled TV-set opening (`--tv-until`) and the source's burned-in labels | eye |
 | SHORT-6 | Every face <-> motion change is a clean cut in a pause, onto a board built ~0.3 s before; no flash, no white frames | eye, frame strips |
 | SHORT-7 | Don't cut back to his face at the end; no takeaway tail | eye |
@@ -114,6 +116,9 @@ they were.
 | SHORT-9 | Every picture belongs to the line; no decorative props | eye |
 | SHORT-10 | Before delivery, check 12-frame strips around every cut in the final MP4 | eye |
 | SHORT-11 | Workshop/live footage: motion inserts alternate between a 50/50 split screen (tracked face + board) and a full-screen board, clean cuts in the pauses; reuse the shared split/tracking helpers | eye |
+| SHORT-12 | In the 50/50 split the subtitles sit in the middle, centred on the seam; on face-only and board-only moments they return to their usual place (`kanz-split.js` does it) | eye |
+| SHORT-13 | Where the voice is joined (a cut between two passages or a removed pause), leave a short silence, about 0.25 s, so the sound has room to turn; the picture still cuts clean | ear |
+| SHORT-14 | Shorts cut from long videos and lives: subtitles are always Egyptian Arabic, even where he speaks English (translate the meaning; keep his voice as is). Only for cut-out shorts, not voice-note or script Reels | eye |
 
 ## Review
 

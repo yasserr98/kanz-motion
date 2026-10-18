@@ -90,6 +90,36 @@ audio steps only). Their voice audio is not in the repo (Ahmed's voice stays pri
 stills but not their full MP4. Your own videos live in `projects/`, which Git ignores. **Before making videos in volume read [docs/EFFICIENCY.md](docs/EFFICIENCY.md)**:
 which model to use, how to keep each video cheap, and the usage log.
 
+## Live/workshop shorts: tracking and split
+
+For shorts cut from Ahmed's 16:9 X Live workshops (Ahmed 2026-10-17: the camera tracks him; inserts alternate between a
+50/50 split and a full-screen board). Built for `projects/short-volume-doesnt-matter`; reuse it, do not rebuild it.
+
+1. **Frames (use instead of `footage.py`, same arguments):**
+   `python engine/footage_track.py projects/short-<slug> shorts/<live>/source/video.mp4 shorts/<live>/transcript.raw.json <start> <end> [--video-from S]`
+   Writes `assets/face/` (1080x1920 tracked 9:16), `assets/half/` (1080x960 tracked crop for one split half), `audio/voice.wav`,
+   `transcript.json`, `assets/track.json`, and `assets/track-check.jpg` (8 source frames, yellow = 9:16 crop, pink = half
+   crop): open it and confirm his face stays inside both. It prints the share of samples where a face was found and the
+   largest camera step; a step under ~3 px/frame glides. Slow: about 5 s of work per second of video, run it in the
+   background. Options: `--zoom` (tighter 9:16), `--half-h` (source px high in the half, default 560; smaller = tighter on
+   the face), `--face-y` (face height in the half, default 0.42), `--no-half`. No `--tv-until` (use `footage.py` for a TV opening).
+2. **Scene:** load `runtime/kanz-footage.js` and `runtime/kanz-split.js` in `index.html` (after kanz-3d.js), then, after
+   `K.look(); K.pace();`:
+   ```js
+   K.footage({ dir: "assets/face", n: N, end: END, windows: [[0, 3.2], ...] });   // full-screen face (first 3 s always)
+   K.split({ dir: "assets/half", n: N, windows: [[a, b], ...] });                // split: face half + board half
+   // anywhere outside both = full-screen board
+   ```
+   Face windows and split windows must not overlap; alternate split and full-screen boards, cutting in the pauses, and
+   build each board ~0.3 s before its cut (`PRE = 0.3`). `K.split` options: `face: "bottom"` (default: board on top,
+   his face below, the captions cover his chest; `"top"` puts the face under the platform bar), `boardScale` (0.8),
+   `boardY` (board centre: 590 / 1205), `sfx: true` for whooshes. The board half is the normal world scaled and clipped,
+   so the same K.* objects work in both layouts; keep board objects between y 250 and 930 of the 1000x860 board's
+   centre and a headline short.
+3. **Check:** `python engine/make.py review <slug> <times>` and pull a split moment, a full-board moment and a face moment.
+   Source overlays (the Kanz logo, the "WARSHA1015" promo box, the name tag) can fall inside the crop when he leans right;
+   they are the source's own, check them in the stills. Demo: `projects/_split-demo`.
+
 ## Layout
 
 | Path | What |

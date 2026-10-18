@@ -112,6 +112,28 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   board, still with clean cuts in the pauses; the camera tracks him (he moves around the 16:9 frame). Use the shared
   split/tracking helpers built for `projects/short-volume-doesnt-matter` once they exist; do not build a second version.
   Rule: SHORT-11.
+- **Title in the first 3 seconds; subtitles off under it.** "add a caption in the first 3 seconds and that caption cancels the
+  subtitles when its there". Every short opens with a title over his face for 3 s and no subtitles while it shows; three
+  title options per reel go to Ahmed ("extract 3 different options for the titles and show me"), and five on-screen
+  treatments were shown for him to choose ("show me 5 different ways"). **Supersedes** the 2026-10-16 "no headline hook
+  over it; captions run from 0" part of the shorts route; his face in the first 3 s stays. Rule: SHORT-4.
+  Treatment chosen from the five shown: the sticker, white ("3a but remove the purple, looks way better with the white
+  thing"); built as `K.title` in `runtime/kanz.js`. Title picks go on the main review page next to each reel ("add the
+  title choices with the main review page and build it after they're all done").
+  Placement (same day): "the headlines are placed in a good placement like for example on the youtube video Casino headline
+  can be placed in the middle of the video near the captions so that we avoid adding it on his face": `K.title` defaults to
+  y 1150, just above the subtitle band. "make the headlines editable": the review page lets Ahmed type his own title;
+  an Approve button there marks a rendered version for Drive + Airtable delivery, whose Brief carries the captions.
+- **Workshop titles at the top.** "titles for workshop video should be on the same level as this one" (live A v3, title under
+  the platform bar). Live/workshop shorts use `K.title(text, { y: 330 })`; long-video shorts keep the mid-frame default. Rule: SHORT-4.
+- **Egyptian Arabic subtitles on cut-out shorts.** "subtitles should be arabic egyptian arabic even if it was said in
+  English for these so that people can understand; this rule is only valid for things we cut out" (live H v1, 10 s).
+  Rule: SHORT-14. Replaces the verbatim-English caption lines in the live shorts.
+- **A breath at every voice join.** "the clean cut was great but there should've been a short moment of silence just
+  enough to allow the transition ... between the sounds not the visuals" (casino H v4, 20 s). Rule: SHORT-13. The
+  dead-air trim (pauses over ~0.3 s) still applies; it must not butt two phrases together.
+- **Subtitles in the middle during the split.** "subtitles need to be in the middle in the 50 50 split then gets back to
+  its place if only him is showing". Rule: SHORT-12.
 - **Voice-note and script Reels use the same three visual types.** "can this flow be incorporated in the VNs too".
   Rule: IMG-5.
 - **Workflow review approved** ("do everything except for the colors of the charts leave them with different colors I
@@ -140,3 +162,11 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   `library/objects/manifest.json` (the 2026-10-10 sheet, batch 2 of 2026-10-11, the 2026-10-13 and casino batches, the
   2026-10-14 stocks batch) are approved. The hijabi character `kanz-npc-f01-*` stays out of gambling scenes. New Codex
   objects still start as candidates until Ahmed approves them. Rule: OBJ-2.
+
+## 2026-10-18
+
+- **Mix and master** ("mix and master all videos properly because the sound effects sometimes overlap ...
+  even the ones you're uploading now fix it then re-upload"): mix 2 now schedules one effect at a time, compresses the
+  voice and masters in two loudness passes to -16 LUFS / -1.5 dBTP (replacing a single gain step and a -1 dBFS sample
+  limiter). Delivered reels are re-sounded with `make.py remix` so their approved picture is unchanged; live B v6 -> v7
+  dropped 16 of 40 overlapping cues. Rule: SND-5.

@@ -22,7 +22,7 @@
   const norm = (s) => s.replace(/[ً-ْـ*%٪،؟?!.,:؛«»…]/g, "").replace(/[إأآ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه").trim();
   K.T = function (word, after = 0, which = 0) {
     const n = norm(word);
-    const hits = (window.TOKENS || []).filter((t) => t.start >= after - 1e-6 && norm(t.w).includes(n));
+    const hits = (window.TOKENS || []).filter((t) => !t.tr && t.start >= after - 1e-6 && norm(t.w).includes(n));
     if (!hits[which]) { console.error("anchor not found:", word, after); return after; }
     return hits[which].start;
   };
@@ -601,6 +601,38 @@
     if (!o.hold) tl.to(e, { y: -2500, duration: 0.5, ease: "power3.inOut" }, t + 0.5 + (o.pause || 0.1))
       .set(e, { autoAlpha: 0 }, t + 1.0 + (o.pause || 0.1));
     K.sfx(t, "whoosh", 0.4);
+    return e;
+  };
+
+  // ---------- K.title: the opening title of a short (Ahmed 2026-10-17, rule SHORT-4) ----------
+  // A white sticker label, tilted -3 deg, ink text in Thmanyah Display, popping onto his face for the first 3 s. No purple
+  // in it ("3a but remove the purple, looks way better with the white thing"); `*word*` marks are accepted and ignored.
+  // Subtitles stay off while it shows: K.captionsFrom is set to its end. Options: until (3.0), at (0.15), y (top of the
+  // label block; default 1150 = the middle of the frame just above the subtitle band, off his face: Ahmed 2026-10-17,
+  // "can be placed in the middle of the video near the captions so that we avoid adding it on his face"), size (84 px),
+  // sfx (true). It must never cover his eyes or mouth: check the review stills at 0.6 and 2.9 s and move it with y only if
+  // the default does (330 = under the platform's top bar, above his head).
+  K.title = function (text, o = {}) {
+    const at = o.at != null ? o.at : 0.15, until = o.until != null ? o.until : 3.0;
+    if (!document.getElementById("ktitle-css")) {
+      const css = document.createElement("style"); css.id = "ktitle-css";
+      css.textContent = `.ktitle{position:absolute;left:90px;right:90px;text-align:center;direction:rtl;font-family:var(--head);font-weight:700;
+        color:#141217;transform-origin:50% 40%;z-index:15;text-wrap:balance;line-height:1.62}
+      .ktitle span{background:#fff;padding:10px 30px;border-radius:22px;box-decoration-break:clone;-webkit-box-decoration-break:clone;
+        box-shadow:0 10px 30px rgba(0,0,0,.35)}`;
+      document.head.appendChild(css);
+    }
+    const e = K.el("div", "ktitle", overlay);
+    e.style.top = (o.y != null ? o.y : 1150) + "px";
+    e.style.fontSize = (o.size || 84) + "px";
+    const span = document.createElement("span");
+    span.textContent = String(text).replace(/\*/g, "");
+    e.appendChild(span);
+    hide(e);
+    tl.fromTo(e, { scale: 0.4, rotation: -3, autoAlpha: 0 }, { scale: 1, rotation: -3, autoAlpha: 1, duration: 0.42, ease: "back.out(2.2)", immediateRender: false }, at);
+    tl.to(e, { scale: 0.85, autoAlpha: 0, duration: 0.18, ease: "power2.in" }, until - 0.18);
+    if (o.sfx !== false) K.sfx(at, "pop", 0.35);
+    K.captionsFrom = Math.max(K.captionsFrom || 0, until);
     return e;
   };
 

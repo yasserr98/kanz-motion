@@ -29,7 +29,8 @@ def caption_body(md):
 
 
 def spoken_text(md):
-    body = caption_body(md)
+    """What the voice says. A line `Arabic translation {{English he speaks}}` (SHORT-14) is aligned on the English."""
+    body = re.sub(r"^.*?\{\{(.*?)\}\}[ \t]*$", r"\1", caption_body(md), flags=re.M)
     return re.sub(r"\n{3,}", "\n\n", body.replace("*", "").strip())
 
 

@@ -20,7 +20,10 @@ scene but not render it).
    the width, then zooms into the 9:16 face through the source's own transition (SHORT-5). A frozen frame at the start
    reads as a glitch.
 5. **Scene.** Load `runtime/kanz-footage.js`; `K.footage({dir: "assets/face", n, windows, end})`.
-   - The first 3 s always show his face; no headline hook over it; captions run from 0 (SHORT-4).
+   - Subtitles are Egyptian Arabic throughout, translating any English he speaks (SHORT-14); script.md keeps the verbatim
+     transcript in a comment for the record.
+   - The first 3 s always show his face with the reel's title over it: `K.title(text)` (white sticker; it hides the
+     subtitles until 3 s by itself). Call it after any line that sets `K.captionsFrom` (SHORT-4). In the 50/50 split, subtitles sit on the seam (SHORT-12, automatic in `kanz-split.js`).
    - Alternate face and motion: cut in the pauses before a word; face for the lines he delivers to camera, boards for the
      mechanism. Windows can carry a jump zoom `[a, b, 1.16]`, but none by default (PACE-5).
    - The last board runs to the last frame; no cut back to the face, no takeaway tail (SHORT-7).

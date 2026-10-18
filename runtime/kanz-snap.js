@@ -18,6 +18,7 @@
   .ksnap{position:absolute;background:#f4f1ea;padding:16px 16px 54px;box-shadow:0 22px 40px rgba(0,0,0,.55),0 2px 4px rgba(0,0,0,.4);
     transform-origin:50% 50%}
   .ksnap .ph{position:relative;width:100%;height:100%;overflow:hidden;background:#111}
+  .ksnap.slim{padding:12px 12px 32px}
   .ksnap img{width:100%;height:100%;object-fit:cover;display:block;filter:contrast(1.12) saturate(1.18) sepia(.16) brightness(1.04)}
   .ksnap .flash{position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 45%,rgba(255,255,255,.14) 0%,rgba(0,0,0,0) 45%,rgba(0,0,0,.55) 100%)}
   .ksnap .leak{position:absolute;inset:0;mix-blend-mode:screen;background:linear-gradient(100deg,rgba(255,120,40,.38) 0%,rgba(255,80,60,.12) 18%,rgba(0,0,0,0) 34%)}
@@ -41,16 +42,18 @@
   let flashEl = null;
   K.snap35 = function (parent, src, o) {
     const w = o.w || 620, h = o.h || 760;
-    const e = K.el("div", "ksnap", parent);
+    // slim: thin frame all round and a modest strip underneath (Ahmed 2026-10-17); the default frame keeps 16/54 px
+    const PX = o.slim ? 24 : 32, PY = o.slim ? 44 : 70;
+    const e = K.el("div", "ksnap" + (o.slim ? " slim" : ""), parent);
     e.innerHTML = `<div class="ph"><img src="${src}"><div class="flash"></div>${o.leak === false ? "" : '<div class="leak"></div>'}` +
       `<div class="grain" style="background-image:url(${grain()})"></div>${o.date ? `<div class="stamp">${o.date}</div>` : ""}</div>`;
-    gsap.set(e, { left: o.x - (w + 32) / 2, top: o.y - (h + 70) / 2, width: w + 32, height: h + 70, rotation: o.rot || 0, zIndex: o.z || 5 });
+    gsap.set(e, { left: o.x - (w + PX) / 2, top: o.y - (h + PY) / 2, width: w + PX, height: h + PY, rotation: o.rot || 0, zIndex: o.z || 5 });
     gsap.set(e.querySelector(".ph"), { width: w, height: h });
     if (o.pos) e.querySelector("img").style.objectPosition = o.pos;
     let c = null;
     if (o.credit) {
       c = K.el("div", "ksnapcredit", parent, o.credit);
-      gsap.set(c, { left: o.x, top: o.y + (h + 70) / 2 + 26, xPercent: -50 });
+      gsap.set(c, { left: o.x, top: o.y + (h + PY) / 2 + 26, xPercent: -50 });
     }
     if (o.at != null) {
       tl.set(e, { autoAlpha: 0 }, 0);
