@@ -139,6 +139,15 @@ def face_share_findings(face_windows, split_windows, duration, live, share=FACE_
     return [dict(kind="face-share", t=0, why=f"his face shows {got:.0%} of {duration:.1f} s < {share:.0%} (SHORT-15)")]
 
 
+def lands_on_board(c, face_windows, split_windows):
+    """True when the picture after the change at c is a full-screen board reached by a hard cut (the half-built check
+    applies); False at every split edge (the split <-> board move eases) and where his face follows."""
+    near = lambda x: abs(x - c) < 0.02  # noqa: E731
+    if any(near(a) or near(b) for a, b, *_ in split_windows or []):
+        return False
+    return not any(near(a) for a, b, *_ in face_windows or [])
+
+
 def window_edges(face_windows, split_windows, duration):
     """Every time the picture changes between face, split and board."""
     edges = set()
@@ -246,11 +255,12 @@ def frame_stats(g):
     return float(g.mean()), float(g.std()), float((np.abs(g - CHARCOAL) > 30).mean())
 
 
-def strip_flags(frames, cut_index, fps=24, charcoal=(52, 7.0), flash=55, big=28.0, small=10.0):
+def strip_flags(frames, cut_index, fps=24, charcoal=(52, 7.0), flash=55, big=28.0, small=10.0, built=True):
     """Frames around one cut (small grey arrays, the cut between cut_index - 1 and cut_index). Flags (SHORT-10):
       charcoal   near-empty charcoal (mean < 52, spread < 7): the cut landed before the board was built
       flash      a frame `flash` levels brighter than both neighbours
-      half-built the first frame after the cut has under half the content the board has 0.25 s later
+      half-built the first frame after the cut has under half the content the board has 0.25 s later (only where a
+                 hard cut lands on a full-screen board, built=True: an eased split move changes its content on purpose)
       one-frame  a single frame unlike both neighbours while they match each other (a wrong board for one frame)
     Returns [(flag, index), ...]."""
     import numpy as np
@@ -262,7 +272,7 @@ def strip_flags(frames, cut_index, fps=24, charcoal=(52, 7.0), flash=55, big=28.
         if 0 < i < len(st) - 1 and m - st[i - 1][0] > flash and m - st[i + 1][0] > flash:
             flags.append(("flash", i))
     later = min(len(st) - 1, cut_index + int(0.25 * fps))
-    if cut_index < len(st) and st[later][2] > 0.08 and st[cut_index][2] < 0.5 * st[later][2]:
+    if built and cut_index < len(st) and st[later][2] > 0.08 and st[cut_index][2] < 0.5 * st[later][2]:
         flags.append(("half-built", cut_index))
     d = lambda i, j: float(np.abs(np.asarray(frames[i], np.float32) - np.asarray(frames[j], np.float32)).mean())
     for k in range(1, len(frames) - 1):

@@ -151,6 +151,11 @@ def test_strip_flags_charcoal_flash_half_built_and_one_frame():
     bad = [face() for _ in range(6)] + [empty] + [board.copy() for _ in range(5)]
     kinds = {f for f, _ in guards.strip_flags(bad, 6)}
     assert {"charcoal", "half-built"} <= kinds
+    assert "half-built" not in {f for f, _ in guards.strip_flags(bad, 6, built=False)}
+    assert guards.lands_on_board(3.0, [[0, 3.0]], [[9, 12]])          # face -> board: a hard cut onto a board
+    assert not guards.lands_on_board(9.0, [[0, 3.0]], [[9, 12]])      # board -> split eases
+    assert not guards.lands_on_board(12.0, [[0, 3.0]], [[9, 12]])     # split -> board eases
+    assert not guards.lands_on_board(5.0, [[5, 6]], [])                # board -> face
     flash = [board.copy() for _ in range(12)]
     flash[8] = np.full((24, 14), 250.0)
     assert ("flash", 8) in guards.strip_flags(flash, 6)

@@ -96,7 +96,8 @@ def cut_strips(proj, mp4, version, short, fps, allow):
         if not len(fr):
             continue
         grey = [f.mean(axis=2)[::4, ::4] for f in fr]
-        flags = guards.strip_flags(grey, min(STRIP // 2, len(grey) - 1), fps)
+        flags = guards.strip_flags(grey, min(STRIP // 2, len(grey) - 1), fps,
+                                   built=guards.lands_on_board(c, short.get("faces"), short.get("splits")))
         bad = [f for f in flags if not any(a.get("kind") == "cut-strip" and abs(a.get("t", -9) - c) < 0.05 and str(a.get("why", "")).strip()
                                            for a in allow)]
         y = row * (h + 34)
