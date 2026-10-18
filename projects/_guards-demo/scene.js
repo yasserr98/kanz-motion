@@ -30,7 +30,7 @@ K.text(a, BAD ? "الرهان 39.8$" : "الرهان " + K.money(39.8), { x: 500
 K.img(a, OBJ + "kanz-bank-v01.png", { x: 500, y: 430, w: 540, at: s2 - 0.1, out: s3 - 0.4 });
 K.tag(a, "دايما", { x: 500, y: 830, at: T("بيكسب"), out: s3 - 0.4, lav: true });
 K.text(a, "مهما كانت النتيجة", { x: 500, y: 150, size: 48, at: T("مهما"), out: s3 - 0.4 });
-if (BAD) { K.sfx(7.0, "pop", 0.3); K.sfx(7.1, "click", 0.3); K.sfx(8.4, "hit", 0.3); } // stacked, and on nothing
+if (BAD) { K.sfx(7.0, "pop", 0.3); K.sfx(7.1, "click", 0.3); K.sfx(8.8, "hit", 0.3); } // stacked, and on nothing
 
 // ---------- split 2: what makes the difference ----------
 K.img(a, OBJ + "kanz-calculator-v01.png", { x: 500, y: 560, w: 360, at: s3 - 0.1 });

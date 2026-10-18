@@ -476,14 +476,19 @@ SEAM = """(t) => { K.seek(t); const f = document.getElementById('splitface'), c 
 
 
 def visual_events(frames, info, every):
-    """Times something visibly changes: a new element, a camera move, a face/split change (sfx-orphan)."""
-    ev, seen, cam = [], set(), None
+    """Times something visibly changes: a new element, an element moving or resizing (a coin landing), a camera move,
+    a face/split change (sfx-orphan)."""
+    ev, seen, cam, pos = [], set(), None, {}
     for t, f in frames:
-        ids = {it["id"] for it in f["items"] if it["kind"] != "caption"}
+        items = [it for it in f["items"] if it["kind"] != "caption"]
+        ids = {it["id"] for it in items}
+        now = {it["id"]: ((it["x0"] + it["x1"]) / 2, (it["y0"] + it["y1"]) / 2, it["x1"] - it["x0"]) for it in items}
+        moved = any(i in pos and (abs(now[i][0] - pos[i][0]) > 12 or abs(now[i][1] - pos[i][1]) > 12 or
+                                  abs(now[i][2] - pos[i][2]) > 0.08 * max(pos[i][2], 1)) for i in now)
         c = f["cam"]
-        if ids - seen or (cam and (abs(c[0] - cam[0]) > 8 or abs(c[1] - cam[1]) > 8 or abs(c[2] - cam[2]) > 0.006)):
+        if ids - seen or moved or (cam and (abs(c[0] - cam[0]) > 8 or abs(c[1] - cam[1]) > 8 or abs(c[2] - cam[2]) > 0.006)):
             ev += [t - every, t]  # it started during the step before this sample
-        seen, cam = ids, c
+        seen, cam, pos = ids, c, now
     for a, b in info["faces"] + info["splits"]:
         ev += [a, b]
     return ev

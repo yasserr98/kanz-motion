@@ -22,12 +22,12 @@ PROJECTS = ["us-dollar-decisions-pace", "real-estate-never-loses", "gamblers-fal
             "short-house-always-wins", "_3d-demo"]
 
 
-def capture(p, slug, label, times=None, original=False, raw_raster=False, original_files=()):
+def capture(p, slug, label, times=None, original=False, raw_raster=False, original_files=(), rev="HEAD"):
     browser = p.chromium.launch(args=["--allow-file-access-from-files"])
     try:
         page = browser.new_page(viewport={"width": 1080, "height": 1920}, device_scale_factor=0.5)
         if original or original_files:
-            source = {f.name: subprocess.check_output(["git", "show", f"HEAD:runtime/{f.name}"])
+            source = {f.name: subprocess.check_output(["git", "show", f"{rev}:runtime/{f.name}"])
                       for f in (ROOT / "runtime").glob("*.js") if original or f.name in original_files}
             def route_runtime(route):
                 body = source.get(route.request.url.rsplit("/", 1)[-1])
@@ -81,6 +81,7 @@ def main():
     ap.add_argument("--expected-differences", help="JSON of exact accepted hashes and reasons for bug-fix differences")
     ap.add_argument("--project", action="append", choices=PROJECTS)
     ap.add_argument("--original", action="store_true", help="Serve original runtime JS from git show HEAD without editing files")
+    ap.add_argument("--rev", default="HEAD", help="commit whose runtime --original serves (default HEAD)")
     ap.add_argument("--raw-raster", action="store_true", help="Keep Chromium's retained raster tiles (may differ by 1-2 color levels)")
     ap.add_argument("--original-file", action="append", default=[], choices=[f.name for f in (ROOT / 'runtime').glob('*.js')],
                     help="Restore one HEAD runtime file in memory to isolate a visual change")
@@ -90,7 +91,7 @@ def main():
     results = json.loads(Path(args.output).read_text()) if args.project and Path(args.output).exists() else {}
     with sync_playwright() as p:
         for slug in args.project or PROJECTS:
-            r = capture(p, slug, Path(args.output).stem, before.get(slug, {}).get("times"), args.original, args.raw_raster, args.original_file)
+            r = capture(p, slug, Path(args.output).stem, before.get(slug, {}).get("times"), args.original, args.raw_raster, args.original_file, args.rev)
             if slug in before:
                 r["before_differences"] = [t for t in r["times"] if r["forward"][str(t)] != before[slug]["forward"][str(t)]]
                 allowed = expected.get(slug, {})
