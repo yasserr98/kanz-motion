@@ -612,7 +612,14 @@
   // "can be placed in the middle of the video near the captions so that we avoid adding it on his face"), size (84 px),
   // sfx (true). It must never cover his eyes or mouth: check the review stills at 0.6 and 2.9 s and move it with y only if
   // the default does (330 = under the platform's top bar, above his head).
+  // With the 2026-10-18 shorts defaults (K.D.faces): K.title() without text uses window.TITLE (shorts/_titles.json,
+  // the option Ahmed picked or his edited text; never copy it by hand), and without o.y its height comes from the face
+  // boxes (window.FACES): the preferred height (330 workshop, 1150 long video; o.prefer to change it) unless that
+  // would touch his eyes or mouth during at..until, else the nearest height that stays clear. K.titleY records it.
   K.title = function (text, o = {}) {
+    if (text != null && typeof text === "object") { o = text; text = null; }
+    if (text == null) text = window.TITLE;
+    if (text == null) throw new Error("K.title: no text and no window.TITLE (shorts/_titles.json entry for this project)");
     const at = o.at != null ? o.at : 0.15, until = o.until != null ? o.until : 3.0;
     if (!document.getElementById("ktitle-css")) {
       const css = document.createElement("style"); css.id = "ktitle-css";
@@ -629,10 +636,65 @@
     span.textContent = String(text).replace(/\*/g, "");
     e.appendChild(span);
     hide(e);
+    K.titleY = o.y != null ? o.y : 1150;
+    if (o.y == null && K.D.faces && window.FACES && K.faceAt) {
+      const pref = o.prefer != null ? o.prefer : window.FACES.kind === "live" ? 330 : 1150;
+      const place = () => { K.titleY = K.clearOfFace(e, at, until, pref); e.style.top = K.titleY + "px"; };
+      place();
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(place); // re-measure with the real font
+    }
     tl.fromTo(e, { scale: 0.4, rotation: -3, autoAlpha: 0 }, { scale: 1, rotation: -3, autoAlpha: 1, duration: 0.42, ease: "back.out(2.2)", immediateRender: false }, at);
     tl.to(e, { scale: 0.85, autoAlpha: 0, duration: 0.18, ease: "power2.in" }, until - 0.18);
     if (o.sfx !== false) K.sfx(at, "pop", 0.35);
     K.captionsFrom = Math.max(K.captionsFrom || 0, until);
+    return e;
+  };
+
+  // ---------- staying clear of his face (2026-10-18; boxes from engine/faces.py via window.FACES) ----------
+  // K.faceAt(t) (runtime/kanz-footage.js) gives the eyes-and-mouth box on screen at t, or null.
+  // K.clearOfFace(el, t0, t1, pref): the top (px) nearest pref, between 280 and 1440 - height, at which el stays
+  // FACE_MARGIN px clear of every face box shown in t0..t1; pref itself when nothing is clear (and a console warning).
+  K.FACE_MARGIN = 24;
+  K.faceUnion = function (t0, t1) {
+    let u = null;
+    for (let t = t0; t <= t1 + 1e-6; t += 1 / 24) {
+      const b = K.faceAt ? K.faceAt(t) : null;
+      if (!b) continue;
+      u = u ? [Math.min(u[0], b[0]), Math.min(u[1], b[1]), Math.max(u[2], b[2]), Math.max(u[3], b[3])] : b.slice();
+    }
+    return u;
+  };
+  K.clearOfFace = function (el, t0, t1, pref) {
+    const u = K.faceUnion(t0, t1), h = el.offsetHeight || 200, m = K.FACE_MARGIN;
+    if (!u) return pref;
+    const clear = (y) => y + h <= u[1] - m || y >= u[3] + m;
+    for (let d = 0; d <= 1200; d += 10) {
+      for (const y of [pref - d, pref + d]) if (y >= 280 && y + h <= 1440 && clear(y)) return y;
+    }
+    console.warn(`K.title: no height keeps it off his face (${t0}-${t1} s); left at ${pref}`);
+    return pref;
+  };
+
+  // ---------- money and percent in right-to-left text (2026-10-18, casino E 39.8 s) ----------
+  // K.money(39.8) -> "$39.8" kept together left-to-right inside Arabic text (the $ stays on the left of its digits
+  // and on their line); K.money(65, "٪") -> "65٪"; K.money(13, " مليار $")? use the words instead. lint flags a $ that
+  // is not attached to its digits (`stray-currency`).
+  K.money = function (value, sym = "$") {
+    const n = typeof value === "number" ? String(value) : String(value).trim();
+    const body = sym === "$" ? "$" + n : n + sym;
+    return `<bdi class="num money" dir="ltr" style="white-space:nowrap">${body}</bdi>`;
+  };
+
+  // ---------- K.under: a subheadline with breathing room (2026-10-18, casino C and F notes) ----------
+  // K.under(head, html, o) places html K.GAP px under the head element's bottom, same board and centre; other options
+  // go to K.text. lint flags a subheadline closer than K.GAP to the headline above it (`tight-gap`).
+  K.GAP = 40;
+  K.under = function (head, html, o = {}) {
+    const parent = head.parentElement, gap = o.gap != null ? o.gap : K.GAP;
+    const e = K.text(parent, html, { size: 40, ...o, x: gsap.getProperty(head, "left"), y: 0 });
+    const put = () => gsap.set(e, { top: gsap.getProperty(head, "top") + head.offsetHeight / 2 + gap + e.offsetHeight / 2 });
+    put();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(put);
     return e;
   };
 
@@ -646,11 +708,16 @@
     if (t < K.captionsFrom || t > K.captionsTo) idx = -1;
     if (idx === capShown) return;
     capShown = idx;
-    const fix = K.D.digits ? (w) => numFix2(convDigits(w)) : numFix;
+    const fix = K.D.digits ? (w) => (K.D.faces ? numFix3 : numFix2)(convDigits(w)) : numFix;
     capBox.innerHTML = idx < 0 ? "" : '<span class="box">' + caps[idx].words.map((w) => { const h = fix(w.w); return w.key ? `<span class="kw">${h}</span>` : h; }).join(" ") + "</span>";
   }
   // isolate numbers so "10%." does not render as ".10%" inside right-to-left text
   function numFix(w) { const m = w.match(/^(.*?)([+−-]?[\d.,]*\d%?)(.*)$/); return m ? `${m[1]}<bdi class="num">${m[2]}</bdi>${m[3]}` : w; }
+  // 2026-10-18 defaults: a $ on either side of the digits goes inside the isolate, written on the left ("$39.8"), so
+  // it can never flip to the other side in right-to-left text (casino E 39.8 s)
+  function numFix3(w) { const m = w.match(/^(.*?)(\$?)([+−-]?[\d.,]*\d[%٪]?)(\$?)(.*)$/);
+    if (!m || !(m[2] || m[4])) return numFix2(w);
+    return `${m[1]}<bdi class="num" dir="ltr">$${m[3]}</bdi>${m[5]}`; }
   function numFix2(w) { const m = w.match(/^(.*?)([+−-]?[\d٠-٩.,٫٬]*[\d٠-٩][%٪]?)(.*)$/); return m ? `${m[1]}<bdi class="num">${m[2]}</bdi>${m[3]}` : w; }
   K.captionsFrom = 0; K.captionsTo = 1e9;
   const grain = document.getElementById("grain");

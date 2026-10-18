@@ -6,6 +6,9 @@ Inputs:  <project>/script.md (text between <!-- captions:start/end -->, *keyword
          <project>/transcript.json (word timings of the final edited voice)
 Output:  <project>/build/timing.js  ->  window.TOKENS (every script word with start/end)
                                        window.CAPTIONS (chunks of <= 4 words / 24 chars)
+         and, for a short cut from a long video, window.CUT / FACES / FREEZES / TITLE (engine/shortinfo.py).
+A cut-out short whose shown captions contain Latin letters fails (exit 1, outputs written): SHORT-14, subtitles are
+Egyptian Arabic even where he speaks English; write the line as `Arabic translation {{English he says}}`.
 
 Alignment uses difflib on normalised Arabic tokens; script words the recogniser missed get
 times interpolated from their neighbours.
@@ -18,6 +21,7 @@ from pathlib import Path
 
 from align import caption_body, spoken_text
 from provenance import current, stamp
+import shortinfo
 
 PUNCT = "،؟?!.,:؛\"«»()…"
 
@@ -124,10 +128,16 @@ def main(proj):
     out.mkdir(exist_ok=True)
     (out / "timing.js").write_text(
         "window.TOKENS=" + json.dumps(toks, ensure_ascii=False) + ";\nwindow.CAPTIONS=" +
-        json.dumps(caps, ensure_ascii=False) + ";\nwindow.DURATION=" + str(timing["duration"]) + ";\n", encoding="utf-8")
+        json.dumps(caps, ensure_ascii=False) + ";\nwindow.DURATION=" + str(timing["duration"]) + ";\n" + shortinfo.extras_js(proj),
+        encoding="utf-8")
     if voice.exists():
         (out / "timing.provenance.json").write_text(json.dumps(stamp(voice, text)), encoding="utf-8")
     print(f"{len(toks)} script words, {matched} matched to the voice, {len(caps)} caption chunks, {timing['duration']:.1f}s")
+    latin = shortinfo.latin_words(toks) if shortinfo.cut_from(proj) else []
+    if latin:
+        sys.exit("SHORT-14: subtitles of a cut-out short are Egyptian Arabic; Latin words shown: "
+                 + ", ".join(f"{w} ({t:.1f}s)" for t, w in latin[:12])
+                 + ". Write each line as `Arabic translation {{English he says}}` in script.md.")
 
 
 if __name__ == "__main__":

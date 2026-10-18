@@ -21,11 +21,39 @@
  * Frames are read as blobs and drawn into one canvas, then released: swapping an <img> src kept every decoded
  * 1080x1920 frame in Chromium's memory and the first render ran out of RAM (2026-10-16).
  * Burned-in text in the source footage (lower-third labels) stays as it is.
+ *
+ * Face boxes (2026-10-18): K.faceAt(t) is the box around his eyes and mouth on screen at t (stage px, window zoom
+ * included; from window.FACES, engine/faces.py), or null where no face shows. With the 2026-10-18 shorts defaults
+ * (K.pace({defaults: "2026-10-18"}), K.D.faces) the subtitles move off that box in every face window (below it when
+ * they fit above y 1440, else above it), and K.duration and `end` follow the voice (window.DURATION) unless the scene
+ * sets them: the audio already carries the ending guard (engine/footage.py).
  */
 (function () {
   const K = window.K;
   K.faceWindows = [];
   K.inFace = (t) => K.faceWindows.some(([a, b]) => t >= a && t < b);
+  K._faceOrigin = 700;
+  const boxAt = (set, t) => {
+    if (!set || !set.boxes || !set.boxes.length) return null;
+    const i = Math.max(0, Math.min(set.boxes.length - 1, Math.floor(t * ((window.FACES && window.FACES.fps) || 24) + 1e-6)));
+    return set.boxes[i] || set.typical || null;
+  };
+  K.faceAt = function (t) {
+    const F = window.FACES;
+    if (!F) return null;
+    const w = K.faceWindows.find(([a, b]) => t >= a && t < b);
+    if (w) {
+      const b = boxAt(F.face, t);
+      if (!b) return null;
+      const z = w[2] || 1, oy = K._faceOrigin;
+      return [540 + (b[0] - 540) * z, oy + (b[1] - oy) * z, 540 + (b[2] - 540) * z, oy + (b[3] - oy) * z];
+    }
+    if (K.inSplit && K.inSplit(t) && F.half) {
+      const b = boxAt(F.half, t);
+      return b ? [b[0], b[1] + K.splitFaceTop, b[2], b[3] + K.splitFaceTop] : null;
+    }
+    return null;
+  };
 
   K.footage = function (o) {
     const stage = document.getElementById("stage");
@@ -61,12 +89,31 @@
     stage.insertBefore(box, document.getElementById("headline"));
     K.faceWindows = o.windows;
     const fps = o.fps || 24;
+    if (K.D.faces && o.end == null && window.DURATION) o.end = window.DURATION;  // the voice, ending guard included
+    if (K.D.faces && window.DURATION) K.duration = window.DURATION;  // not DURATION + 1.6: no silent board after the last word
     const grain = document.getElementById("grain");
     const grainOp = grain ? getComputedStyle(grain).opacity : null;
     // a soft whoosh on every cut from the face into the motion (none back to the face: the voice carries it)
     const touches = (b) => o.windows.some(([a]) => Math.abs(a - b) < 0.02);
     if (o.sfx !== false) o.windows.forEach(([, b]) => { if (!touches(b) && (o.end == null || b < o.end - 0.1)) K.sfx(b, "whoosh", 0.16); });
     img.style.transformOrigin = `540px ${o.faceY || 700}px`;
+    K._faceOrigin = o.faceY || 700;
+    // subtitles off his face (K.D.faces): one height per face window, so they never jump inside a window
+    const cap = document.getElementById("captions"), CAPH = 170, capTops = new Map();
+    let cap0 = null, capMoved = false;
+    const capTopFor = (w) => {
+      if (capTops.has(w)) return capTops.get(w);
+      if (cap0 == null) cap0 = parseFloat(getComputedStyle(cap).top) || 1268;
+      const u = K.faceUnion(w[0], w[1] - 1e-3), m = K.FACE_MARGIN;
+      let y = null;
+      if (u && !(cap0 + CAPH <= u[1] - m || cap0 >= u[3] + m)) {
+        if (u[3] + m + CAPH <= 1440) y = u[3] + m;
+        else if (u[1] - m - CAPH >= 270) y = u[1] - m - CAPH;
+      }
+      capTops.set(w, y);
+      return y;
+    };
+    const avoid = !!(K.D.faces && window.FACES && cap);
 
     const X = o.xfade == null ? 0.2 : o.xfade, h = X / 2;
     const ease = (u) => u * u * (3 - 2 * u);
@@ -152,6 +199,10 @@
     const prev = K.seek;
     K.seek = function (t) {
       prev(t);
+      if (avoid) {
+        const w = o.windows.find(([a, b]) => t >= a && t < b), y = w ? capTopFor(w) : null;
+        if (y != null) { cap.style.top = y + "px"; capMoved = true; } else if (capMoved) { cap.style.top = ""; capMoved = false; }
+      }
       if (style !== "cut" && style !== "dissolve") styleMotion(t);
       const win = faceStyled(t);
       const on = !!win;

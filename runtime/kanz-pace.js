@@ -41,6 +41,16 @@
  *   paper  objects and figures keep their contrast on the paper world (kanz-look.css)
  *   nosnap K.snap does nothing (one warning); K.snap(t, f, hold, {force: true}) or {nosnap: false} brings it back
  * Chart colours are deliberately unchanged (Ahmed 2026-10-17: "leave them with different colors I like it").
+ *
+ * Shorts defaults (2026-10-18, review hardening): K.pace({defaults: "2026-10-18"}) turns on everything above plus
+ *   faces  K.title() takes its text from shorts/_titles.json (window.TITLE) and its height from the face boxes
+ *          (window.FACES, engine/faces.py): workshop shorts prefer y 330, long-video shorts y 1150, never on his eyes
+ *          or mouth; the subtitles move off the face box in face and split moments (SHORT-4, SHORT-12)
+ *   ease   K.split eases its moves to and from a full-screen board (0.35 s); cuts to and from his full face stay
+ *          clean (SHORT-16)
+ *   gap    K.under(head, html) puts a subheadline under a headline with K.GAP (40 px) of breathing room
+ * The template calls it with "2026-10-18"; scenes on "2026-10-17" or none render exactly as before. Each can be
+ * switched on alone in an older scene: K.pace({ defaults: "2026-10-17", ease: true }).
  */
 (function () {
   const K = window.K, tl = K.tl;
@@ -60,12 +70,15 @@
     };
   };
 
-  K.DEFAULTS = "2026-10-17";
+  K.DEFAULTS = "2026-10-18";
   K.CAPBAND = [1190, 1450];
   K.pace = function (o = {}) {
     K.PACE = true;
     const on = !!o.defaults && String(o.defaults) >= "2026-10-17";
     ["band", "lead", "punch", "fly", "marks", "digits", "sizes", "paper", "nosnap"].forEach((k) => { K.D[k] = on && o[k] !== false; });
+    const on18 = !!o.defaults && String(o.defaults) >= "2026-10-18";
+    // each can also be switched on alone in an older scene, e.g. K.pace({ defaults: "2026-10-17", ease: true })
+    ["faces", "ease", "gap"].forEach((k) => { K.D[k] = (on18 && o[k] !== false) || o[k] === true; });
     stage.classList.toggle("kd-sizes", !!K.D.sizes);
     stage.classList.toggle("kd-paper", !!K.D.paper);
     K.camSmooth = true;

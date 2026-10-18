@@ -14,8 +14,9 @@ K.look(); // look v2 (docs/LOOK-V2.md): safe zones, light, contact shadows. Call
 // pace (docs/PACE.md): smooth camera, 24 fps motion, mix 2, room tone, drift between moves (K.finish).
 // defaults (docs/PACE.md "Visual defaults"): caption band kept clear, boards arrive built, punch hides the caption,
 // capped fly-ins, marks sized to their element, one digit system (K.DIGITS), 28/34 px floors, paper contrast, no snap
-// zooms. Switch one off with e.g. { defaults: "2026-10-17", fly: false }
-K.pace({ defaults: "2026-10-17" });
+// zooms. Switch one off with e.g. { defaults: "2026-10-18", fly: false }. 2026-10-18 adds the shorts defaults
+// (title and subtitles off his face, eased split moves, K.under breathing room; docs/RULES.md SHORT-4, -16, TXT-5)
+K.pace({ defaults: "2026-10-18" });
 // snake layout: neighbours 1,100 px apart in a row, rows 1,800 apart (closer rows show under the captions)
 const hook = K.board("hook", 0, 0), b2 = K.board("two", -1100, 0);
 K.cam(0, "hook");
