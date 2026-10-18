@@ -170,3 +170,14 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   voice and masters in two loudness passes to -16 LUFS / -1.5 dBTP (replacing a single gain step and a -1 dBFS sample
   limiter). Delivered reels are re-sounded with `make.py remix` so their approved picture is unchanged; live B v6 -> v7
   dropped 16 of 40 overlapping cues. Rule: SND-5.
+- **Open decisions from the review hardening** (asked in one message, answered the same day):
+  - (a) Face vs. animation in workshop shorts (live F: "show Ahmed's face more and less animation"; live H: "more dynamic
+    animation"): his face, full screen or in the split, is on screen at least 50% of a workshop short; boards only where
+    the line explains a mechanism, says a number or names something, and those inserts move. Rule: SHORT-15.
+  - (b) Transitions (casino: the clean cut; live C: "make the transitions more smooth"): clean picture cuts between face
+    and board, eased moves into and out of the 50/50 split, and never a cut or move inside a word. Rule: SHORT-16.
+  - (c) Press photos of real moments (Mandi, Messi): a standing yes. Press photos of real public moments may be used in
+    `K.snap35` with source and credit in `CREDITS.md`; never generated or repainted. **Changes** IMG-8 (openly licensed
+    only). Rule: IMG-8.
+  - (d) Re-running delivered reels through `make.py remix`: only when a reel is touched again (a revision or a
+    re-upload); no bulk re-run. Rule: SND-5.

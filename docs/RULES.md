@@ -62,7 +62,7 @@ they were.
 | IMG-5 | Voice-note and script Reels use the same three types; a place photo gets a board of its own with only text and tags | eye |
 | IMG-6 | No date stamp or credit line on screen; credits for the post caption go in `projects/<slug>/CREDITS.md` | eye |
 | IMG-7 | Text over a photo reaches 4.5:1 against its brightest background pixels | `contrast.py` |
-| IMG-8 | Real people and real events: openly licensed real photos only (source, licence, credit in `CREDITS.md`); never generated or repainted | eye |
+| IMG-8 | Real people and real events: real photos only, never generated or repainted: openly licensed ones, or press photos of real public moments (standing yes, 2026-10-18); source, licence or credit in `CREDITS.md` | eye |
 | IMG-9 | Gambling content: never a hijab-wearing character, generated person or photo | eye |
 | IMG-10 | Websites on screen are genuine screenshots (URL + capture date in `CREDITS.md`), the main visual of their slide | eye |
 | OBJ-1 | Objects: approved `library/objects/` or new Codex objects in the fixed icon style; never invent a style for a topic | eye |
@@ -99,7 +99,7 @@ they were.
 | SND-2 | SFX only CC0 or explicitly licensed, each in `engine/sfx_library.py` with its source; Sonniss/Mixkit files local only, never committed; generated ones (`sfx_gen.py`) always in a new category, so finished videos keep their sounds | `manifest.json` |
 | SND-3 | Room tone under every pause (`K.bed = "room"`); set `K.bedUnder` per video when it is too loud | ear |
 | SND-4 | Loudness -16 LUFS (± 1) | `make.py check/ship` |
-| SND-5 | Mix and master: one sound effect at a time (cues under 0.3 s apart keep the louder; the next effect chokes the last; none longer than 1.4 s), the voice high-passed and gently compressed, effects ducked under speech and kept 6 dB under it, two-pass loudness to -16 LUFS with a -1.5 dBTP ceiling. An approved render gets new sound with `make.py remix <name> <from> <to>` (picture copied bit for bit) | `render.py` mix 2 |
+| SND-5 | Mix and master: one sound effect at a time (cues under 0.3 s apart keep the louder; the next effect chokes the last; none longer than 1.4 s), the voice high-passed and gently compressed, effects ducked under speech and kept 6 dB under it, two-pass loudness to -16 LUFS with a -1.5 dBTP ceiling. An approved render gets new sound with `make.py remix <name> <from> <to>` (picture copied bit for bit) when it is touched again; no bulk re-run | `render.py` mix 2 |
 
 ## Shorts cut from a long video
 
