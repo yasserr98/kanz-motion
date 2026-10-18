@@ -119,9 +119,11 @@ printf 'done\\n'
 set -e
 mkdir -p scratch
 export TMPDIR="$PWD/scratch"
-ssh() { shift; bash -c "$1"; }
+ssh() { while [ "$1" = -o ]; do shift 2; done; shift; bash -c "$1"; }
 sleep() { command sleep 0.05; }
-export -f ssh sleep
+flock() { shift; "$@"; }
+pgrep() { return 1; }
+export -f ssh sleep flock pgrep
 chmod +x "$KANZ_RENDER_DIR/.venv/bin/python"
 bash engine/vps_render.sh slug v1 --extra "apostrophe ' ; \\$(touch INJECTED)"
 '''
