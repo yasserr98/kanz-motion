@@ -207,3 +207,6 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   is for new renders only; a delivered reel keeps its sound unless Ahmed asks for that reel. **Replaces** (d) above
   ("only when a reel is touched again"). The five delivered reels remixed earlier today on his morning request stay as
   they are. Rule: SND-5.
+- **(d) final** (same day, a minute later): "sorry lets make it whenever I touch it again". A delivered reel goes
+  through `make.py remix` whenever it is touched again (a revision or a re-upload); no bulk re-run. **Replaces** the
+  "new renders only" line above. Rule: SND-5.
