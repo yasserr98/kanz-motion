@@ -181,3 +181,11 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
     only). Rule: IMG-8.
   - (d) Re-running delivered reels through `make.py remix`: only when a reel is touched again (a revision or a
     re-upload); no bulk re-run. Rule: SND-5.
+- **Room tone 40% quieter** ("sound of white noise the one you added, make it less by 40%"; "make sure to brief the
+  hardening about the 40% thing because the sound was too loud", relayed by the reels coordinator session): the room
+  tone bed is multiplied by 0.6 (-4.4 dB) after its per-scene level (`K.bedUnder`), in every mix 2 render; the trim is
+  part of the mix cache key, so cached mixes refresh. Rule: SND-3.
+- **Face <-> split stays a clean cut** (relayed the same day): asked first for a smoother face <-> split change, then,
+  shown the 0.2 s dissolve of live C v4, "I hate this transition basically", then "can it be a clean cut?". Every change
+  to or from his full face is a clean cut (face <-> board and face <-> split); no dissolve, crossfade or see-through
+  frame anywhere. The eased move between the split and a full-screen board stays. Rule: SHORT-16.

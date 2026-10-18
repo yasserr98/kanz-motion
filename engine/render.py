@@ -87,6 +87,7 @@ def master(raw, out):
 
 
 BED_UNDER_VOICE = 21.0  # room tone sits this many dB under the voice's median speech level
+BED_TRIM = 0.6  # Ahmed 2026-10-18: "make it less by 40%": room tone amplitude x0.6 (-4.4 dB), after K.bedUnder
 
 
 def room_tone(n, seed=7):
@@ -209,7 +210,7 @@ def mix_audio_v2(proj, cues, duration, out, t0=0.0, bed=None, resolved=None):
     if bed == "room":  # never digital silence between phrases (pacing study 2026-10-13)
         rt = room_tone(n)
         rdb = 10 * np.log10(np.mean(rt.mean(axis=1) ** 2) + 1e-12)
-        bus += rt * np.float32(10 ** (((vref - BED_UNDER_VOICE) - rdb) / 20))
+        bus += rt * np.float32(BED_TRIM * 10 ** (((vref - BED_UNDER_VOICE) - rdb) / 20))
     raw = out.with_name(out.stem + "-raw.wav")
     pcm = bus.astype("<f4").tobytes()
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "f32le", "-ar", str(SR), "-ac", "2", "-i", "-", "-c:a", "pcm_f32le", str(raw)],
@@ -258,7 +259,7 @@ def mix_key(proj, cues, duration, t0, mix, bed, resolved):
     for f in files:
         h.update(f.encode() + (ROOT / "library" / "sfx" / f).read_bytes())
     h.update(json.dumps([[c, f] for c, f in resolved], sort_keys=True).encode())
-    h.update(json.dumps([round(duration, 4), round(t0, 4), mix, bed, BED_UNDER_VOICE, SFX_TARGET, SR, SFX_MIN_GAP, SFX_CHOKE,
+    h.update(json.dumps([round(duration, 4), round(t0, 4), mix, bed, BED_UNDER_VOICE, BED_TRIM, SFX_TARGET, SR, SFX_MIN_GAP, SFX_CHOKE,
                          SFX_MAX_LEN, SFX_TAIL, SFX_DUCK, SFX_UNDER_VOICE, VOICE_CHAIN, MASTER]).encode())
     for fn in (mix_audio, mix_audio_v2, room_tone, decode, env_db, smooth_gain, schedule_sfx, master):
         h.update(inspect.getsource(fn).encode())
