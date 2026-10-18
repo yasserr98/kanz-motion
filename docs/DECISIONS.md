@@ -189,3 +189,16 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   shown the 0.2 s dissolve of live C v4, "I hate this transition basically", then "can it be a clean cut?". Every change
   to or from his full face is a clean cut (face <-> board and face <-> split); no dissolve, crossfade or see-through
   frame anywhere. The eased move between the split and a full-screen board stays. Rule: SHORT-16.
+- **Review hardening** (asked by the coordinating session from Ahmed's notes on ~15 shorts, 2026-10-05..18): the notes
+  that kept coming back became engine defaults and failing checks, so a fix stays fixed. The last word cut off
+  (casino A v4, F v3, H v2, E v4) -> the ending guard in `footage.py` and the ship ending/leak checks (SHORT-3); the
+  title over his eyes (A, C, E, G, H) and a title that never rendered (live D) -> face boxes, `K.title()` from
+  `_titles.json`, `on-face` and the ship title check (SHORT-4); source freezes read as lag (live C) -> `freezes.json`,
+  `freeze` and the duplicate-frame check (SHORT-17), and `K.split` now waits for the full-face frame too (a face
+  window under a split scene could be captured one frame late); visual errors in transitions (live H) -> the cut strips
+  (SHORT-10); English subtitles left in -> `captions.py` fails (SHORT-14); the $ placed wrong after it was reported
+  fixed (casino E 39.8 s) -> `K.money`, `$` inside the caption isolate, `stray-currency` (NUM-5); empty seconds on
+  screen -> no lint-ok excuse over 1.5 s (REV-1) and K.duration ends with the voice; breathing room (casino C, F) ->
+  `K.under`, `tight-gap` (TXT-5); effects stacking -> `sfx-overlap`, `sfx-orphan` (SND-5); dead air in workshops ->
+  `tighten_footage.py` by default (SHORT-13); notes reported fixed without a picture -> the notes ledger (REV-7).
+  Runtime changes switch on with `K.pace({ defaults: "2026-10-18" })` (the template); finished projects render as before.

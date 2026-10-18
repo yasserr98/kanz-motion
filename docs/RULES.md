@@ -41,7 +41,7 @@ they were.
 | HOOK-1 | The hook is the question headline plus ONE hero object, nothing else until the question ends | eye (lint `dead` is expected here) |
 | HOOK-2 | Hook layout: three-line question headline, keyword last in lavender, one ~600 px hero with glow + float | eye |
 | HOOK-3 | The hero is complete on frame 1 and settles from oversized (`K.settle`); `K.captionsFrom` = end of the question | `hook` |
-| PACE-1 | New scenes: `K.look()`, then `K.pace({ defaults: "2026-10-17" })`, and `K.finish()` as the last line | `structure`, `make.py check` |
+| PACE-1 | New scenes: `K.look()`, then `K.pace({ defaults: "2026-10-18" })`, and `K.finish()` as the last line | `structure`, `make.py check` |
 | PACE-2 | The 2026-10-17 defaults stay on: caption band kept clear, boards arrive built, punch hides the caption, capped fly-ins, marks sized to their element | `caption-band`, `half-built-arrival`, `markup-crossing-text` |
 | PACE-3 | Boards arrive built (`K.go` + `at: g.lead`), open close and pull out (`K.frame`); never land on an empty board | `half-built-arrival`, `dead` |
 | PACE-4 | Carry one hero between boards (`K.carry`, `K.dim`); never clear a board before building the next | eye |
@@ -85,11 +85,13 @@ they were.
 | NUM-1 | Show only numbers the voice says; real market figures carry a source on screen and in `CREDITS.md` | eye, `data.py` |
 | NUM-2 | No "مثال افتراضي" tag when the voice frames the figures as an example ("خلينا نقول", "لو") | eye |
 | NUM-3 | One digit system: Western digits with the Arabic percent sign (`35`, `65٪`), on screen and in captions | `digits` |
+| NUM-5 | A dollar amount is written `$39.8`, the $ on the left of its digits and on their line: `K.money(39.8)` on screen; captions do it by themselves with the 2026-10-18 defaults | `stray-currency` |
 | NUM-4 | Bars that compare numbers share one scale and zero baseline (`K.scale`); small true gaps get a bracket | `bars` |
 | TXT-1 | Size floors in board px: source lines 28 px, labels 34 px | `small-text` |
 | TXT-2 | At most four labelled elements on a board at once; split a busier board into two beats | `crowded-board` |
 | TXT-3 | No label that repeats the caption word for word; a label adds what the caption doesn't say | `caption-repeat` |
 | TXT-4 | No text under objects, captions or other text | `covered`, `text-on-text`, `covered-shape` |
+| TXT-5 | Breathing room: a subheadline sits at least `K.GAP` (40 board px) under its headline; `K.under(head, html)` places it | `tight-gap` |
 
 ## Sound
 
@@ -99,7 +101,7 @@ they were.
 | SND-2 | SFX only CC0 or explicitly licensed, each in `engine/sfx_library.py` with its source; Sonniss/Mixkit files local only, never committed; generated ones (`sfx_gen.py`) always in a new category, so finished videos keep their sounds | `manifest.json` |
 | SND-3 | Room tone under every pause (`K.bed = "room"`), 40% quieter since 2026-10-18 (amplitude x0.6, after any `K.bedUnder`); set `K.bedUnder` per video when it is still too loud | ear, `render.py` `BED_TRIM` |
 | SND-4 | Loudness -16 LUFS (± 1) | `make.py check/ship` |
-| SND-5 | Mix and master: one sound effect at a time (cues under 0.3 s apart keep the louder; the next effect chokes the last; none longer than 1.4 s), the voice high-passed and gently compressed, effects ducked under speech and kept 6 dB under it, two-pass loudness to -16 LUFS with a -1.5 dBTP ceiling. An approved render gets new sound with `make.py remix <name> <from> <to>` (picture copied bit for bit) when it is touched again; no bulk re-run | `render.py` mix 2 |
+| SND-5 | Mix and master: one sound effect at a time (cues under 0.3 s apart keep the louder; the next effect chokes the last; none longer than 1.4 s), the voice high-passed and gently compressed, effects ducked under speech and kept 6 dB under it, two-pass loudness to -16 LUFS with a -1.5 dBTP ceiling. An approved render gets new sound with `make.py remix <name> <from> <to>` (picture copied bit for bit) when it is touched again; no bulk re-run. Scenes write one cue per visual event: none within 0.3 s of another, none on nothing | `render.py` mix 2, `sfx-overlap`, `sfx-orphan` |
 
 ## Shorts cut from a long video
 
@@ -107,26 +109,30 @@ they were.
 | --- | --- | --- |
 | SHORT-1 | Source media, photos, face frames and full transcripts stay local (git-ignored) | `.gitignore` |
 | SHORT-2 | Leave out passages that attack people by religion or repeat unproven allegations; say why | eye |
-| SHORT-3 | Start on a word, drop lines that point back to the long video, end before the next sentence (trim the trailing second) | eye |
-| SHORT-4 | The first 3 s always show his face with a title over it: `K.title(text)`, a white sticker, no purple; text from `shorts/_titles.json` (3 options per reel, Ahmed picks, option 1 until he does); no subtitles while it shows (`K.title` sets `K.captionsFrom`); long-video (YouTube) shorts: middle of the frame just above the subtitle band (default `y` 1150); workshop/live shorts: at the top under the platform bar, `{ y: 330 }` (as live A v3), never over his eyes or mouth; Ahmed edits the text and approves on the review page | eye |
+| SHORT-3 | Start on a word, drop lines that point back to the long video, end before the next sentence. The ending guard keeps 0.4 s after the last word (stopped 0.05 s before the next source word, the fade inside that tail) and the scene runs to the end of the voice | `footage.py`, `end-cut`, ship ending + leak |
+| SHORT-4 | The first 3 s always show his face with a title over it: `K.title(text)`, a white sticker, no purple; text from `shorts/_titles.json` (3 options per reel, Ahmed picks, option 1 until he does); no subtitles while it shows (`K.title` sets `K.captionsFrom`); long-video (YouTube) shorts: middle of the frame just above the subtitle band (default `y` 1150); workshop/live shorts: at the top under the platform bar, `{ y: 330 }` (as live A v3), never over his eyes or mouth; Ahmed edits the text and approves on the review page. With the 2026-10-18 defaults `K.title()` takes the text from `_titles.json` and its height from the face boxes (`assets/faces.json`) | `title`, `on-face`, ship title |
 | SHORT-5 | Keep a styled TV-set opening (`--tv-until`) and the source's burned-in labels | eye |
-| SHORT-6 | Every face <-> motion change is a clean cut in a pause, onto a board built ~0.3 s before; no flash, no white frames | eye, frame strips |
+| SHORT-6 | Every face <-> motion change is a clean cut in a pause, onto a board built ~0.3 s before; no flash, no white frames | `mid-word-cut`, ship cut strips |
 | SHORT-7 | Don't cut back to his face at the end; no takeaway tail | eye |
 | SHORT-8 | Pay off what the hook promises ("three words" -> three titled beats) | eye |
 | SHORT-9 | Every picture belongs to the line; no decorative props | eye |
-| SHORT-10 | Before delivery, check 12-frame strips around every cut in the final MP4 | eye |
+| SHORT-10 | Before delivery, check 12-frame strips around every cut in the final MP4: `make.py ship` writes `out/cuts-<version>.jpg` and fails on charcoal, flash, half-built and one-frame flags and face-track jumps | ship cut strips |
 | SHORT-11 | Workshop/live footage: motion inserts alternate between a 50/50 split screen (tracked face + board) and a full-screen board, clean cuts in the pauses; reuse the shared split/tracking helpers | eye |
-| SHORT-12 | In the 50/50 split the subtitles sit in the middle, centred on the seam; on face-only and board-only moments they return to their usual place (`kanz-split.js` does it) | eye |
-| SHORT-13 | Where the voice is joined (a cut between two passages or a removed pause), leave a short silence, about 0.25 s, so the sound has room to turn; the picture still cuts clean | ear |
-| SHORT-14 | Shorts cut from long videos and lives: subtitles are always Egyptian Arabic, even where he speaks English (translate the meaning; keep his voice as is). Only for cut-out shorts, not voice-note or script Reels | eye |
+| SHORT-12 | In the 50/50 split the subtitles sit in the middle, centred on the seam (on its board side when his face is right under it); on face-only and board-only moments they return to their usual place, never over his eyes or mouth (`kanz-split.js`, `kanz-footage.js`) | `caption-switch`, `on-face` |
+| SHORT-13 | Where the voice is joined (a cut between two passages or a removed pause), leave a short silence, about 0.25 s, so the sound has room to turn; the picture still cuts clean. `footage(_track).py --also S E` joins ranges with it; `tighten_footage.py` (default for workshop shorts) keeps 0.2 s after a word and 0.1 s before the next | `footage.py`, `tighten_footage.py` |
+| SHORT-14 | Shorts cut from long videos and lives: subtitles are always Egyptian Arabic, even where he speaks English (translate the meaning; keep his voice as is). Only for cut-out shorts, not voice-note or script Reels | `captions.py` (Latin words fail) |
+| SHORT-15 | Workshop shorts: his face, full screen or in the split, is on screen at least 50% of the runtime; boards only where the line explains a mechanism, says a number or names something, and those inserts move | `face-share` |
+| SHORT-16 | Every change to or from his full face is a clean cut (face <-> board and face <-> split), in a pause, never inside a word; no dissolve, crossfade or see-through frame anywhere. Split <-> full-screen board moves ease over 0.35 s (2026-10-18 defaults) | `mid-word-cut` |
+| SHORT-17 | No frozen source picture in a face or split window (a stalled stream reads as lag): `assets/freezes.json` from the footage tools; choose other source seconds | `freeze`, ship duplicate frames |
 
 ## Review
 
 | Id | Rule | Check |
 | --- | --- | --- |
-| REV-1 | Lint every scene; fix each finding or justify it in `lint-ok.json` | `lint.py --strict` |
+| REV-1 | Lint every scene; fix each finding or justify it in `lint-ok.json`. An empty stretch (dead or fill) over 1.5 s outside the 0-3 s title window cannot be justified | `lint.py --strict` |
 | REV-2 | Review through one contact sheet (`make.py review`), not image by image | |
 | REV-3 | Before delivery, `make.py ship <slug> <version>` passes (lint, render, MP4 frames, loudness) and the check sheet is looked at | `make.py ship` |
 | REV-4 | Renders go to the render host when one is set (`KANZ_RENDER_HOST`); run them in the background, never poll | `make.py render` |
 | REV-5 | Fix requests come as timestamps: find the exact moment in the audio/frames first and say where it really was | |
 | REV-6 | Check fonts, Arabic joining, overlaps and timing on frames pulled from the MP4 itself | `make.py check` |
+| REV-7 | Every review note goes in `projects/<slug>/notes.json` (`make.py note`): time, his words, open or fixed. A note is reported fixed only with its still from the new version (`out/notes-<version>.jpg`, written by ship) | ship notes |

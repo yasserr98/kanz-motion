@@ -1,0 +1,297 @@
+"""Review hardening (2026-10-18): each recurring review note has a check that fails. No browser, no API."""
+import json
+import shutil
+import subprocess
+
+import numpy as np
+import pytest
+
+import faces
+import footage
+import guards
+import lint
+import make
+import shortinfo
+
+W = lambda w, s, e: {"w": w, "start": s, "end": e}  # noqa: E731
+
+
+# ---------- P0-1 ending guard ----------
+
+def test_ending_guard_adds_tail_and_stops_before_the_next_word():
+    words = [W("a", 1.0, 1.4), W("b", 1.5, 2.0), W("c", 2.2, 2.6), W("next", 3.5, 3.9)]
+    g, = footage.plan_segments(words, [(1.0, 2.0)])
+    assert g["last_word_end"] == 2.0 and g["src_end"] == pytest.approx(2.15)  # clamped 0.05 s before "c"
+    assert g["clamped"] and g["next_word_start"] == 2.2
+    g, = footage.plan_segments(words, [(1.0, 2.6)])
+    assert g["src_end"] == pytest.approx(3.0) and not g["clamped"]           # the full 0.4 s tail
+    g, = footage.plan_segments(words, [(1.0, 2.5)])                           # an end inside "c" leaves "c" out
+    assert g["last_word_end"] == 2.0
+    g, = footage.plan_segments(words, [(1.0, 2.33)], exact=True)
+    assert g["src_end"] == 2.33
+
+
+def test_joined_ranges_open_a_pause_and_shift_words():
+    words = [W("a", 1.0, 1.4), W("b", 5.0, 5.4), W("c", 5.5, 5.9), W("d", 9.0, 9.4)]
+    s = footage.plan_segments(words, [(1.0, 1.4), (5.0, 5.9)])
+    assert s[0]["lead"] == 0 and s[1]["lead"] == footage.JOIN
+    assert s[1]["out_start"] == pytest.approx(0.8 + 0.25)            # range 1 (0.8 s with its tail) + the join pause
+    assert footage.short_duration(s) == pytest.approx(1.05 + 1.3)
+
+
+def test_voice_fade_sits_inside_the_tail(monkeypatch):
+    monkeypatch.setattr(footage, "decode", lambda src, t0, dur: np.ones((int(round(dur * footage.SR)), 2), np.float32))
+    g, = footage.plan_segments([W("a", 0.0, 1.0)], [(0.0, 1.0)])
+    a = footage.voice_audio("x", [g])
+    assert a[int(0.99 * footage.SR), 0] == 1.0          # the word itself is untouched
+    assert a[-1, 0] < 0.01                               # silent at the very end
+    assert len(a) == int(round(1.4 * footage.SR))
+
+
+def test_ship_ending_and_leak_checks():
+    sr = 8000
+    rng = np.random.default_rng(1)
+    room = rng.normal(0, 0.001, sr * 3)
+    cut = room.copy()
+    cut[-int(0.1 * sr):] += rng.normal(0, 0.3, int(0.1 * sr))    # a word still sounding at the end
+    assert guards.ending_problems(cut, sr)
+    ok = room.copy()
+    ok[sr:2 * sr] += rng.normal(0, 0.3, sr)
+    assert not guards.ending_problems(ok, sr)
+    assert guards.leak_problems({"ranges": [{"start": 0, "end": 3.0, "last_word_end": 2.6, "next_word_start": 2.9}]})
+    assert not guards.leak_problems({"ranges": [{"start": 0, "end": 2.85, "last_word_end": 2.6, "next_word_start": 2.9}]})
+
+
+def test_end_cut_finding():
+    assert guards.end_cut_findings(11.5, 11.9, {"ranges": []})
+    assert not guards.end_cut_findings(11.9, 11.9, {"ranges": []})
+    assert not guards.end_cut_findings(10, 11.9, None)
+
+
+# ---------- P0-2 face-aware text ----------
+
+def test_fill_boxes_interpolates_and_drops_outliers():
+    s = [[100, 100, 300, 300], None, [120, 100, 320, 300], [900, 100, 1000, 140], [140, 100, 340, 300]]
+    b = faces.fill_boxes(s, 30, every=6, fps=24)
+    assert b[0] == [100, 100, 300, 300] and b[3] == [105, 100, 305, 300]   # a quarter of the way from frame 0 to 12
+    assert b[18][0] < 200                                                  # the far-off hit at frame 18 was dropped
+    assert faces.fill_boxes([None, None], 12) == [None] * 12
+
+
+def test_on_face_flags_title_and_captions_not_world_text():
+    face = [400, 500, 700, 800]
+    frame = {"items": [dict(id=1, kind="title", txt="t", x0=300, x1=800, y0=520, y1=640),
+                       dict(id=2, kind="caption", txt="c", x0=300, x1=800, y0=1300, y1=1400),
+                       dict(id=3, kind="text", txt="w", x0=400, x1=700, y0=600, y1=700, over_face=False)]}
+    hits = guards.on_face_findings(1.0, frame, face)
+    assert [h["id"] for h in hits] == [1]
+    assert not guards.on_face_findings(1.0, frame, None)
+
+
+def test_title_text_comes_from_the_pick():
+    assert shortinfo.title_text({"options": ["a", "b", "c"], "pick": 2}) == "b"
+    assert shortinfo.title_text({"options": ["a", "b"]}) == "a"
+    assert shortinfo.title_text({"options": ["a"], "pick": 0, "text": "mine"}) == "mine"
+    titles = {"reels": {"x": {"slug": "short-x", "options": ["a"], "pick": 1}}}
+    assert shortinfo.title_entry("short-x", titles)[0] == "x"
+
+
+def test_short_without_title_is_a_finding():
+    kinds = [f["kind"] for f in lint.static_scene_findings('K.footage({}); K.finish();')]
+    assert "title" in kinds
+    assert "title" not in [f["kind"] for f in lint.static_scene_findings('K.footage({}); K.title(); K.finish();')]
+
+
+def test_ship_title_must_match_the_pick(tmp_path, monkeypatch):
+    import shipcheck
+    proj = tmp_path / "short-x"
+    proj.mkdir()
+    monkeypatch.setattr(shortinfo, "TITLES", tmp_path / "_titles.json")
+    (tmp_path / "_titles.json").write_text(json.dumps({"reels": {"x": {"slug": "short-x", "options": ["أ", "ب"], "pick": 2}}}),
+                                           encoding="utf-8")
+    (proj / "scene.js").write_text('K.footage({}); K.title("أ"); K.finish();', encoding="utf-8")
+    assert shipcheck.title_problems(proj)
+    (proj / "scene.js").write_text('K.footage({}); K.title(); K.finish();', encoding="utf-8")
+    assert not shipcheck.title_problems(proj)
+    (proj / "scene.js").write_text('K.footage({}); K.finish();', encoding="utf-8")
+    assert shipcheck.title_problems(proj)
+
+
+# ---------- P0-3 freezes ----------
+
+def test_freeze_runs_and_window_overlap():
+    diffs = [255] + [5] * 10 + [0.0] * 14 + [5] * 10
+    runs = faces.freeze_runs(diffs, 24)
+    assert runs == [[round(10 / 24, 3), round(25 / 24, 3)]]
+    assert guards.freeze_findings([[0, 3]], [], runs)
+    assert not guards.freeze_findings([[2, 3]], [], runs)
+    assert guards.freeze_findings([], [[0.9, 2]], runs)            # 0.14 s of it inside a split window shows
+    assert faces.freeze_runs([255] + [0.0] * 6, 24) == []          # 0.29 s is not reported
+
+
+def test_duplicate_run_and_fps():
+    assert guards.decimate_runs([False, True, True, False, True], 24) == (3, pytest.approx(3 / 24))
+    assert guards.decimate_runs([False] * 5, 24) == (0, 0.0)
+    probs, warn = guards.fps_problems(30, 24, 24)
+    assert not probs and "judder" in warn
+    probs, warn = guards.fps_problems(24, 30, 24)
+    assert probs and warn is None
+
+
+# ---------- P1-4 cut strips ----------
+
+def test_strip_flags_charcoal_flash_half_built_and_one_frame():
+    rng = np.random.default_rng(2)
+    face = lambda: rng.integers(80, 200, (24, 14)).astype(np.float32)  # noqa: E731
+    board = np.full((24, 14), 22.0)
+    board[6:18, 3:11] = 190                                              # a built board
+    empty = np.full((24, 14), 22.0) + rng.normal(0, 1, (24, 14))
+    ok = [face() for _ in range(6)] + [board.copy() for _ in range(6)]
+    assert guards.strip_flags(ok, 6) == []
+    bad = [face() for _ in range(6)] + [empty] + [board.copy() for _ in range(5)]
+    kinds = {f for f, _ in guards.strip_flags(bad, 6)}
+    assert {"charcoal", "half-built"} <= kinds
+    flash = [board.copy() for _ in range(12)]
+    flash[8] = np.full((24, 14), 250.0)
+    assert ("flash", 8) in guards.strip_flags(flash, 6)
+    other = np.full((24, 14), 22.0)
+    other[2:8, 2:6] = 240
+    blip = [board.copy() for _ in range(12)]
+    blip[9] = other
+    assert ("one-frame", 9) in guards.strip_flags(blip, 6)
+
+
+def test_track_jumps_skip_seams():
+    cx = [100.0] * 20 + [140.0] * 20
+    assert guards.track_jumps(cx, [[0, 1.6]], 24)
+    assert not guards.track_jumps(cx, [[0, 1.6]], 24, seams=[20])
+    assert guards.window_edges([[0, 3], [5, 6]], [[3, 4.5]], 6) == [3, 4.5, 5]
+
+
+# ---------- P1-5 joins + tighten ----------
+
+def test_tighten_keeps_more_after_a_word(tmp_path):
+    import tighten_footage
+    from PIL import Image
+    proj = tmp_path
+    for d in ("face", "half"):
+        (proj / "assets" / d).mkdir(parents=True)
+        for i in range(48):
+            Image.new("RGB", (8, 8), (i, i, i)).save(proj / "assets" / d / f"{i + 1:06d}.jpg")
+    (proj / "audio").mkdir()
+    footage.write_wav(np.zeros((2 * footage.SR, 2), np.float32), proj / "audio" / "voice.wav")
+    (proj / "assets" / "track.json").write_text(json.dumps({"cx": list(range(48)), "cy": [0] * 48, "diff": [1.0] * 48, "joins": []}))
+    tr = {"segments": [{"start": 0.0, "end": 1.9, "words": [W("a", 0.0, 0.5), W("b", 1.5, 1.9)]}], "duration": 2.0,
+          "cut_from": {"ranges": [{"start": 0, "end": 2, "last_word_end": 1.9, "next_word_start": None, "out_start": 0.0, "lead": 0}]}}
+    (proj / "transcript.json").write_text(json.dumps(tr))
+    t = tighten_footage.tighten(proj, analyse=False)
+    w = t["segments"][0]["words"]
+    assert w[1]["start"] - w[0]["end"] == pytest.approx(0.3, abs=0.05)       # the pause kept is 0.3 s >= 0.25 (SHORT-13)
+    assert t["tightened"]["cuts_at_s"][0] == pytest.approx(0.5 + 0.2, abs=0.05)  # 0.2 s kept after "a", 0.1 before "b"
+    j = json.loads((proj / "assets" / "track.json").read_text())
+    assert len(j["diff"]) == len(j["cx"]) == len(list((proj / "assets" / "face").glob("*.jpg")))
+
+
+# ---------- P1-6 language ----------
+
+def test_latin_caption_words_are_found_and_fail_captions(tmp_path):
+    assert shortinfo.latin_words([{"w": "Polymarket", "start": 1}, {"w": "سوق", "start": 2}, {"w": "go", "hid": True}]) == [(1, "Polymarket")]
+    import captions
+    proj = tmp_path
+    (proj / "audio").mkdir()
+    footage.write_wav(np.zeros((footage.SR, 2), np.float32), proj / "audio" / "voice.wav")
+    from provenance import stamp
+    tr = {**stamp(proj / "audio" / "voice.wav"), "duration": 1.0, "cut_from": {"ranges": []},
+          "segments": [{"words": [W("السوق", 0.1, 0.4), W("Polymarket", 0.5, 0.9)]}]}
+    (proj / "transcript.json").write_text(json.dumps(tr), encoding="utf-8")
+    (proj / "script.md").write_text("<!-- captions:start -->\nالسوق Polymarket\n<!-- captions:end -->\n", encoding="utf-8")
+    with pytest.raises(SystemExit, match="SHORT-14"):
+        captions.main(proj)
+    assert "window.CUT" in (proj / "build" / "timing.js").read_text(encoding="utf-8")
+    (proj / "script.md").write_text("<!-- captions:start -->\nالسوق بوليماركت {{السوق Polymarket}}\n<!-- captions:end -->\n", encoding="utf-8")
+    captions.main(proj)
+
+
+def test_extras_only_for_cut_out_shorts(tmp_path):
+    (tmp_path / "transcript.json").write_text(json.dumps({"segments": []}))
+    assert shortinfo.extras_js(tmp_path) == ""
+
+
+# ---------- P1-7 dead frames and spacing ----------
+
+def test_long_empty_stretch_cannot_be_excused():
+    ok = [{"kind": "dead", "range": [0, 20], "why": "face"}]
+    assert not lint.justified({"kind": "dead", "from": 4.0, "to": 7.0}, ok)
+    assert lint.justified({"kind": "dead", "from": 0.5, "to": 4.2}, ok)      # 1.2 s outside the title window
+    assert lint.justified({"kind": "fill", "from": 1.0, "to": 3.0}, [{"kind": "fill", "range": [0, 3], "why": "title"}])
+
+
+def test_tight_gap_in_board_px():
+    head = dict(id=1, kind="text", txt="h", head=True, board="1", x0=200, x1=800, y0=200, y1=300, sc=1)
+    sub = dict(id=2, kind="text", txt="s", board="1", x0=300, x1=700, y0=310, y1=350)
+    assert guards.tight_gap_findings(0, {"items": [head, sub]}, 40)
+    assert not guards.tight_gap_findings(0, {"items": [head, {**sub, "y0": 345, "y1": 385}]}, 40)
+    small = {**head, "sc": 0.8}
+    assert not guards.tight_gap_findings(0, {"items": [small, {**sub, "y0": 333, "y1": 373}]}, 40)  # 33 px = 41 board px
+
+
+# ---------- P1-8 notes ledger ----------
+
+def test_notes_ledger(tmp_path, capsys):
+    make.note(tmp_path, ["39.8", "الدولار مكانه غلط", "v3"])
+    make.note(tmp_path, ["fixed", "1"])
+    n = json.loads((tmp_path / "notes.json").read_text(encoding="utf-8"))
+    assert n == [{"t": 39.8, "note": "الدولار مكانه غلط", "status": "fixed", "version": "v3"}]
+    with pytest.raises(SystemExit):
+        make.note(tmp_path, [])
+
+
+# ---------- P1-9 sfx at scene level ----------
+
+def test_sfx_overlap_and_orphan():
+    cues = [{"t": 1.0, "cat": "pop"}, {"t": 1.1, "cat": "click"}, {"t": 5.0, "cat": "hit"}]
+    out = guards.sfx_findings(cues, [1.0, 1.05])
+    assert [h["kind"] for h in out] == ["sfx-overlap", "sfx-orphan"]
+    assert not guards.sfx_findings([{"t": 1.0, "cat": "pop"}], [1.2])
+
+
+# ---------- decisions (a) and (b), P2 money ----------
+
+def test_face_share_for_workshop_shorts():
+    assert guards.face_share_findings([[0, 3]], [[5, 6]], 20, live=True)
+    assert not guards.face_share_findings([[0, 3]], [[5, 12]], 20, live=True)
+    assert not guards.face_share_findings([[0, 3]], [], 20, live=False)
+
+
+def test_cut_inside_a_word():
+    words = [W("a", 1.0, 1.5), W("b", 1.7, 2.1)]
+    assert guards.mid_word_findings([1.2], words)
+    assert not guards.mid_word_findings([1.6, 1.02], words)
+
+
+def test_caption_switch():
+    assert not guards.caption_switch_findings([(1, True, 960.0), (2, False, None), (3, True, 954.0)])
+    assert guards.caption_switch_findings([(1, True, None), (2, False, 960.0)])
+
+
+def test_stray_currency():
+    item = lambda txt, **kw: dict(id=1, kind="text", txt=txt, x0=0, x1=10, y0=0, y1=10, **kw)  # noqa: E731
+    assert guards.currency_findings(0, {"items": [item("الرهان 39.8$")]})
+    assert guards.currency_findings(0, {"items": [item("$ 39.8")]})
+    assert not guards.currency_findings(0, {"items": [item("الرهان $39.8")]})
+    assert guards.currency_findings(0, {"items": [item("الرهان $39.8", currency={"ok": False, "where": "on the right"})]})
+
+
+@pytest.mark.skipif(not shutil.which("ffmpeg"), reason="ffmpeg")
+def test_freeze_detected_on_repeated_jpegs(tmp_path):
+    from PIL import Image
+    d = tmp_path / "assets" / "face"
+    d.mkdir(parents=True)
+    rng = np.random.default_rng(3)
+    frames = [rng.integers(0, 255, (64, 36, 3), dtype=np.uint8) for _ in range(10)]
+    seq = frames[:4] + [frames[4]] * 16 + frames[5:]
+    for i, f in enumerate(seq):
+        Image.fromarray(f).save(d / f"{i + 1:06d}.jpg", quality=90)
+    runs = faces.freeze_runs(faces.frame_diffs(d), 24)
+    assert len(runs) == 1 and runs[0][1] - runs[0][0] == pytest.approx(16 / 24, abs=0.05)
+    subprocess.run  # noqa: B018 (ffmpeg is only needed for the skip condition's sibling tests)

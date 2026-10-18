@@ -120,6 +120,25 @@ For shorts cut from Ahmed's 16:9 X Live workshops (Ahmed 2026-10-17: the camera 
    Source overlays (the Kanz logo, the "WARSHA1015" promo box, the name tag) can fall inside the crop when he leans right;
    they are the source's own, check them in the stills. Demo: `projects/_split-demo`.
 
+## Review guards (2026-10-18)
+
+The notes Ahmed kept repeating on the shorts are engine defaults and failing checks now (docs/RULES.md lists each rule
+with its check; `projects/_guards-demo` shows every one, clean and broken):
+
+- **Footage tools** (`footage.py`, `footage_track.py`): the ending guard (last word + 0.4 s, stopped before the next
+  source word), `--also S E` voice joins with a 0.25 s pause, dead air tightened by default for workshops, then
+  `engine/faces.py`: `assets/faces.json` (eyes-and-mouth box per frame) and `assets/freezes.json`.
+- **Runtime** with `K.pace({ defaults: "2026-10-18" })`: `K.title()` takes its text from `shorts/_titles.json` and its
+  height off his face; subtitles move off his face; `K.split` eases to and from a full board (cuts to and from his
+  face stay clean); `K.money(39.8)` keeps `$39.8` together in Arabic text; `K.under(head, html)` leaves `K.GAP` px of
+  breathing room. Each can be switched on alone in an older scene (`ease: true`, `faces: true`, `gap: true`).
+- **Lint** (`engine/guards.py`): on-face, freeze, title, end-cut, face-share, mid-word-cut, caption-switch, sfx-overlap,
+  sfx-orphan, stray-currency, tight-gap; `lint-ok.json` cannot excuse an empty stretch over 1.5 s after the title.
+- **Ship** (`engine/shipcheck.py`): the ending, the next-sentence leak, the title pick, duplicate frames in face windows,
+  frame rate, face-track jumps, `out/cuts-<version>.jpg` (12 frames around every cut, flagged frames outlined) and
+  `out/notes-<version>.jpg` (a still for every note in `notes.json`; `make.py note`). `make.py remix` runs the sound
+  checks only.
+
 ## Layout
 
 | Path | What |

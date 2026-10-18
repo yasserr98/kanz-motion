@@ -35,15 +35,17 @@ Work in this folder, even if the chat opened in the Kanz repo or a Kanz worktree
 4. **Image pass.** `shots.json` from the whole script, a visual type per shot, Codex generates, before the scene is
    written ([images](docs/routes/images.md); IMG, OBJ rules).
 5. **Scene.** Copy the worked example's `scene.js` and adapt it; new projects start from `projects/_template`.
-   `K.look()`, `K.pace({ defaults: "2026-10-17" })`, `K.finish()` last (PACE-1, PACE-2). Simple hook (HOOK-1..3), boards
+   `K.look()`, `K.pace({ defaults: "2026-10-18" })`, `K.finish()` last (PACE-1, PACE-2). Simple hook (HOOK-1..3), boards
    arrive built, one carried hero, no snap zooms (PACE-3..5), paper world at chapter turns, ending cut back to the hook
    (PACE-6). Western digits with ٪ (NUM-3), sizes 28/34 px (TXT-1), at most four labels a board (TXT-2), labels never
    repeat the caption (TXT-3), only numbers the voice says (NUM-1). Objects: approved in the manifest only (OBJ-2).
 6. **Review.** `python engine/lint.py projects/<slug>`; fix or justify every finding in `lint-ok.json` (REV-1). Then
    `make.py review <slug> <times>` -> look at `out/review.jpg`, fix, repeat (REV-2).
 7. **Ship.** `make.py ship <slug> v1`: lint --strict, render (on the render host when `KANZ_RENDER_HOST` is set;
-   `--local` to render here), 12 frames from the MP4, loudness. It stops at the first failure (REV-3, REV-4). Look at
-   `out/check-v1.jpg`, then open the MP4 for Ahmed (`ii <path>`). Run it in the background; do not poll.
+   `--local` to render here), 12 frames from the MP4, loudness, the ending, and for shorts the cut strips, title,
+   freezes and frame rate. It stops at the first failure (REV-3, REV-4). Look at `out/check-v1.jpg`, `out/cuts-v1.jpg`
+   and `out/notes-v1.jpg`, then open the MP4 for Ahmed (`ii <path>`). Run it in the background; do not poll. Review
+   notes go in `notes.json` (`make.py note`); report one fixed only with its still (REV-7).
 8. **Cover** (style A): `projects/<slug>/cover.json` -> `python engine/cover.py projects/<slug>`; check the crop lines in
    `out/cover-review.jpg`.
 9. **Record (Ahmed's copy only).** Add a row to the usage log and update the backlog in the Kanz repo
