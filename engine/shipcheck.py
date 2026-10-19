@@ -2,6 +2,7 @@
 
 Every project:
   ending     the voice has stopped before the final 0.15 s of the MP4 (the last word is not cut off)
+  tail       the MP4 ends within 0.6 s of the last word in build/timing.js: no silent tail (PACE-6, 2026-10-18)
   notes      projects/<slug>/notes.json (Ahmed's review notes): a still at every noted time -> out/notes-<version>.jpg,
              each listed as fixed or OPEN; a note is reported fixed only with its still from this version
 Cut-out shorts (transcript.json cut_from) also:
@@ -55,6 +56,19 @@ def ending(proj, mp4):
         if not guards.ending_problems(v, SR):
             return [], ["the last 0.15 s are loud but the voice is silent there: an effect is still ringing at the end"]
     return probs, []
+
+
+def last_word_end(proj):
+    """End of the last spoken word in build/timing.js (output time), or None."""
+    f = proj / "build" / "timing.js"
+    m = re.search(r"window\.TOKENS=(\[.*?\]);", f.read_text(encoding="utf-8"), re.S) if f.exists() else None
+    ends = [t["end"] for t in (json.loads(m.group(1)) if m else []) if not t.get("tr") and t.get("end") is not None]
+    return max(ends, default=None)
+
+
+def tail(proj, mp4):
+    """PACE-6: no silent tail after the last word on the rendered MP4."""
+    return ["tail: " + f["why"] for f in guards.tail_findings(duration(mp4), last_word_end(proj))]
 
 
 def frames_rgb(mp4, t, n, size=THUMB):
@@ -193,7 +207,7 @@ def run(proj, mp4, version, allow=(), picture=True):
     fps = short.get("fps") or 24
     problems, warns, info = [], [], []
     p, w = ending(proj, mp4)
-    problems += p
+    problems += p + tail(proj, mp4)
     warns += w
     if not picture:  # a remix cannot move the ending (the picture is copied): report it, do not fail
         return [], warns + [p + " (a remix keeps the cut; fix it in a new version)" for p in problems], info

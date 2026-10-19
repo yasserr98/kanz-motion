@@ -39,14 +39,14 @@ they were.
 | Id | Rule | Check |
 | --- | --- | --- |
 | HOOK-1 | The hook is the question headline plus ONE hero object, nothing else until the question ends | eye (lint `dead` is expected here) |
-| HOOK-2 | Hook layout: three-line question headline, keyword last in lavender, one ~600 px hero with glow + float | eye |
+| HOOK-2 | Hook layout: three-line question headline, keyword last in lavender, one ~600 px hero with glow + float. When the hook is about something that moves (a price, a percentage, a loss), the hero is a live diagram already moving on frame 1 (EXPL-1), never a still chart icon | eye |
 | HOOK-3 | The hero is complete on frame 1 and settles from oversized (`K.settle`); `K.captionsFrom` = end of the question | `hook` |
 | PACE-1 | New scenes: `K.look()`, then `K.pace({ defaults: "2026-10-18" })`, and `K.finish()` as the last line | `structure`, `make.py check` |
 | PACE-2 | The 2026-10-17 defaults stay on: caption band kept clear, boards arrive built, punch hides the caption, capped fly-ins, marks sized to their element | `caption-band`, `half-built-arrival`, `markup-crossing-text` |
 | PACE-3 | Boards arrive built (`K.go` + `at: g.lead`), open close and pull out (`K.frame`); never land on an empty board | `half-built-arrival`, `dead` |
 | PACE-4 | Carry one hero between boards (`K.carry`, `K.dim`); never clear a board before building the next | eye |
 | PACE-5 | No snap zooms (`K.snap`) or face jump zooms by default; the camera drifts and pulls out | `K.snap` warns |
-| PACE-6 | Paper world (`K.world`) at chapter turns; ending = cut back to the hook on the last word, ~1.3 s tail | eye |
+| PACE-6 | Paper world (`K.world`) at chapter turns. Ending: never cut back to the hook or replay an earlier picture. The last line gets its own moving visual that keeps building into the last word, and the video ends about 0.4 s after that word (`K.duration = tLast + 0.4`): no silent tail, no static end card | lint `long-tail`, `hook-replay`; ship `tail`; eye |
 | PACE-7 | Variety where the script gives a reason: one `K.punch` on the thesis, `K.stack`/`K.pile` for amounts, `K.swap` for state changes, map/globe + `K.pin` for places | eye |
 | PACE-8 | 3D: `K.flip` for myth -> fact, `K.browser` for genuine website screenshots, `K.fold` for a reveal | eye |
 
@@ -57,7 +57,9 @@ they were.
 | IMG-1 | Every video gets an image pass before the scene is written: `shots.json` from the whole script, then Codex | `codex_assets.py` |
 | IMG-2 | Generate with Codex without asking first (`codex_assets.py --jobs 4`); compare icons with the references, regenerate mismatches | eye |
 | IMG-3 | Icons follow the approved Kanz icon style whatever the topic; no topic-specific aesthetic | eye |
-| IMG-4 | Place or setting -> full-screen photo; real person or moment -> disposable print (`K.snap35`); concept, mechanism or number -> Kanz icon on charcoal | eye |
+| IMG-4 | Place or setting -> full-screen photo; real person or moment -> disposable print (`K.snap35`); concept, mechanism or number -> animated diagram or drawn illustration (EXPL-1), with Kanz icons only as supporting props | eye |
+| EXPL-1 | A line about something that moves or works (a price rising and falling, a loss, risk, a percentage, a flow of money, cause and effect, a comparison) is explained by an animated diagram built in the engine: `K.area` drawing the real path with its dips, `K.bar`/`K.delta`, `K.count`, `K.stack`, arrows and flows. A drawn illustration also works. Never a still icon or a picture of a chart | eye |
+| EXPL-2 | Icons support, they don't explain: an icon can be the hero only for a plain thing (a house, a bank, a wallet). No board holds one unchanging picture while the voice explains for more than about 2 s; something on it moves with the words | eye, lint `still-image` (a warning), `dead` |
 | IMG-11 | Disposable prints (`K.snap35`) use the slim frame, `slim: true`: a thin border all round and only a modest strip underneath, not the wide Polaroid margins; the photo stays untouched | eye |
 | IMG-5 | Voice-note and script Reels use the same three types; a place photo gets a board of its own with only text and tags | eye |
 | IMG-6 | No date stamp or credit line on screen; credits for the post caption go in `projects/<slug>/CREDITS.md` | eye |
@@ -118,7 +120,7 @@ they were.
 | SHORT-9 | Every picture belongs to the line; no decorative props | eye |
 | SHORT-10 | Before delivery, check 12-frame strips around every cut in the final MP4: `make.py ship` writes `out/cuts-<version>.jpg` and fails on charcoal, flash, half-built and one-frame flags and face-track jumps | ship cut strips |
 | SHORT-11 | Workshop/live footage: motion inserts alternate between a 50/50 split screen (tracked face + board) and a full-screen board, clean cuts in the pauses; reuse the shared split/tracking helpers | eye |
-| SHORT-12 | In the 50/50 split the subtitles sit in the middle, centred on the seam (on its board side when his face is right under it); on face-only and board-only moments they return to their usual place, never over his eyes or mouth (`kanz-split.js`, `kanz-footage.js`) | `caption-switch`, `on-face` |
+| SHORT-12 | In the 50/50 split the subtitles sit in the middle, centred on the seam (on its board side when his face is right under it); on face-only and board-only moments they return to their usual place, never over his eyes or mouth; when his face reaches the band they move down (below his chin, at most to y 1500), never up over his head (`kanz-footage.js` capTopFor) (`kanz-split.js`, `kanz-footage.js`) | `caption-switch`, `on-face` |
 | SHORT-13 | Where the voice is joined (a cut between two passages or a removed pause), leave a short silence, about 0.25 s, so the sound has room to turn; the picture still cuts clean. `footage(_track).py --also S E` joins ranges with it; `tighten_footage.py` (default for workshop shorts) keeps 0.2 s after a word and 0.1 s before the next | `footage.py`, `tighten_footage.py` |
 | SHORT-14 | Shorts cut from long videos and lives: subtitles are always Egyptian Arabic, even where he speaks English (translate the meaning; keep his voice as is). Only for cut-out shorts, not voice-note or script Reels | `captions.py` (Latin words fail) |
 | SHORT-15 | Workshop shorts: his face, full screen or in the split, is on screen at least 50% of the runtime; boards only where the line explains a mechanism, says a number or names something, and those inserts move | `face-share` |

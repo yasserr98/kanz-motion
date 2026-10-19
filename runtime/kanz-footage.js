@@ -99,17 +99,16 @@
     img.style.transformOrigin = `540px ${o.faceY || 700}px`;
     K._faceOrigin = o.faceY || 700;
     // subtitles off his face (K.D.faces): one height per face window, so they never jump inside a window
-    const cap = document.getElementById("captions"), CAPH = 170, capTops = new Map();
+    const cap = document.getElementById("captions"), CAPH = 170, CAP_LOWEST = 1500, capTops = new Map();
     let cap0 = null, capMoved = false;
     const capTopFor = (w) => {
       if (capTops.has(w)) return capTops.get(w);
       if (cap0 == null) cap0 = parseFloat(getComputedStyle(cap).top) || 1268;
       const u = K.faceUnion(w[0], w[1] - 1e-3), m = K.FACE_MARGIN;
       let y = null;
-      if (u && !(cap0 + CAPH <= u[1] - m || cap0 >= u[3] + m)) {
-        if (u[3] + m + CAPH <= 1440) y = u[3] + m;
-        else if (u[1] - m - CAPH >= 270) y = u[1] - m - CAPH;
-      }
+      // Only ever down, toward the bottom safe line (CAP_LOWEST), never up over his head (Ahmed 2026-10-18 on live H:
+      // "the captions up is soo bad", then on the low version "this was super we can stick to it").
+      if (u && !(cap0 + CAPH <= u[1] - m || cap0 >= u[3] + m)) y = Math.min(Math.max(u[3] + m, cap0), CAP_LOWEST);
       capTops.set(w, y);
       return y;
     };

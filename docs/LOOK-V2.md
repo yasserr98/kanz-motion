@@ -1,8 +1,9 @@
 # Look v2: fuller, lit, evidence-led Reels
 
 > **Pace (2026-10-13, default for new videos, [PACE.md](PACE.md))** changes four things below: the hook hero settles from
-> oversized instead of `K.push` (section 7); the paper world is used at chapter turns, not only 1-2 per video; the ending
-> cuts back to the hook on the last word with a ~1.3 s tail instead of a ~2 s hold; boards sit 1,100 px apart in a snake.
+> oversized instead of `K.push` (section 7); the paper world is used at chapter turns, not only 1-2 per video; boards sit
+> 1,100 px apart in a snake. **2026-10-18 (PACE-6):** the ending no longer cuts back to the hook: the last line gets its own
+> moving visual and the video stops ~0.4 s after the last word (the takeaway ending below is superseded).
 > **2026-10-17:** Western digits with ٪ everywhere (`K.DIGITS = "en"` under the template's defaults; section 6), source
 > lines 28 px and labels 34 px minimum, contrast kept on the paper world. The rules in force are in [RULES.md](RULES.md).
 > `projects/_sample-real-estate-v3/` below is local to Ahmed's copy (not in the public repo).
@@ -193,7 +194,7 @@ these applied; not for posting).
   purple, and chart lines turn ink (CSS in `runtime/kanz-look.css`). Captions keep their dark pill. Use it for 1-2
   chapter turns a video, e.g. a definition or the key idea. Pass `color: K.INK` only if an element keeps a
   light colour. Worked example: `projects/_paper-demo/` (not for posting).
-- **Takeaway ending.** After the last word, `K.cam(t, <hook board>, { via: 0.42 })` returns to the opening
+- **Takeaway ending** (superseded 2026-10-17 by the pace ending and 2026-10-18 by PACE-6; kept for old projects). After the last word, `K.cam(t, <hook board>, { via: 0.42 })` returns to the opening
   composition and `K.takeaway(board, html, { x, y, size, at })` shows the video's question or thesis in big type,
   in words the voice actually said. Extend `K.duration` by about 2 s for the hold.
 - **Smooth camera** (approved 2026-10-11 from a side-by-side trial): `K.camSmooth = true` after `K.look()`

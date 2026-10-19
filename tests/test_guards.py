@@ -287,6 +287,78 @@ def test_stray_currency():
     assert guards.currency_findings(0, {"items": [item("الرهان $39.8", currency={"ok": False, "where": "on the right"})]})
 
 
+# ---------- PACE-6 ending, EXPL-2 still icons (re-do review 2026-10-18) ----------
+
+def box(id, kind="obj", txt="kanz-bank-v01.png", x=300, y=400, w=400, board="1", **kw):
+    return dict(id=id, kind=kind, txt=txt, x0=x, x1=x + w, y0=y, y1=y + w, board=board, **kw)
+
+
+def test_tail_after_the_last_word():
+    hit, = guards.tail_findings(66.66, 65.36)                   # the old worked example: tLast + 1.3
+    assert hit["kind"] == "long-tail" and hit["rule"] == "PACE-6" and "PACE-6" in hit["why"]
+    assert not guards.tail_findings(65.76, 65.36)               # tLast + 0.4
+    assert not guards.tail_findings(65.96, 65.36)               # 0.6 s is the limit
+    assert not guards.tail_findings(10.0, None)                 # no words: nothing to measure
+
+
+def test_ship_tail_reads_timing_js(tmp_path, monkeypatch):
+    import shipcheck
+    (tmp_path / "build").mkdir()
+    toks = [{"w": "a", "start": 1.0, "end": 1.5}, {"w": "b", "start": 1.6, "end": 2.0}, {"w": "x", "tr": True, "start": 5, "end": 9}]
+    (tmp_path / "build" / "timing.js").write_text("window.TOKENS=" + json.dumps(toks) + ";\nwindow.DURATION=2.2;\n", encoding="utf-8")
+    assert shipcheck.last_word_end(tmp_path) == 2.0              # hidden (tr) tokens do not count
+    monkeypatch.setattr(shipcheck, "duration", lambda mp4: 3.3)
+    assert "PACE-6" in shipcheck.tail(tmp_path, "x.mp4")[0]
+    monkeypatch.setattr(shipcheck, "duration", lambda mp4: 2.4)
+    assert not shipcheck.tail(tmp_path, "x.mp4")
+    assert shipcheck.last_word_end(tmp_path / "none") is None
+
+
+def test_hook_replay_board_and_hero():
+    head = box(9, kind="text", txt="ليه", board=None)
+    hook = {"items": [head, box(1, txt="kanz-usd-banknote-v01.png", w=600, board="1")]}
+    back = {"items": [box(2, txt="kanz-usd-banknote-v01.png", w=520, board="1"), box(3, kind="text", txt="جزء", board="1")]}
+    hit, = guards.replay_findings(hook, back, 66.6)
+    assert hit["kind"] == "hook-replay" and hit["rule"] == "PACE-6"
+    assert "hook board" in hit["why"] and "hook hero" in hit["why"]
+    other = {"items": [box(4, txt="kanz-usd-banknote-v01.png", w=500, board="7")]}   # the hero again, on a new board
+    assert "hook hero" in guards.replay_findings(hook, other, 66.6)[0]["why"]
+    carried = {"items": [box(5, txt="kanz-usd-banknote-v01.png", w=200, board="7"), box(6, txt="kanz-receipt-v01.png", board="7")]}
+    assert not guards.replay_findings(hook, carried, 66.6)                           # a small carried hero is no replay
+    faint = {"items": [box(2, txt="kanz-usd-banknote-v01.png", w=600, board="7", opacity=0.3)]}
+    assert not guards.replay_findings(hook, faint, 66.6)
+    assert not guards.replay_findings(hook, None, 66.6)
+    assert guards.main_board({"items": [head]}) is None
+
+
+def test_still_icon_under_the_voice_is_a_warning():
+    words = [W(str(i), i * 0.5, i * 0.5 + 0.4) for i in range(20)]               # 0.4 s of speech every 0.5 s
+    icon = lambda t, **kw: (t, {"items": [box(1, **kw), box(9, kind="caption", txt="c")]})  # noqa: E731
+    frames = [icon(i * 0.25) for i in range(25)]                                 # 0-6 s: one icon, nothing else
+    hit, = guards.still_image_findings(frames, words)
+    assert hit["kind"] == "still-image" and hit["level"] == "warn" and hit["rule"] == "EXPL-2"
+    assert hit["from"] == 0 and hit["to"] == 6.0
+    assert not guards.still_image_findings(frames, words, skip=[(0, 6.5)])        # the hook / a face window
+    assert not guards.still_image_findings(frames[:8], words)                     # 1.75 s: 1.4 s of speech
+    assert not guards.still_image_findings(frames, [])                            # silence over an icon is not EXPL-2
+    grows = [icon(i * 0.25, w=round(200 * 1.08 ** i)) for i in range(25)]        # the icon keeps scaling with the words
+    assert not guards.still_image_findings(grows, words)
+    drift = [icon(i * 0.25, x=300 + 3 * i) for i in range(25)]                    # camera drift alone keeps it still
+    assert guards.still_image_findings(drift, words)
+    new = frames[:8] + [(t, {"items": f["items"] + [box(2, kind="text", txt="label")]}) for t, f in frames[8:16]] + frames[16:]
+    assert not guards.still_image_findings(new, words)                            # something appears every 2 s
+    chart = [(t, {"items": f["items"] + [box(3, txt="path")]}) for t, f in frames]  # a diagram beside it
+    assert not guards.still_image_findings(chart, words)
+    photo = [icon(i * 0.25, txt="street.jpg") for i in range(25)]                 # a place photo (IMG-4) is not an icon
+    assert not guards.still_image_findings(photo, words)
+
+
+def test_warnings_do_not_fail_strict():
+    findings = [{"kind": "still-image", "level": "warn", "justified": False}, {"kind": "long-tail", "justified": False},
+                {"kind": "hook-replay", "justified": True}]
+    assert lint.unjustified(findings) == 1
+
+
 @pytest.mark.skipif(not shutil.which("ffmpeg"), reason="ffmpeg")
 def test_freeze_detected_on_repeated_jpegs(tmp_path):
     from PIL import Image

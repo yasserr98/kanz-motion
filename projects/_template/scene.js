@@ -1,7 +1,8 @@
 /* Scene template. Boards are areas of one continuous world; the camera moves between them.
  * Anchor every entrance to a word in the voice: N("word") in script order, or T("word", afterSeconds).
  * Defaults for new videos (Ahmed, 2026-10-11; docs/LOOK-V2.md section 9): complete first frame, fill the frame,
- * charts with weight, bars to scale, paper world for chapter turns, takeaway ending.
+ * charts with weight, bars to scale, paper world for chapter turns. Ending (2026-10-18, PACE-6): a moving last beat that
+ * stops 0.4 s after the last word, never a replay of the hook.
  * Pace (Ahmed 2026-10-13, docs/PACE.md): boards arrive built (K.go + at: g.lead), camera drift, one hero carried
  * between boards, 24 fps motion, room-tone bed; script-route voices are retimed (make.py retime) before the scene.
  * Variety (Ahmed 2026-10-13, docs/PACE.md): one K.punch({riser: true}) on the key sentence, K.stack/K.pile for amounts,
@@ -51,14 +52,15 @@ K.img(b2, OBJ + "kanz-house-v01.png", { x: 760, y: 330, w: 420, at: g2.lead, ent
 // REAL PERSON or MOMENT -> disposable print of a licensed photo (never generated); credit goes to CREDITS.md, not the frame.
 // Keep it in the board's upper two thirds so it clears the captions; tags on it sit on top:
 // K.snap35(b2, "assets/photos/person.jpg", { x: 500, y: 560, w: 520, h: 640, rot: -4, at: g2.lead, flash: false });
-// CONCEPT, MECHANISM or NUMBER -> Kanz icon on charcoal (Codex `kanz` or library/objects), as above.
+// CONCEPT, MECHANISM or NUMBER -> an animated diagram built in the engine (K.area, K.bar/K.delta, K.count, K.stack,
+// arrows) or a drawn illustration; Kanz icons only support it (EXPL-1, EXPL-2: no still icon explaining for over 2 s).
 
-// ---------- ending: cut back to the hook on the last word, the thesis big, ~1.3 s after the voice ----------
+// ---------- ending (PACE-6, 2026-10-18): the last line gets its own moving visual, building into the last word ----------
+// Never cut back to the hook or replay its hero (lint `hook-replay`); the video stops 0.4 s after the last word
+// (lint `long-tail`, ship `tail`). Worked example: the bill column draining into pounds in examples/us-dollar-decisions-pace.
 const tLast = (window.TOKENS || []).slice(-1)[0]?.end || 4;
-K.cam(tLast - 0.15, "hook", { dur: 0.04, sfx: false });
-K.glow(hook, 500, 500, 760, { at: tLast - 0.15 });
-K.settle(hero, tLast - 0.15, { fromScale: 1.4, fromY: 60, dur: 0.9 }); // the hook hero lands again on the cut
-// if the hero was carried away (K.carry), bring a copy instead: K.img(hook, src, { ..., at: tLast - 0.19, enter: "fly" })
-K.takeaway(hook, "الفكرة <span class='kw'>الأساسية</span>", { x: 500, y: 90, size: 96, at: tLast - 0.05, glow: false }); // words the voice said
-K.duration = tLast + 1.3;
+// const gEnd = K.go(N("أول-كلمة-في-الجملة-الأخيرة"), "end");
+// K.frame(gEnd.arrive, "end", { scale: 1.1, dur: tLast + 0.4 - gEnd.arrive }); // keep the camera moving to the end
+// K.stack(K.boards.end.el, OBJ + "...", { x: 500, y: 640, n: 6, at: gEnd.lead, stagger: (tLast - 0.3 - gEnd.lead) / 5 }); // the last lands on the last word
+K.duration = tLast + 0.4;
 K.finish(); // last line: adds the camera drift between moves

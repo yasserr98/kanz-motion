@@ -7,7 +7,8 @@
  *  - one dollar is carried from board to board instead of being rebuilt; obsolete objects dim, never clear
  *  - hook hero settles from oversized from frame 1; no caption under the question headline
  *  - three paper chapters (mechanism, key idea, "one factor"); snap zooms on the emphasis words
- *  - ends ~1.3 s after the last word (was 2.4 s of silent hold)
+ *  - ends 0.4 s after the last word (PACE-6, 2026-10-18: the last line builds its own diagram; no cut back to the hook,
+ *    no silent tail). The Fed's rate and the cost of making it rise as growing bars, not arrow icons (EXPL-1)
  * Review fixes (v4 of this rebuild, 2026-10-13): "أمريكا مش طرف" as K.punch with the riser (the carried dollar crossed
  * it); debt board raised (حكومات sat under the caption); faint F01 off the edge; dollar stack beside the demand chart;
  * labels dimmed before the dollar leaves the salary board; price tag inside the frame; container ship for "مستوردة".
@@ -80,8 +81,11 @@ K.carry(dollar, "fed", gFed.start, { x: 260, y: 300, w: 230, rot: -6, opacity: 0
 const fedBank = K.img(B.fed, OBJ + "kanz-bank-v01.png", { x: 700, y: 380, w: 520, at: gFed.lead, glow: true, enter: "fly" });
 const fedTitle = K.text(B.fed, "البنك المركزي الأمريكي", { x: 600, y: 80, size: 56, head: true, at: N("الأمريكي") - 0.3 });
 const tRaise = N("يرفع");
-const rateUp = K.arrow(B.fed, 860, 520, 860, 330, { at: tRaise, bend: 0.001, width: 11, color: K.INK });
-const rateTag = K.tag(B.fed, "الفايدة", { x: 840, y: 590, lav: true, size: 44, at: N("الفايدة") });
+// the rate rises as a bar that grows, then steps up again on "الفايدة" (EXPL-1: a mechanism moves, not an arrow icon)
+const rateUp = K.bar(B.fed, { x: 860, y: 540, w: 70, h: 110, at: tRaise, dur: 0.35, color: L, illustrative: true });
+const tRate = N("الفايدة");
+tl.to(rateUp, { scaleY: 1.9, duration: 0.45, ease: "power2.out" }, tRate);
+const rateTag = K.tag(B.fed, "الفايدة", { x: 840, y: 590, lav: true, size: 44, at: tRate });
 const tInv = N("مستثمرين");
 K.frame(tInv - 0.3, "fed");
 K.img(B.fed, OBJ + "kanz-npc-m01-counting-money-v01.png", { x: 210, y: 560, w: 380, at: tInv - 0.1, enter: "fly", fromX: -80 });
@@ -209,7 +213,9 @@ K.arrow(B.made, 100, 690, 110, 470, { at: K.T("مستوردة", tEven) + 0.3, be
 const tCost = N("فتزيد");
 K.frame(tCost - 0.2, "made");
 K.text(B.made, "تكلفة تصنيعه تزيد", { x: 500, y: 90, size: 60, head: true, color: L, at: tCost });
-K.arrow(B.made, 460, 300, 460, 180, { at: tCost + 0.2, bend: 0.001, color: RED, width: 9 });
+// the cost climbs with the words: a red bar that grows on "فتزيد" and again on "تصنيعه" (EXPL-1)
+const costUp = K.bar(B.made, { x: 460, y: 330, w: 46, h: 110, at: tCost + 0.1, dur: 0.4, color: RED, illustrative: true });
+tl.to(costUp, { scaleY: 1.5, duration: 0.45, ease: "power2.out" }, N("تصنيعه"));
 
 // ---------- 10. paper chapter: the US decision is one factor; its effect depends on each country ----------
 const tFac = N("فالقرار");
@@ -240,23 +246,24 @@ K.img(B.bill, OBJ + "kanz-receipt-v01.png", { x: 300, y: 400, w: 420, at: tPart 
 const tYourBill = N("فاتورتك");
 K.text(B.bill, "فاتورتك", { x: 300, y: 80, size: 70, head: true, color: L, at: tYourBill });
 K.snap(tYourBill, 1.25, 0.55);
-const tUsd = N("بالدولار");
-K.rect(B.bill, 140, 300, 320, 120, { at: tUsd - 0.2, width: 6 });
-K.img(B.bill, OBJ + "kanz-usd-cent-stack-v01.png", { x: 560, y: 330, w: 170, at: tUsd, shadow: false });
-K.tag(B.bill, "بالدولار", { x: 560, y: 470, lav: true, size: 44, at: tUsd + 0.1 });
-const tEgp = N("بالجنيه");
-K.img(B.bill, OBJ + "kanz-egp-banknote-stack-v01.png", { x: 540, y: 700, w: 300, at: tEgp - 0.3 });
-K.text(B.bill, "يوصلك بالجنيه", { x: 750, y: 780, size: 50, head: true, at: tEgp });
-K.tl.to(wal, { left: 800, top: 330, scale: 0.72, opacity: 0.5, duration: 0.6, ease: "power2.inOut" }, tPart - 0.3);
+K.tl.to(wal, { left: 860, top: 300, scale: 0.6, opacity: 0.35, duration: 0.6, ease: "power2.inOut" }, tPart - 0.3);
 K.dim(noUsd, tPart - 0.3, 0, 0.3);
-
-// ---------- ending: back to the hook during the last word, thesis big, ~1.3 s after the voice ----------
+// ---------- ending (PACE-6, 2026-10-18): the last line builds its own diagram into the last word, no cut back ----------
+// The bill is a column; the dollar-priced part fills it on "بالدولار", then flows out as pounds that keep landing until
+// "بالجنيه". The camera keeps pushing towards the pile to the end, and the video stops 0.4 s after the last word.
+const bill = K.bar(B.bill, { x: 590, y: 640, w: 110, h: 400, at: tPart, dur: 0.5, outline: true, color: "rgba(255,255,255,.08)", illustrative: true });
+const tUsd = N("بالدولار");
+const usdPart = K.bar(B.bill, { x: 590, y: 640, w: 110, h: 170, at: tUsd - 0.1, dur: 0.5, color: L, illustrative: true });
+K.tag(B.bill, "بالدولار", { x: 590, y: 195, lav: true, size: 44, at: tUsd + 0.1 });
+const tBefore = N("قبل");
 const tLast = (window.TOKENS || []).slice(-1)[0].end;
-const tBack = tLast - 0.15;
-K.cam(tBack, "hook", { dur: 0.04, sfx: false }); // a cut into motion back to the opening (the via pull-back read as a jumble)
-K.sfx(tBack, "whoosh", 0.25);
-K.glow(B.hook, 500, 520, 760, { at: tBack });
-K.img(B.hook, USD, { x: 500, y: 520, w: 520, at: tBack - 0.04, rot: -5, enter: "fly", fromScale: 1.45, fromY: 60, sfx: false }); // on the cut: no empty frame
-K.takeaway(B.hook, "جزء من <span class='kw'>فاتورتك</span> بيتحسب بالدولار", { x: 500, y: 90, size: 96, at: tBack + 0.1, glow: false });
-K.duration = tLast + 1.3;
+K.frame(tBefore - 0.1, "bill", { scale: 1.12, dx: 110, dy: 50, dur: tLast + 0.4 - tBefore }); // a slow push into the end
+const tReach = N("يوصلك");
+K.arrow(B.bill, 650, 560, 730, 610, { at: tReach - 0.1, bend: -30 });
+tl.to(usdPart, { scaleY: 0.35, duration: tLast - tReach, ease: "power1.in" }, tReach); // the dollar part drains into pounds
+const tEgp = N("بالجنيه");
+const pile = 6, stagger = (tLast - 0.3 - tReach) / (pile - 1); // K.stack: each note lands 0.3 s after its start
+K.stack(B.bill, OBJ + "kanz-egp-banknote-v01.png", { x: 820, y: 640, n: pile, w: 210, step: 46, at: tReach, stagger });
+K.text(B.bill, "يوصلك بالجنيه", { x: 800, y: 800, size: 50, head: true, at: tEgp });
+K.duration = tLast + 0.4;
 K.finish();

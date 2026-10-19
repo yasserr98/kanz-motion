@@ -176,6 +176,103 @@ def end_cut_findings(duration, voice_end, cut):
     return []
 
 
+TAIL_LIMIT = 0.6       # s after the last word: the video ends ~0.4 s after it (PACE-6)
+HERO_SHARE = 0.6       # the hook hero back at this share of its hook width or more is a replay (PACE-6)
+STILL_LIMIT = 2.0      # s of speech over one unchanging picture (EXPL-2)
+ICON = re.compile(r"\.png$", re.I)
+
+
+def tail_findings(duration, last_word_end, limit=TAIL_LIMIT):
+    """Silence after the last word (`long-tail`, PACE-6): "remove the dead silence" (re-do review 2026-10-18, the
+    1.3 s tail every Reel copied from the worked example)."""
+    if last_word_end is None or duration - last_word_end <= limit + 1e-6:
+        return []
+    return [dict(kind="long-tail", t=round(last_word_end, 3), rule="PACE-6",
+                 why=f"the video runs {duration - last_word_end:.2f} s after the last word > {limit} s "
+                     f"(PACE-6: K.duration = tLast + 0.4)")]
+
+
+def visible(frame, kinds=None):
+    return [i for i in frame["items"] if i["kind"] != "caption" and i.get("opacity", 1) >= .5
+            and (kinds is None or i["kind"] in kinds)]
+
+
+def main_board(frame):
+    """The board covering most of the frame (visible items' area), or None (headline only, footage)."""
+    area = {}
+    for i in visible(frame):
+        if i.get("board"):
+            area[i["board"]] = area.get(i["board"], 0) + (i["x1"] - i["x0"]) * (i["y1"] - i["y0"])
+    return max(area, key=lambda b: area[b]) if area else None
+
+
+def hero_of(frame):
+    """The largest visible picture (img.obj) of a frame, or None."""
+    pics = [i for i in visible(frame, ("obj",)) if re.search(r"\.(png|jpe?g|webp|svg)$", i["txt"], re.I)]
+    return max(pics, key=lambda i: (i["x1"] - i["x0"]) * (i["y1"] - i["y0"])) if pics else None
+
+
+def replay_findings(hook_frame, end_frame, t_end, share=HERO_SHARE):
+    """The last frame back on the hook board or showing the hook's hero again (`hook-replay`, PACE-6): "we end the
+    video with the same pic as the hook sucks", "we don't need a replica" (re-do review 2026-10-18)."""
+    if not hook_frame or not end_frame:
+        return []
+    why = []
+    board = main_board(hook_frame)
+    if board and main_board(end_frame) == board:
+        why.append("the last frame is on the hook board")
+    hero = hero_of(hook_frame)
+    if hero:
+        w = hero["x1"] - hero["x0"]
+        if any(i["txt"] == hero["txt"] and i["x1"] - i["x0"] >= share * w for i in visible(end_frame, ("obj",))):
+            why.append(f"the hook hero {hero['txt']} is back on the last frame")
+    if not why:
+        return []
+    return [dict(kind="hook-replay", t=round(t_end, 3), rule="PACE-6",
+                 why="; ".join(why) + " (PACE-6: the last line gets its own moving visual, never a replay of the hook)")]
+
+
+def still_image_findings(frames, words, skip=(), limit=STILL_LIMIT, moved_px=25.0, grown=0.04):
+    """A stretch where the only picture on screen is one unchanging icon while the voice keeps explaining
+    (`still-image`, EXPL-2, a warning): "not explanatory at all", "this needs to be dynamic ... rather than just an
+    image" (re-do review 2026-10-18). frames: [(t, frame)] in time order; skip: [(a, b)] windows not checked (the hook,
+    face/split windows). A run ends when anything appears or leaves, or the icon moves or grows (camera drift and the
+    idle float stay under moved_px / grown between samples)."""
+    def key(frame):
+        items = visible(frame)
+        objs = [i for i in items if i["kind"] == "obj"]
+        if len(objs) != 1 or not ICON.search(objs[0]["txt"]):
+            return None
+        return (objs[0]["id"], frozenset(i["id"] for i in items)), objs[0]
+
+    def moved(a, b):
+        ca, cb = ((a["x0"] + a["x1"]) / 2, (a["y0"] + a["y1"]) / 2), ((b["x0"] + b["x1"]) / 2, (b["y0"] + b["y1"]) / 2)
+        wa, wb = a["x1"] - a["x0"], b["x1"] - b["x0"]
+        return abs(ca[0] - cb[0]) > moved_px or abs(ca[1] - cb[1]) > moved_px or abs(wa - wb) > grown * max(wa, 1)
+
+    def speech(a, b):
+        return sum(overlap((a, b), (w["start"], w["end"])) for w in words)
+
+    out, run = [], None   # run: [start, key, last icon box]
+
+    def close(end):
+        if run and speech(run[0], end) > limit + 1e-6:
+            out.append({"kind": "still-image", "level": "warn", "rule": "EXPL-2", "from": round(run[0], 3), "to": round(end, 3),
+                        "what": run[2]["txt"], "why": f"{speech(run[0], end):.1f} s of speech over one still icon > {limit} s "
+                                                      f"(EXPL-2: explain it with a moving diagram; icons only support)"})
+
+    for t, frame in frames:
+        k = None if any(a <= t < b for a, b in skip) else key(frame)
+        if run and k and k[0] == run[1] and not moved(run[2], k[1]):
+            run[2] = k[1]
+            continue
+        close(t)
+        run = [t, k[0], k[1]] if k else None
+    if run:
+        close(frames[-1][0])
+    return out
+
+
 def caption_switch_findings(samples):
     """Subtitles on the seam exactly when the split shows (`caption-switch`, SHORT-12). samples: [(t, split_shown,
     caption_top_px or None)]."""

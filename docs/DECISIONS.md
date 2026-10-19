@@ -210,3 +210,18 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
 - **(d) final** (same day, a minute later): "sorry lets make it whenever I touch it again". A delivered reel goes
   through `make.py remix` whenever it is touched again (a revision or a re-upload); no bulk re-run. **Replaces** the
   "new renders only" line above. Rule: SND-5.
+- **Subtitles never move up onto his head** (live H v4: "why did you move the caption so upward on his face", "the
+  captions up is soo bad"; on the v5 stills with the subtitles low over his chest: "this was super we can stick to it"):
+  on face-only moments the subtitles stay at the usual height or move down toward y 1500 when his face reaches the band;
+  the 2026-10-18 `faces` default no longer lifts them above his face. Rule: SHORT-12.
+- **Explain with moving diagrams, not icons** (re-do review of rising-stock v1 and portfolio-rebalancing v4: "in the future
+  I want there to be more illustrations and drawings that explain stuff rather than the icons, like when there is
+  something technical and dynamic we need to explain it visually", "for these and the ones in the future"; on the hook's
+  still chart icon: "this needs to be dynamic to show the stock rising and falling etc rather than just an image"; on a
+  still monitor icon: "not explanatory at all"). Mechanisms, prices, percentages and comparisons are animated diagrams or
+  drawn illustrations; icons only support. **Replaces** "concept, mechanism or number -> Kanz icon" in IMG-4.
+  Rules: EXPL-1, EXPL-2, IMG-4, HOOK-2.
+- **No replica ending, no dead silence** (same review: "the fact that we end the video with the same pic as the hook
+  sucks I want it to be more dynamic", "last frame sucks we don't need a replica we need to keep the video going and
+  remove the dead silence"). The last line gets its own moving visual and the video ends about 0.4 s after the last word.
+  **Replaces** "ending = cut back to the hook on the last word, ~1.3 s tail" (2026-10-17). Rule: PACE-6.

@@ -34,6 +34,11 @@ Shorts cut from a long video (review hardening 2026-10-18, engine/guards.py):
 Every scene: sfx-overlap (cues under 0.3 s apart), sfx-orphan (a cue on no visual event), stray-currency (a $ not on
 the left of its digits), and with the 2026-10-17 defaults or later tight-gap (a subheadline under K.GAP px below its
 headline).
+Endings and explanations (re-do review 2026-10-18, engine/guards.py):
+  long-tail    the video runs more than 0.6 s after the last word (PACE-6: K.duration = tLast + 0.4)
+  hook-replay  the last frame is on the hook board, or shows the hook's hero at 60% of its hook size or more (PACE-6)
+  still-image  a WARNING: over 2 s of speech while the only picture on screen is one unchanging icon (EXPL-2); it is
+               listed but never counts as unjustified, so --strict does not fail on it
 Dead and fill findings exclude the simple hook (t < K.captionsFrom) and K.footage / K.split windows. lint-ok.json cannot
 excuse a dead or fill stretch of more than 1.5 s outside the 0-3 s title window.
 Writes out/lint.json and, when there are findings, out/lint.jpg. Exit code defaults to 0.
@@ -449,6 +454,11 @@ def justified(finding, allowances):
     return False
 
 
+def unjustified(findings):
+    """Findings --strict fails on: not justified in lint-ok.json, warnings (level "warn", e.g. still-image) excepted."""
+    return sum(not h['justified'] and h.get('level') != 'warn' for h in findings)
+
+
 def legacy_findings(report, fill, hook_limit):
     """Expose ALL original report categories to strict mode, retaining old JSON fields."""
     out = []
@@ -522,7 +532,7 @@ def short_findings(page, frames, fine, step, every, defaults_on):
                         seam.append((t, shown, top))
         out += guards.caption_switch_findings(seam)
     return out, {"faces": info["faces"], "splits": info["splits"], "duration": info["duration"], "fps": info.get("fps") or 24,
-                 "cut": bool(info["cut"])}
+                 "cut": bool(info["cut"]), "words": info["words"]}
 
 
 def main():
@@ -564,7 +574,8 @@ def main():
         fine_times = [round(i * step, 6) for i in range(1, int(scene_end / step) + 1)]
         arrivals = page.evaluate('window.__lintArrivals')
         arrival_times = [h['t'] for h in arrivals if 0 < h['t'] <= voice_end]
-        sampled = {t: page.evaluate(probe, t) for t in sorted(set(sample_times + fine_times + arrival_times))}
+        t_end = round(max(scene_end - 1 / 24, step), 4)  # the last frame (PACE-6 hook-replay)
+        sampled = {t: page.evaluate(probe, t) for t in sorted(set(sample_times + fine_times + arrival_times + [t_end]))}
         frames = [(t, sampled[t]) for t in sample_times]
         new_findings = merge_hits([h for t, f in frames for h in frame_findings(t, f)], a.every)
         defaults_on = page.evaluate("Object.values(K.D || {}).some(Boolean)")
@@ -678,6 +689,14 @@ def main():
                     h["to"], h["frames"] = t, h["frames"] + 1
         edge = sorted((h for h in edge_hits.values() if h["frames"] >= 3), key=lambda h: h["from"])
 
+        # 9. the ending and explanations (re-do review 2026-10-18): no silent tail, no replay of the hook (PACE-6);
+        #    no long still icon under the voice (EXPL-2, a warning)
+        words = short["words"]
+        new_findings += guards.tail_findings(short["duration"] or scene_end, max((w["end"] for w in words), default=None))
+        if fine_times:
+            new_findings += guards.replay_findings(sampled[fine_times[0]], sampled[t_end], t_end)
+        new_findings += guards.still_image_findings(frames, words, skip=windows)
+
         report = {"project": proj.name, "look2": look2, "every": a.every, "voice_end": voice_end,
                   "safe": safe, "dead": dead, "thin": thin, "hook_late": hook, "first_fill": first_fill, "bars": bars,
                   "covered": covered, "under_captions": under, "edge": edge,
@@ -698,7 +717,7 @@ def main():
         for h in findings:
             h['justified'] = justified(h, allowances)
         report['findings'] = findings
-        report['unjustified'] = sum(not h['justified'] for h in findings)
+        report['unjustified'] = unjustified(findings)
         report['brief_every'] = step
         report['brief_end'] = scene_end
         (out_dir / "lint.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -729,7 +748,7 @@ def main():
             print(f"    {h['from']:6.2f}-{h['to']:6.2f}s  {h['what']}")
         extra = ('digits', 'small-text', 'crowded-board', 'caption-repeat') if defaults_on else ()
         extra += ('on-face', 'freeze', 'title', 'end-cut', 'face-share', 'mid-word-cut', 'caption-switch', 'sfx-overlap',
-                  'sfx-orphan', 'stray-currency', 'tight-gap')
+                  'sfx-orphan', 'stray-currency', 'tight-gap', 'long-tail', 'hook-replay', 'still-image')
         for kind in ('text-on-text', 'covered-shape', 'caption-band', 'brief', 'half-built-arrival', 'markup-crossing-text', 'structure') + extra:
             hits = [h for h in new_findings if h['kind'] == kind]
             print(f'  {kind}: {len(hits)} finding(s)')

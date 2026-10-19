@@ -461,7 +461,8 @@
   };
 
   // ---------- ending: the video's thesis, big, held after the last word (approved 2026-10-11) ----------
-  // Use words the voice actually says. Pair it with K.cam(t, <hook board>) so the last frame mirrors the first.
+  // Use words the voice actually says. Old projects paired it with K.cam(t, <hook board>); new videos never return to the
+  // hook and stop 0.4 s after the last word (PACE-6, 2026-10-18).
   K.takeaway = function (parent, html, o = {}) {
     if (o.glow !== false) K.glow(parent, o.x, o.y, o.glow || 760, { at: o.at });
     return K.text(parent, html, { head: true, size: 120, w: 860, from: "pop", sfx: "hit", gain: 0.3, ...o });

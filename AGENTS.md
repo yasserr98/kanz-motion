@@ -36,8 +36,9 @@ Work in this folder, even if the chat opened in the Kanz repo or a Kanz worktree
    written ([images](docs/routes/images.md); IMG, OBJ rules).
 5. **Scene.** Copy the worked example's `scene.js` and adapt it; new projects start from `projects/_template`.
    `K.look()`, `K.pace({ defaults: "2026-10-18" })`, `K.finish()` last (PACE-1, PACE-2). Simple hook (HOOK-1..3), boards
-   arrive built, one carried hero, no snap zooms (PACE-3..5), paper world at chapter turns, ending cut back to the hook
-   (PACE-6). Western digits with ٪ (NUM-3), sizes 28/34 px (TXT-1), at most four labels a board (TXT-2), labels never
+   arrive built, one carried hero, no snap zooms (PACE-3..5), paper world at chapter turns, a moving last beat
+   that ends ~0.4 s after the last word, never a replay of the hook (PACE-6); mechanisms and numbers as animated
+   diagrams, icons only support (EXPL-1, EXPL-2). Western digits with ٪ (NUM-3), sizes 28/34 px (TXT-1), at most four labels a board (TXT-2), labels never
    repeat the caption (TXT-3), only numbers the voice says (NUM-1). Objects: approved in the manifest only (OBJ-2).
 6. **Review.** `python engine/lint.py projects/<slug>`; fix or justify every finding in `lint-ok.json` (REV-1). Then
    `make.py review <slug> <times>` -> look at `out/review.jpg`, fix, repeat (REV-2).
