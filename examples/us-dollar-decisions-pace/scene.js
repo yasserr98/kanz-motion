@@ -171,6 +171,25 @@ const gWeb = K.go(tWeb, "web", { scale: 1.3, dy: 0 });
 K.world(gWeb.start, "paper");
 K.carry(buy, "web", gWeb.start, { x: 500, y: 430, w: 400, opacity: 1, dur: 0.55 });
 K.glow(B.web, 500, 430, 580, { at: gWeb.arrive });
+// "the dollar is inside": routes spread from it to many countries as the board arrives, so the close open never shows
+// a lone stack (lint fill, PACE-3, EXPL-1); trade and debts attach on their words, the extra routes fade at "تغيير"
+const route = (x2, y2, bend) => {
+  const mx = (500 + x2) / 2 - (y2 - 430) * bend, my = (430 + y2) / 2 + (x2 - 500) * bend;
+  return Array.from({ length: 13 }, (_, i) => {
+    const u = i / 12, a = (1 - u) * (1 - u), b = 2 * (1 - u) * u, c = u * u;
+    return [a * 500 + b * mx + c * x2, a * 430 + b * my + c * y2];
+  });
+};
+const web = [], webDots = [];
+[[170, 480, 0.12], [830, 480, -0.12], [250, 690, -0.15], [750, 690, 0.15], [500, 750, 0.1], [500, 200, -0.1]].forEach(([x, y, bend], i) => {
+  const at = gWeb.lead + i * 0.06;
+  web.push(K.line(B.web, route(x, y, bend), { at, dur: 0.4, color: K.INK, width: 4, ease: "power2.out" }));
+  const d = K.el("div", "abs", B.web);
+  gsap.set(d, { left: x - 12, top: y - 12, width: 24, height: 24, borderRadius: "50%", background: L, autoAlpha: 0 });
+  tl.fromTo(d, { scale: 0, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.3, ease: "back.out(3)", immediateRender: false }, at + 0.35);
+  webDots.push(d);
+});
+web.push(...webDots);
 const tTrade = N("التجارة");
 K.frame(tTrade - 0.3, "web");
 K.dashed(B.web, 640, 380, 790, 260, { at: tTrade - 0.1, color: K.INK });
@@ -180,8 +199,11 @@ const tDebts = N("والديون");
 K.dashed(B.web, 360, 380, 210, 260, { at: tDebts - 0.1, color: K.INK });
 K.img(B.web, OBJ + "kanz-loan-agreement-v01.png", { x: 170, y: 190, w: 210, at: tDebts, shadow: false, enter: "fly" });
 K.text(B.web, "الديون", { x: 170, y: 330, size: 50, head: true, color: K.INK, at: tDebts });
-K.text(B.web, "بين بلاد كتير", { x: 500, y: 80, size: 62, head: true, color: L, at: N("بلاد") });
+const tCountries = N("بلاد");
+K.text(B.web, "بين بلاد كتير", { x: 500, y: 80, size: 62, head: true, color: L, at: tCountries });
+tl.to(webDots, { scale: 1.5, duration: 0.18, yoyo: true, repeat: 1, stagger: 0.05, ease: "power1.inOut" }, tCountries); // the many countries
 const tChange = N("تغيير");
+tl.to(web, { autoAlpha: 0, duration: 0.3 }, tChange - 0.2);
 K.frame(tChange - 0.2, "web", { scale: 1.1, dy: 90 });
 K.tag(B.web, "قيمته", { x: 690, y: 650, lav: true, size: 46, at: N("قيمته") });
 K.tag(B.web, "تكلفة الاقتراض بيه", { x: 300, y: 650, lav: true, size: 46, at: N("الاقتراض") });
