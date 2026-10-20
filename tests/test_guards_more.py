@@ -127,12 +127,19 @@ def test_c17_face_share_union_and_clamping():
     item(2, "obj", "grid line", y0=370, y1=371),
 ])
 def test_c24_board_headline_large_panel_and_grid_line(shape):
-    head = item(head=True)
+    head = item(head=True, bh=True)
     assert guards.headline_cross_findings(1, {"items": [head, shape]}, 40)
 
 
+def test_c24_display_font_alone_is_not_a_headline():
+    """Rising Stock v5's moving price counters and sell button carry .head (the display font), not data-role=headline."""
+    counter = item(head=True)
+    line = item(2, "obj", "line", y0=370, y1=371)
+    assert not guards.headline_cross_findings(1, {"items": [counter, line]}, 40)
+
+
 def test_c24_scaled_split_gap_and_real_background():
-    head = item(head=True, sc=.8)
+    head = item(head=True, bh=True, sc=.8)
     panel = item(2, "obj", "panel", y0=431, y1=800)
     assert guards.headline_cross_findings(1, {"items": [head, panel]}, 40)
     assert not guards.headline_cross_findings(1, {"items": [head, {**panel, "y0": 433}]}, 40)
@@ -170,11 +177,18 @@ def test_c28_word_timed_labels_are_exempt_from_brief():
     assert [h["id"] for h in lint.brief_findings(frames, .2, .1)] == [2]
 
 
-@pytest.mark.parametrize("profile,threshold", [("", 2.5), ("2026-10-17", 1.5), ("2026-10-18", 1.5)])
-def test_c29_dead_threshold_by_profile(profile, threshold):
-    assert lint.dead_limit(profile) == threshold
-    assert bool(lint.exclude_windows([(4, 6)], [], lint.dead_limit(profile))) == (threshold == 1.5)
+@pytest.mark.parametrize("profile", ["", "2026-10-17", "2026-10-18"])
+def test_c29_dead_threshold_stays_2_5(profile):
+    assert lint.dead_limit(profile) == 2.5
+    assert not lint.exclude_windows([(4, 6)], [], lint.dead_limit(profile))
     assert lint.dead_limit(profile, 3) == 3
+
+
+def test_c16_title_entrance_and_exit_are_not_missing_titles():
+    info = {"cut": True, "duration": 4, "faces": [[0, 3]], "splits": []}
+    face = {"items": [], "face": [200, 500, 800, 900], "face_only": True}
+    assert not lint.opening_findings([(.1, face), (2.9, face)], info)
+    assert "no visible title" in lint.opening_findings([(1.5, face)], info)[0]["why"]
 
 
 @pytest.mark.parametrize("end,next_start,fail,warn", [

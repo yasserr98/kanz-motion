@@ -2,8 +2,8 @@
 
 Reads the live page (no video render) and reports:
   safe   text outside the platform safe zones (K.SAFE, docs/LOOK-V2.md); objects whose centre is outside
-  dead   stretches longer than --dead seconds where nothing new appears and the camera holds (1.5 s for the
-         2026-10-17+ defaults profile; legacy 2.5 s)
+  dead   stretches longer than --dead seconds (2.5 s) where nothing new appears and the camera holds; an empty frame
+         is the fill check's job from 1.5 s (REV-1)
   fill   stretches longer than 1.5 s where visible content covers less than --fill of the safe area (MUST FIX
          since 2026-10-11: fill the frame when the voice names a thing, or justify it)
   hook   the first visual arriving later than --hook (0.3 s since 2026-10-11) and a first frame below --fill
@@ -162,7 +162,7 @@ PROBE = """(t) => {
       intentional: K.logoIntentional === true,
       sc: el.offsetHeight ? r.height / el.offsetHeight : 1,
       over_face: !!el.closest('#headline, #overlay, #captions'),
-      fs: parseFloat(cs.fontSize) || 0, src: el.matches('.ksrc'), head: !!el.closest('#headline, .head'), hl: !!el.closest('#headline'), card: el.matches('.card, .tag'),
+      fs: parseFloat(cs.fontSize) || 0, src: el.matches('.ksrc'), head: !!el.closest('#headline, .head'), hl: !!el.closest('#headline'), bh: !!el.closest('[data-role=headline]'), card: el.matches('.card, .tag'),
       board: bd ? bd.dataset.lkb : null,
       parents: [...(function* () { for (let p = el.parentElement; p; p = p.parentElement)
         if (p.dataset.lid) yield +p.dataset.lid; })()],
@@ -510,8 +510,13 @@ def logo_contrast(page, frame):
 
 
 def dead_limit(profile, explicit=None):
-    """REV-1: 1.5 s with the 2026-10-17+ profile; explicit --dead and legacy 2.5 s remain supported."""
-    return explicit if explicit is not None else (1.5 if profile >= "2026-10-17" else 2.5)
+    """REV-1: a stretch with nothing new and a still camera is `dead` from 2.5 s on every profile; an empty frame is
+    caught from 1.5 s by the fill check. A 1.5 s dead limit flagged eight stretches in the approved Rising Stock v5
+    (2026-10-20) and would push scenes toward the extra animation Ahmed keeps cutting. Explicit --dead still wins."""
+    return explicit if explicit is not None else 2.5
+
+
+TITLE_IN, TITLE_OUT = .5, .25  # seconds of K.title's entrance and exit that may show it below half opacity
 
 
 def opening_findings(frames, info):
@@ -527,8 +532,8 @@ def opening_findings(frames, info):
         why = []
         if not frame.get("face") or not frame.get("face_only"):
             why.append("no visible full face")
-        if not any(i["kind"] == "title" for i in items):
-            why.append("no visible title")
+        if TITLE_IN <= t <= end - TITLE_OUT and not any(i["kind"] == "title" for i in items):
+            why.append("no visible title")  # K.title pops in over 0.42 s and leaves in its last 0.18 s
         if any(i["kind"] == "caption" for i in items):
             why.append("caption visible under the opening title")
         if why:
@@ -651,7 +656,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("project")
     ap.add_argument("--every", type=float, default=0.25)
-    ap.add_argument("--dead", type=float, help="dead seconds (2026-10-17+ defaults: 1.5; legacy: 2.5)")
+    ap.add_argument("--dead", type=float, help="dead seconds (default 2.5)")
     ap.add_argument("--fill", type=float, default=0.30)
     ap.add_argument("--hook", type=float, default=0.3)
     ap.add_argument("--no-sheet", action="store_true")

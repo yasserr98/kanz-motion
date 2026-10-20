@@ -88,11 +88,13 @@ def tight_gap_findings(t, frame, gap):
 
 
 def headline_cross_findings(t, frame, gap):
-    """Anything that crosses a K.headline or board .head, or starts less than `gap` board px under its last line (TXT-6):
-    panel and card edges, chart and grid lines, objects, images, blocks. The headline box is the union of its visible
-    words; identified full-bleed backgrounds, captions, the headline's own glow and faint elements are ignored."""
+    """Anything that crosses a K.headline, or a board headline marked data-role="headline", or starts less than `gap`
+    board px under its last line (TXT-6): panel and card edges, chart and grid lines, objects, images, blocks. The
+    headline box is the union of its visible words; identified full-bleed backgrounds, captions, the headline's own glow
+    and faint elements are ignored. `.head` alone is the display font (counters, buttons, big labels), not a headline:
+    flagging it turned an approved Reel's moving price counters into 35 findings (Rising Stock v5, 2026-10-20)."""
     words = [i for i in frame["items"] if i["kind"] == "text" and i.get("hl") and i.get("opacity", 1) >= .5 and i["txt"]]
-    heads = [i for i in frame["items"] if i["kind"] == "text" and i.get("head") and not i.get("hl")
+    heads = [i for i in frame["items"] if i["kind"] == "text" and i.get("bh") and not i.get("hl")
              and i.get("board") and i.get("opacity", 1) >= .5 and i["txt"]]
     if words:
         heads.append(dict(x0=min(w["x0"] for w in words), x1=max(w["x1"] for w in words),

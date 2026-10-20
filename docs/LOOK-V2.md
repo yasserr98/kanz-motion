@@ -56,7 +56,7 @@ tighten these numbers if needed.
 `engine/lint.py` steps through the scene every 0.25 s (no video render, about a minute) and reports:
 
 - **safe**: text outside the zones above; focal objects cut by them.
-- **dead**: from 1.5 s with nothing new on screen and the camera still under the current defaults (legacy: 2.5 s; REV-1).
+- **dead**: from 2.5 s with nothing new on screen and the camera still; an empty frame is caught by fill from 1.5 s (REV-1).
 - **thin**: 1.5 s or longer where content covers less than 30% of the safe area.
 - **hook**: the first visual arriving after 1.0 s.
 

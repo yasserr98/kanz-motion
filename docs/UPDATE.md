@@ -67,7 +67,8 @@ Recent changes (2026-10-18 to 2026-10-20). Every rule below is a line in `docs/R
 - **Sound:** one effect at a time, the voice gently compressed, two-pass loudness to -16 LUFS; room tone 40% quieter.
   `python engine/make.py remix <name> <from> <to>` gives an approved render the new sound without touching its picture.
   `K.fire()` now plays one sound (`legacyPair: true` keeps the old two).
-- **Stricter checks:** lint flags empty stretches from 1.5 s (was 2.5 s), headline crossings, titles over the face,
+- **Stricter checks:** lint flags headline crossings (the main headline, and board headlines you mark with
+  `data-role="headline"`), titles over the face,
   frozen footage, overlapping sound effects and stray `$` signs; `make.py check` now fails when it finds a problem and
   `make.py ship` stops on a library object that is not approved. Fix the finding or justify it in `lint-ok.json`.
 - **One browser job at a time:** render, lint, stills, cover and contrast queue for one slot per computer, across every

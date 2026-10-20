@@ -241,8 +241,8 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   the chart panel's top edge runs through the last headline line "ممكن تاخده؟": "ship it but for future reference I
   dont want that overlap"). Panel and card edges, chart and grid lines, objects and diagrams sit fully below the
   headline with `K.GAP` to spare. v6 shipped as it is; this applies from the next video. Rule: TXT-6.
-- **Mechanical audit follow-up** (2026-10-20 fix brief; evidence in the local `A-report.md`, `B1-report.md` and
-  `B2-report.md`, not public assets). These clarify the current rules; delivered projects keep their existing profile:
+- **Mechanical audit follow-up** (2026-10-20 audit of every amend against these rules; the version-by-version record
+  and per-reel exceptions are in the private Kanz repo, `reports/kanz-motion-deliveries/AMENDS.md`). These clarify the current rules; delivered projects keep their existing profile:
   - **Whole last word first** (B2 X1): Casino F's last word ended at source 709.48 s and the next began at 709.52 s;
     the 0.05 s margin would cut inside the word. Listen to the untrimmed source, preserve the entire audible last word,
     add quiet after a verified cut and report guard conflicts for a human ear. No next-sentence leak. Rule: SHORT-3.
@@ -261,9 +261,13 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   - **Keep the exact selected take** (A-report, Emotional Trading v7): "the second one on the file this is the one I
     want in the video why didnt you add it" (`dd045029`, 2026-10-11 04:32); the repair spliced `r2-2.mp3`. Preserve and
     splice the approved cache/take audio; regenerating the same spelling is not the same take. Rule: VOICE-9.
-  - **Readable holds and dead stretches** (B1 C28/C29; choices explicitly specified in this fix brief): labels stay fully
-    visible at least 0.8 s except word-timed punch labels (`brief`); current defaults detect dead stretches from
-    1.5 s instead of the legacy 2.5 s. Rules: TXT-7, REV-1.
+  - **Readable holds and dead stretches** (B1 C28/C29): labels stay fully visible at least 0.8 s except word-timed
+    punch labels (`brief`). Dead stretches (nothing new, camera still) stay detected from 2.5 s; Ahmed's "2 seconds
+    with nothing on the screen" (Casino E v5) is an empty frame, which the fill check catches from 1.5 s. A 1.5 s
+    dead limit was tried and flagged eight stretches in the approved Rising Stock v5. Rules: TXT-7, REV-1.
+  - **What counts as a headline** (TXT-6): the main headline and board headlines marked `data-role="headline"`.
+    `.head` alone is the display font of counters, buttons and big labels; checking it flagged 35 non-headlines in
+    Rising Stock v5.
   - **Approval is a ship gate** (B1 C18): warnings alone let unapproved library objects ship. `make.py ship` stops
     on a library object that is not approved. Rule: OBJ-2; engine implementation is a separate audit job.
   - **One machine, all checkouts** (B1 C2, B2 X17): a checkout-local lock allowed simultaneous jobs in different

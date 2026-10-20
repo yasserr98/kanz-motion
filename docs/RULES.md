@@ -96,7 +96,7 @@ they were.
 | TXT-3 | No label that repeats the caption word for word; a label adds what the caption doesn't say | `caption-repeat` |
 | TXT-4 | No text under objects, captions or other text | `covered`, `text-on-text`, `covered-shape` |
 | TXT-5 | Breathing room: a subheadline sits at least `K.GAP` (40 board px) under its headline; `K.under(head, html)` places it | `tight-gap` |
-| TXT-6 | Nothing crosses a headline: panel and card edges, grid and chart lines, objects and diagrams start at least `K.GAP` below its last line (move or shrink the panel, not the headline) | `headline-cross` |
+| TXT-6 | Nothing crosses a headline: panel and card edges, grid and chart lines, objects and diagrams start at least `K.GAP` below its last line (move or shrink the panel, not the headline) ; board headlines are marked `data-role="headline"` (`.head` alone is only the display font) | `headline-cross` |
 | TXT-7 | A label stays fully visible for at least 0.8 s, except word-timed punch labels | `brief` |
 
 ## Sound
@@ -136,7 +136,7 @@ they were.
 
 | Id | Rule | Check |
 | --- | --- | --- |
-| REV-1 | Lint every scene; fix each finding or justify it in `lint-ok.json`. With the current defaults, dead stretches are detected from 1.5 s (legacy: 2.5 s). An empty stretch (dead or fill) over 1.5 s outside the 0-3 s title window cannot be justified | `lint.py --strict` |
+| REV-1 | Lint every scene; fix each finding or justify it in `lint-ok.json`. Dead stretches (nothing new, camera still) are detected from 2.5 s and thin/empty frames from 1.5 s. An empty stretch (dead or fill) over 1.5 s outside the 0-3 s title window cannot be justified | `lint.py --strict` |
 | REV-2 | Review through one contact sheet (`make.py review`), not image by image | |
 | REV-3 | Before delivery, `make.py ship <slug> <version>` passes (lint, render, MP4 frames, loudness) and the check sheet is looked at | `make.py ship` |
 | REV-4 | Renders go to the render host when one is set (`KANZ_RENDER_HOST`); run them in the background, never poll | `make.py render` |
