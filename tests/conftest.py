@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "engine"))
 
 
 @pytest.fixture(autouse=True)
-def offline(monkeypatch):
+def offline(monkeypatch, tmp_path):
     import urllib.request
     import eleven
     import tts
@@ -27,6 +27,11 @@ def offline(monkeypatch):
     import make
     monkeypatch.delenv("KANZ_RENDER_HOST", raising=False)
     monkeypatch.setattr(make, "render_host", lambda: None)
+    # tests never take the machine's real local render slot (it would block real renders for the whole run)
+    import slot
+    monkeypatch.setattr(slot, "LOCK", tmp_path / ".local-render.lock")
+    monkeypatch.setattr(slot, "_held", None)
+    monkeypatch.delenv("KANZ_LOCAL_SLOT", raising=False)
 
 
 @pytest.fixture

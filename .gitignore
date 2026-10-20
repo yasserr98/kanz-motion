@@ -45,3 +45,4 @@ examples/*/assets/codex/**/*.log
 # split-layout half frames are cut from the source video too (SHORT-1)
 projects/*/assets/half/
 examples/*/assets/half/
+.local-render.lock

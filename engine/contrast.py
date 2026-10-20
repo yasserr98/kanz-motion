@@ -35,6 +35,8 @@ def contrast(rgb, colour):
 def main(proj, times):
     proj = Path(proj).resolve()
     worst = 99
+    import slot
+    slot.hold("contrast")  # one local Chromium at a time (AGENTS.md, usage discipline)
     with sync_playwright() as p:
         b = p.chromium.launch(args=["--allow-file-access-from-files"])
         pg = b.new_page(viewport={"width": 1080, "height": 1920})

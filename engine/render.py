@@ -300,6 +300,8 @@ def main():
     proj = Path(a.project).resolve()
     out_dir = proj / "out"
     out_dir.mkdir(exist_ok=True)
+    import slot
+    slot.hold("render")  # one local Chromium at a time (AGENTS.md, usage discipline)
     with sync_playwright() as p:
         browser = p.chromium.launch(args=["--allow-file-access-from-files"])
         errors, page_errors = [], []

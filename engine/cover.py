@@ -59,6 +59,8 @@ def main():
                             lines="<br>".join(line_html(s) for s in c["lines"]))
     src = out / "_cover.html"
     src.write_text(page_html, encoding="utf-8")
+    import slot
+    slot.hold("cover")  # one local Chromium at a time (AGENTS.md, usage discipline)
     with sync_playwright() as p:
         b = p.chromium.launch(args=["--allow-file-access-from-files"])
         pg = b.new_page(viewport={"width": 1080, "height": 1920})
