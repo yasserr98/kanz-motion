@@ -29,7 +29,7 @@ Both routes
     python engine/make.py note <name> <seconds> "<his words>" [version]   # add a review note (notes.json, open)
     python engine/make.py note <name> fixed <n>    # mark note n fixed; ship then shows it with a still from the MP4
 Setup
-    python engine/make.py doctor [name]             # check tools, fonts, keys, render host, Codex, references
+    python engine/make.py doctor [name] [--shorts]  # tools, fonts, keys, host, Codex; optional shorts dependencies
 
 <name> is a folder in projects/ (your videos, never committed) or examples/ (the curated worked examples).
 
@@ -130,15 +130,23 @@ def render_host():
     return os.environ.get("KANZ_RENDER_HOST") or eleven.env().get("KANZ_RENDER_HOST") or None
 
 
-def render(proj, name, local=False):
-    """Render the MP4 (workflow review M7): on the render host when KANZ_RENDER_HOST is set, here with --local or without one."""
+def render_target(local=False):
+    """Current routing policy, shared by full renders and remixes: (host, bash), or (None, None) for local."""
     host, bash = render_host(), shutil.which("bash")
     if host and not local and bash:
+        return host, bash
+    if host and not local:
+        print("render: KANZ_RENDER_HOST is set but bash was not found; rendering locally", file=sys.stderr)
+    return None, None
+
+
+def render(proj, name, local=False):
+    """Render the MP4 (workflow review M7): on the render host when KANZ_RENDER_HOST is set, here with --local or without one."""
+    host, bash = render_target(local)
+    if host:
         print(f"render: on {host} (engine/vps_render.sh); --local renders on this machine", flush=True)
         run([bash, "engine/vps_render.sh", proj.name, name])
         return
-    if host and not local:
-        print("render: KANZ_RENDER_HOST is set but bash was not found; rendering locally", file=sys.stderr)
     run([PY, "engine/render.py", proj, "--name", name])
 
 
@@ -251,6 +259,10 @@ def ship(proj, name, version, local=False):
     def stop(step, why):
         print(f"\nSHIP STOPPED at {step}: {why}", file=sys.stderr)
         sys.exit(1)
+    import objects
+    unapproved = objects.findings(proj)
+    if unapproved:  # OBJ-2 is a delivery gate; drafting commands still only warn
+        stop("objects", "; ".join(unapproved))
     for w in project_warnings(proj):
         print("WARNING:", w, file=sys.stderr)
     print("ship 1/4: lint --strict", flush=True)
@@ -284,8 +296,8 @@ def remix(proj, name, src_version, version, local=False):
     if newest.stat().st_mtime > src.stat().st_mtime:
         sys.exit(f"{newest.name} changed after {src.name} was rendered: its cues may not match the picture. Ship a new version instead.")
     out_name = f"{name}-{version}"
-    host, bash = render_host(), shutil.which("bash")
-    if host and not local and bash:
+    host, bash = render_target(local)
+    if host:
         run([bash, "engine/vps_render.sh", proj.name, out_name, "--remix", src.name])
     else:
         run([PY, "engine/render.py", proj, "--name", out_name, "--remix", src.name])
@@ -298,7 +310,8 @@ def remix(proj, name, src_version, version, local=False):
 def main():
     if len(sys.argv) >= 2 and sys.argv[1] == "doctor":
         import doctor
-        sys.exit(doctor.main(project_dir(sys.argv[2]) if len(sys.argv) > 2 else None))
+        args = [a for a in sys.argv[2:] if a != "--shorts"]
+        sys.exit(doctor.main(project_dir(args[0]) if args else None, shorts="--shorts" in sys.argv))
     if len(sys.argv) < 3:
         print(__doc__)
         return
@@ -368,6 +381,8 @@ def main():
         problems, _ = check(proj, name, arg or "v1")
         for prob in problems:
             print("CHECK:", prob, file=sys.stderr)
+        if problems:
+            sys.exit(1)
     elif step == "ship":
         ship(proj, name, arg or "v1", local)
     elif step == "note":

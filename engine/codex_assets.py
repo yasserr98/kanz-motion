@@ -14,14 +14,18 @@ shots.json:
   ]
 }
 
+Set "gambling": true on shots.json or an individual shot to apply IMG-9 to free-photo prompts.
+A top-level true applies to every shot, even if a shot has gambling: false.
+
 Modes
   kanz  ICONS: the fixed Kanz icon style (the MD rules), transparent cutout, attached approved references
   free  PHOTOS: a full-screen 9:16 photo of a generic place or setting, no Kanz style rules (Ahmed 2026-10-16:
         "the MD files were meant for icons rather than photos ... free photos are great"). Which type a shot gets:
-        AGENTS.md, "Images and icons: always ask Codex", step 2
-  edit  a REAL supplied photo given the Kanz editorial treatment (Kanz brand/image-treatment/CREATE-A-BRANDED-IMAGE.md).
-        Real people are never generated. The image tool also refuses to EDIT public figures (Messi, 2026-10-16):
-        for them use K.photo's CSS grade or K.snap35 on the untouched licensed photo instead.
+        docs/routes/images.md
+  edit  a REAL supplied photo of a place or object given the Kanz editorial treatment (Kanz
+        brand/image-treatment/CREATE-A-BRANDED-IMAGE.md). Never for real people or real moments (IMG-8: real photos,
+        never generated or repainted; the image tool also refuses to EDIT public figures, Messi 2026-10-16): show
+        those untouched in a slim K.snap35 print (IMG-11) or with K.photo's CSS grade.
 
 Each run writes <name>.png, <name>.prompt.txt and <name>.log beside it, and appends a row to
 <project>/assets/codex/PROVENANCE.md (prompt file, references, Codex session id, seconds). Outputs are candidates:
@@ -82,8 +86,8 @@ def prompt_for(shot, mode, context):
         return (f"Create one image for a vertical short video (9:16, 1080x1920). The video is about: {context}\n"
                 f"This image appears while the narrator says: {shot['line']}\nShow: {shot['subject']}\n"
                 + shot.get("free_style", "") + "\nNo real, identifiable people. No text, letters, numbers, logos or watermark.\n"
-                "No woman wearing a hijab or headscarf (never in gambling scenes, Ahmed 2026-10-16).\n"
-                "Return only the image.")
+                + ("No woman wearing a hijab or headscarf (never in gambling scenes, Ahmed 2026-10-16).\n"
+                   if shot.get("gambling") is True else "") + "Return only the image.")
     if mode == "edit":
         return EDIT.format(accent=shot["accent"], ratio=shot.get("ratio", "4:5 portrait"))
     raise ValueError(mode)
@@ -138,6 +142,8 @@ def main():
     only = set(a.only.split(",")) if a.only else None
     tasks = []
     for s in spec["shots"]:
+        if spec.get("gambling") is True:
+            s = {**s, "gambling": True}
         if only and s.get("name") not in only:  # shots covered by library objects carry no name
             continue
         for mode in s.get("modes", [s.get("mode", "kanz")]):

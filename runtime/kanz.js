@@ -527,6 +527,7 @@
   // ---------- effects ----------
   // Brand-coloured fire (lavender core -> deep plum), rising from baseY between cx +- w/2. Flicker, embers and glow are
   // all timeline tweens, so frames stay deterministic. o: { at, out, h, n (flame tongues), embers, sfx (default true) }
+  // SND-5: one fire cue; legacyPair: true restores the old simultaneous whoosh for an existing scene.
   K.fire = function (parent, cx, baseY, w, o = {}) {
     const h = o.h || w * 0.8, t0 = o.at, end = o.out != null ? o.out : (window.DURATION || 60) + 2;
     const box = K.el("div", "abs", parent);
@@ -561,7 +562,7 @@
     tl.fromTo(box, { autoAlpha: 0, scaleY: 0.2, transformOrigin: "50% 100%" }, { autoAlpha: 1, scaleY: 1, duration: 0.6, ease: "power2.out", immediateRender: false }, t0);
     tl.to(glow, { opacity: 0.65, duration: 0.5, yoyo: true, repeat: Math.max(1, Math.ceil((end - t0) / 0.5)), ease: "sine.inOut" }, t0);
     if (o.out != null) tl.to(box, { autoAlpha: 0, duration: 0.4 }, o.out);
-    if (o.sfx !== false) { K.sfx(t0, "fire", 0.7, 0); K.sfx(t0, "whoosh", 0.4); }
+    if (o.sfx !== false) { K.sfx(t0, "fire", 0.7, 0); if (o.legacyPair === true) K.sfx(t0, "whoosh", 0.4); }
     return box;
   };
 

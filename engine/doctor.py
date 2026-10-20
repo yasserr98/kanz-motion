@@ -2,6 +2,7 @@
 
     python engine/make.py doctor              # tools, fonts, keys, render host, Codex, reference sheets
     python engine/make.py doctor <name>       # also the project's scene structure and object approvals
+    python engine/make.py doctor --shorts     # also OpenCV and yt-dlp for shorts; not needed for voice notes
 
 Prints OK / WARN / FAIL per line; FAIL means a step of the checklist cannot run. Exit code 1 when anything FAILs.
 Never prints key values.
@@ -27,13 +28,18 @@ def version(cmd):
     return out[0] if r.returncode == 0 and out else None
 
 
-def checks(proj=None):
+def checks(proj=None, shorts=False):
     """Yield (level, what, detail)."""
     py = sys.version_info
     yield ("OK" if py >= (3, 11) else "FAIL", "Python", f"{py.major}.{py.minor}.{py.micro} (needs 3.11+)")
     for mod, why in [("numpy", "render mix"), ("PIL", "contact sheets"), ("playwright", "render, lint")]:
         ok = importlib.util.find_spec(mod) is not None
         yield ("OK" if ok else "FAIL", f"python module {mod}", why if ok else "python -m pip install -r requirements.txt")
+    if shorts:
+        for mod, why in [("cv2", "shorts face tracking"), ("yt_dlp", "shorts source downloads")]:
+            ok = importlib.util.find_spec(mod) is not None
+            yield ("OK" if ok else "FAIL", f"python module {mod}",
+                   why if ok else "python -m pip install -r requirements-shorts.txt")
     for tool in ("ffmpeg", "ffprobe"):
         v = version([tool, "-version"])
         yield ("OK" if v else "FAIL", tool, v.split(" Copyright")[0] if v else "not on PATH (install ffmpeg)")
@@ -78,7 +84,8 @@ def checks(proj=None):
         bash = shutil.which("bash")
         yield ("OK" if r is not None and r.returncode == 0 and bash else "WARN", "render host",
                f"{host} reachable, renders go there (--local to render here)" if r is not None and r.returncode == 0 and bash
-               else f"{host} set but {'bash not found' if not bash else 'not reachable over ssh'}: renders fall back to --local")
+               else f"{host} set but bash not found: renders run locally" if not bash
+               else f"{host} not reachable over ssh: host renders fail; use --local explicitly to render here")
     else:
         yield ("OK", "render host", "none set: renders run on this machine (KANZ_RENDER_HOST in .env to use a server)")
     codex = version(["codex", "--version"])
@@ -99,9 +106,9 @@ def checks(proj=None):
                 yield ("WARN", "  -", w)
 
 
-def main(proj=None):
+def main(proj=None, shorts=False):
     fails = 0
-    for level, what, detail in checks(proj):
+    for level, what, detail in checks(proj, shorts=shorts):
         fails += level == "FAIL"
         print(f"{level:4}  {what}: {detail}")
     print("doctor:", "ready" if not fails else f"{fails} FAIL(s): fix them before making a video")
@@ -111,4 +118,5 @@ def main(proj=None):
 if __name__ == "__main__":
     from console import utf8
     utf8()
-    sys.exit(main(Path(sys.argv[1]) if len(sys.argv) > 1 else None))
+    args = [a for a in sys.argv[1:] if a != "--shorts"]
+    sys.exit(main(Path(args[0]) if args else None, shorts="--shorts" in sys.argv))

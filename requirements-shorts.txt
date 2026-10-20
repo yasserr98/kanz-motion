@@ -1,0 +1,4 @@
+# Optional shorts route: install in addition to the base tools below.
+-r requirements.txt
+opencv-python-headless>=4.10
+yt-dlp>=2024.8.6

@@ -209,3 +209,93 @@ def test_project_dir_falls_back_to_examples(monkeypatch, tmp_path):
     assert make.project_dir("demo") == tmp_path / "examples/demo"
     (tmp_path / "projects/demo").mkdir(parents=True)
     assert make.project_dir("demo") == tmp_path / "projects/demo"
+
+
+@pytest.mark.parametrize("problems", [[], ["blank frame", "loudness not measured"]])
+def test_check_cli_exit_status(project, monkeypatch, capsys, problems):
+    import make
+    monkeypatch.setattr(sys, "argv", ["make.py", "check", "demo"])
+    monkeypatch.setattr(make, "project_dir", lambda name: project)
+    monkeypatch.setattr(make, "check", lambda *args: (problems, -16))
+    try:
+        make.main()
+        code = 0
+    except SystemExit as exc:
+        code = exc.code
+    assert code == (1 if problems else 0)
+    assert capsys.readouterr().err.count("CHECK:") == len(problems)
+
+
+@pytest.mark.parametrize("status", ["candidate", "rejected", "unlisted", "approved", "local", "local-alias"])
+def test_ship_object_approval_gate(project, monkeypatch, capsys, status):
+    import make
+    import objects
+    name = "kanz-test-v01.png"
+    monkeypatch.setattr(objects, "statuses", lambda *args: {} if status == "unlisted" else
+                        {name: {"status": "candidate" if status.startswith("local") else status}})
+    src = f'K.img(b, "../../library/objects/{name}");'
+    if status == "local":
+        src = f'K.img(b, "assets/codex/kanz/{name}");'
+    elif status == "local-alias":
+        src = f'const ART = "assets/codex/kanz/"; K.img(b, ART + "{name}");'
+    (project / "scene.js").write_text(src)
+    calls = []
+    monkeypatch.setattr(make.subprocess, "run", lambda *a, **k: SimpleNamespace(returncode=0))
+    monkeypatch.setattr(make, "captions", lambda *a: None)
+    monkeypatch.setattr(make, "render", lambda *a: calls.append("render"))
+    monkeypatch.setattr(make, "check", lambda *a: ([], -16))
+    if status in ("candidate", "rejected", "unlisted"):
+        with pytest.raises(SystemExit) as exc:
+            make.ship(project, "demo", "v1")
+        assert exc.value.code == 1
+        assert not calls
+        assert "SHIP STOPPED at objects" in capsys.readouterr().err
+    else:
+        make.ship(project, "demo", "v1")
+        assert calls == ["render"]
+
+
+def test_library_path_with_nonstandard_unlisted_name(project):
+    import objects
+    (project / "scene.js").write_text('K.img(b, "../../library/objects/custom.png");')
+    assert "custom.png: not in" in objects.findings(project)[0]
+
+
+@pytest.mark.parametrize("gambling", [None, False, True])
+def test_free_photo_prompt_scopes_gambling(gambling):
+    shot = {"line": "line", "subject": "a street"}
+    if gambling is not None:
+        shot["gambling"] = gambling
+    prompt = codex_assets.prompt_for(shot, "free", "context")
+    assert ("No woman wearing a hijab or headscarf" in prompt) == (gambling is True)
+
+
+def test_draft_render_warns_on_candidate(project, monkeypatch, capsys):
+    import make
+    import objects
+    (project / "transcript.json").write_text("{}")
+    monkeypatch.setattr(sys, "argv", ["make.py", "render", "demo"])
+    monkeypatch.setattr(make, "project_dir", lambda name: project)
+    monkeypatch.setattr(objects, "findings", lambda proj: ["kanz-test-v01.png: candidate"])
+    monkeypatch.setattr(make, "captions", lambda *args: None)
+    calls = []
+    monkeypatch.setattr(make, "render", lambda *args: calls.append("render"))
+    make.main()
+    assert calls == ["render"]
+    assert "WARNING: object kanz-test-v01.png: candidate" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("top,shot,expected", [(True, False, True), (False, True, True), (False, False, False)])
+def test_assets_inherits_gambling_flag(tmp_path, monkeypatch, top, shot, expected):
+    spec = tmp_path / "shots.json"
+    spec.write_text(json.dumps({"project": "project", "context": "test", "gambling": top, "shots": [
+        {"name": "one", "mode": "free", "line": "line", "subject": "street", "gambling": shot}]}))
+    monkeypatch.setattr(codex_assets, "ROOT", tmp_path)
+    monkeypatch.setattr(sys, "argv", ["assets", str(spec), "--jobs", "1"])
+    prompts = []
+    def run(s, mode, context, out):
+        prompts.append(codex_assets.prompt_for(s, mode, context))
+        return s["name"], mode, "ok", "session", 0
+    monkeypatch.setattr(codex_assets, "run", run)
+    codex_assets.main()
+    assert ("No woman wearing a hijab or headscarf" in prompts[0]) == expected
