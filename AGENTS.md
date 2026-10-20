@@ -39,7 +39,7 @@ Work in this folder, even if the chat opened in the Kanz repo or a Kanz worktree
    arrive built, one carried hero, no snap zooms (PACE-3..5), paper world at chapter turns, a moving last beat
    that ends ~0.4 s after the last word, never a replay of the hook (PACE-6); mechanisms and numbers as animated
    diagrams, icons only support (EXPL-1, EXPL-2). Western digits with ٪ (NUM-3), sizes 28/34 px (TXT-1), at most four labels a board (TXT-2), labels never
-   repeat the caption (TXT-3), only numbers the voice says (NUM-1). Objects: approved in the manifest only (OBJ-2).
+   repeat the caption (TXT-3), nothing crosses a headline (TXT-6, `headline-cross`), only numbers the voice says (NUM-1). Objects: approved in the manifest only (OBJ-2).
 6. **Review.** `python engine/lint.py projects/<slug>`; fix or justify every finding in `lint-ok.json` (REV-1). Then
    `make.py review <slug> <times>` -> look at `out/review.jpg`, fix, repeat (REV-2).
 7. **Ship.** `make.py ship <slug> v1`: lint --strict, render (on the render host when `KANZ_RENDER_HOST` is set;
@@ -59,7 +59,8 @@ anything, and say where it really was if it differs (REV-5).
 ## Usage discipline (Claude Pro limits)
 
 - One fresh session per video; Sonnet 5.5 at medium effort, Opus only for engine work ([docs/EFFICIENCY.md](docs/EFFICIENCY.md)).
-- Review through one contact sheet, not image by image. Never more than one local Chromium (render, lint or stills) at a time.
+- Review through one contact sheet, not image by image. Never more than one local Chromium (render, lint or stills) at a time: the engine
+  queues them itself (`engine/slot.py`, REPO-6); a job printing "waiting for the local render slot" is queued, not stuck.
 
 ## Brand authority (Kanz repo, when it is alongside)
 

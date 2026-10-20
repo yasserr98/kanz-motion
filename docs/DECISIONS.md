@@ -225,3 +225,17 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   sucks I want it to be more dynamic", "last frame sucks we don't need a replica we need to keep the video going and
   remove the dead silence"). The last line gets its own moving visual and the video ends about 0.4 s after the last word.
   **Replaces** "ending = cut back to the hook on the last word, ~1.3 s tail" (2026-10-17). Rule: PACE-6.
+
+## 2026-10-19
+
+- **Local renders one at a time** (after five parallel local renders and lints ran his 16 GB PC out of memory and
+  crashed Claude, asked how to run them: "Local, one at a time"). Every engine script that opens Chromium waits for one
+  machine-wide slot (`engine/slot.py`, lock file `.local-render.lock`); a crashed job frees it. Full renders still go
+  to the render host when `KANZ_RENDER_HOST` is set. Rule: REPO-6.
+
+## 2026-10-20
+
+- **Nothing overlaps the headline** (approving Why Sell Part of a Winning Stock v6, with a screenshot of the hook where
+  the chart panel's top edge runs through the last headline line "ممكن تاخده؟": "ship it but for future reference I
+  dont want that overlap"). Panel and card edges, chart and grid lines, objects and diagrams sit fully below the
+  headline with `K.GAP` to spare. v6 shipped as it is; this applies from the next video. Rule: TXT-6.

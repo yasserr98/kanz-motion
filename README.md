@@ -133,7 +133,7 @@ with its check; `projects/_guards-demo` shows every one, clean and broken):
   face stay clean); `K.money(39.8)` keeps `$39.8` together in Arabic text; `K.under(head, html)` leaves `K.GAP` px of
   breathing room. Each can be switched on alone in an older scene (`ease: true`, `faces: true`, `gap: true`).
 - **Lint** (`engine/guards.py`): on-face, freeze, title, end-cut, face-share, mid-word-cut, caption-switch, sfx-overlap,
-  sfx-orphan, stray-currency, tight-gap; `lint-ok.json` cannot excuse an empty stretch over 1.5 s after the title.
+  sfx-orphan, stray-currency, tight-gap, headline-cross (TXT-6); `lint-ok.json` cannot excuse an empty stretch over 1.5 s after the title.
 - **Ship** (`engine/shipcheck.py`): the ending, the next-sentence leak, the title pick, duplicate frames in face windows,
   frame rate, face-track jumps, `out/cuts-<version>.jpg` (12 frames around every cut, flagged frames outlined) and
   `out/notes-<version>.jpg` (a still for every note in `notes.json`; `make.py note`). `make.py remix` runs the sound

@@ -25,6 +25,10 @@ def box_hit(r, box):
 
 # ---------- lint: frames from the page ----------
 
+# Subtitles on face-only moments (SHORT-12, Ahmed 2026-10-18 on live H: "this was super we can stick to it"): their
+# usual top (look2 #captions, y 1268) or lower, down to CAP_LOWEST in runtime/kanz-footage.js, never up over his head.
+CAP_BAND_TOP, CAP_LOWEST = 1268, 1500
+
 def on_face_findings(t, frame, box):
     """Text drawn over his eyes or mouth (`on-face`): the title over his eyes (casino A, C, E, G, H)."""
     if not box:
@@ -33,6 +37,8 @@ def on_face_findings(t, frame, box):
     for it in frame["items"]:
         if it["kind"] not in ("text", "caption", "title") or it.get("opacity", 1) < .5 or not it.get("over_face", it["kind"] != "text"):
             continue
+        if it["kind"] == "caption" and it["y0"] >= CAP_BAND_TOP - 2:
+            continue  # SHORT-12: subtitles at their usual height or moved down below his chin are the approved place
         area = (it["x1"] - it["x0"]) * (it["y1"] - it["y0"])
         if area and box_hit(it, box) > 0.02 * area:
             out.append(dict(kind="on-face", t=t, id=it["id"], what=it["txt"][:40], by=it["kind"]))
@@ -80,6 +86,33 @@ def tight_gap_findings(t, frame, gap):
             if -0.25 * (s["y1"] - s["y0"]) / (h.get("sc") or 1) < d < gap - 0.5:
                 out.append(dict(kind="tight-gap", t=t, id=s["id"], what=s["txt"][:30], by=h["txt"][:30],
                                 why=f"{max(d, 0):.0f} px under the headline < {gap:.0f} px"))
+    return out
+
+
+def headline_cross_findings(t, frame, gap):
+    """Anything that crosses a K.headline or starts less than `gap` px under its last line (`headline-cross`, TXT-6):
+    panel and card edges, chart and grid lines, objects, images, blocks. The headline box is the union of its visible
+    words; backgrounds (over 60% of the frame), captions, the headline's own glow and faint elements are ignored."""
+    words = [i for i in frame["items"] if i["kind"] == "text" and i.get("hl") and i.get("opacity", 1) >= .5 and i["txt"]]
+    if not words:
+        return []
+    h = dict(x0=min(w["x0"] for w in words), x1=max(w["x1"] for w in words),
+             y0=min(w["y0"] for w in words), y1=max(w["y1"] for w in words))
+    out = []
+    for i in frame["items"]:
+        if i["kind"] == "caption" or i.get("hl") or i.get("over_face") or i.get("opacity", 1) < .5:
+            continue
+        if i["kind"] == "text" and not i.get("card"):
+            continue  # plain labels: text-on-text and tight-gap cover them
+        if (i["x1"] - i["x0"]) * (i["y1"] - i["y0"]) > .6 * 1080 * 1920:
+            continue
+        if min(h["x1"], i["x1"]) <= max(h["x0"], i["x0"]):
+            continue
+        if i["y1"] <= h["y0"] or i["y0"] >= h["y1"] + gap - .5:
+            continue
+        d = i["y0"] - h["y1"]
+        why = "crosses the headline" if d < 0 else f"less than {gap:.0f} px under the headline"
+        out.append(dict(kind="headline-cross", t=t, id=i["id"], what=i["txt"][:30], by=" ".join(w["txt"] for w in words)[:30], why=why))
     return out
 
 

@@ -138,7 +138,7 @@ def main():
     only = set(a.only.split(",")) if a.only else None
     tasks = []
     for s in spec["shots"]:
-        if only and s["name"] not in only:
+        if only and s.get("name") not in only:  # shots covered by library objects carry no name
             continue
         for mode in s.get("modes", [s.get("mode", "kanz")]):
             tasks.append((s, mode, proj / "assets" / "codex" / mode))

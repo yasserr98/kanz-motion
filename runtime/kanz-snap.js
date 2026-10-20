@@ -76,6 +76,7 @@
   // stay on top) and under the face layer and captions; darkened top and bottom so the headline and captions read.
   let screens = 0;
   const screenTimes = [];
+  K.screenWindows = screenTimes; // lint: a full-screen photo fills the frame (fill / dead / first frame)
   const seek0 = K.seek;
   K.seek = function (t) {
     const result = seek0(t);

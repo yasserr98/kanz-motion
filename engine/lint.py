@@ -33,7 +33,8 @@ Shorts cut from a long video (review hardening 2026-10-18, engine/guards.py):
   caption-switch  subtitles not on the seam exactly while the split shows (SHORT-12)
 Every scene: sfx-overlap (cues under 0.3 s apart), sfx-orphan (a cue on no visual event), stray-currency (a $ not on
 the left of its digits), and with the 2026-10-17 defaults or later tight-gap (a subheadline under K.GAP px below its
-headline).
+headline), and headline-cross (TXT-6: a panel/card edge, chart or grid line, object or block crossing a K.headline or
+starting less than K.GAP below its last line).
 Endings and explanations (re-do review 2026-10-18, engine/guards.py):
   long-tail    the video runs more than 0.6 s after the last word (PACE-6: K.duration = tLast + 0.4)
   hook-replay  the last frame is on the hook board, or shows the hook's hero at 60% of its hook size or more (PACE-6)
@@ -137,7 +138,7 @@ PROBE = """(t) => {
     out.push({ id: +el.dataset.lid, kind, opacity: o, label: el.matches(COVERSEL), currency,
       sc: el.offsetHeight ? r.height / el.offsetHeight : 1,
       over_face: !!el.closest('#headline, #overlay, #captions'),
-      fs: parseFloat(cs.fontSize) || 0, src: el.matches('.ksrc'), head: !!el.closest('#headline, .head'),
+      fs: parseFloat(cs.fontSize) || 0, src: el.matches('.ksrc'), head: !!el.closest('#headline, .head'), hl: !!el.closest('#headline'), card: el.matches('.card, .tag'),
       board: bd ? bd.dataset.lkb : null,
       parents: [...(function* () { for (let p = el.parentElement; p; p = p.parentElement)
         if (p.dataset.lid) yield +p.dataset.lid; })()],
@@ -515,6 +516,7 @@ def short_findings(page, frames, fine, step, every, defaults_on):
     out += merge_hits([h for t, f in frames for h in guards.currency_findings(t, f)], every)
     if defaults_on:
         out += merge_hits([h for t, f in frames for h in guards.tight_gap_findings(t, f, info["gap"])], every)
+        out += merge_hits([h for t, f in frames for h in guards.headline_cross_findings(t, f, info["gap"])], every)
     out += guards.sfx_findings(info["cues"], visual_events(fine, info, step))
     if info["cut"]:
         out += guards.freeze_findings(info["faces"], info["splits"], info["freezes"])
@@ -552,6 +554,8 @@ def main():
     proj = Path(a.project).resolve()
     out_dir = proj / "out"
     out_dir.mkdir(exist_ok=True)
+    import slot
+    slot.hold("lint")  # one local Chromium at a time (AGENTS.md, usage discipline)
     with sync_playwright() as p:
         browser = p.chromium.launch(args=["--allow-file-access-from-files"])
         page = browser.new_page(viewport={"width": 1080, "height": 1920}, device_scale_factor=1)
@@ -598,6 +602,8 @@ def main():
                 why = outside(it)
                 if not why:
                     continue
+                if it["kind"] == "caption" and why == "bottom" and it["y0"] <= guards.CAP_LOWEST + 1:
+                    continue  # SHORT-12: subtitles moved down below his chin (at most to y 1500) are the approved place
                 if it["kind"] == "obj":
                     cx, cy = (it["x0"] + it["x1"]) / 2, (it["y0"] + it["y1"]) / 2
                     if SAFE["upperLeft"] <= cx <= SAFE["upperRight"] and SAFE["top"] <= cy <= SAFE["bottom"]:
@@ -630,7 +636,7 @@ def main():
         for e0, e1 in zip(events, events[1:] + [voice_end]):
             if e1 - e0 > a.dead:
                 dead.append((round(e0, 2), round(e1, 2)))
-        windows = page.evaluate('[[0, K.captionsFrom || 0], ...(K.faceWindows || []).map(w => w.slice(0,2)), ...(K.splitWindows || []).map(w => w.slice(0,2))]')
+        windows = page.evaluate('[[0, K.captionsFrom || 0], ...(K.faceWindows || []).map(w => w.slice(0,2)), ...(K.splitWindows || []).map(w => w.slice(0,2)), ...(K.screenWindows || []).map(w => w.slice(0,2))]')
         dead = exclude_windows(dead, windows, a.dead)
 
         # 3. frame fill (captions excluded)
@@ -643,6 +649,8 @@ def main():
         first = next((t for t, f in frames if any(it["kind"] != "caption" for it in f["items"])), None)
         hook = None if first is not None and first <= a.hook else first
         first_fill = cov[0] if cov else 0
+        if any(w0 <= times[0] < w1 for w0, w1 in windows[1:]):
+            first_fill = 1.0  # the first frame is a full-screen photo or the face (K.screen / footage windows)
 
         # 5. bars drawn to scale
         bars = bar_findings(page.evaluate("(K.bars || []).map(b => ({...b}))"))
@@ -748,7 +756,7 @@ def main():
             print(f"    {h['from']:6.2f}-{h['to']:6.2f}s  {h['what']}")
         extra = ('digits', 'small-text', 'crowded-board', 'caption-repeat') if defaults_on else ()
         extra += ('on-face', 'freeze', 'title', 'end-cut', 'face-share', 'mid-word-cut', 'caption-switch', 'sfx-overlap',
-                  'sfx-orphan', 'stray-currency', 'tight-gap', 'long-tail', 'hook-replay', 'still-image')
+                  'sfx-orphan', 'stray-currency', 'tight-gap', 'headline-cross', 'long-tail', 'hook-replay', 'still-image')
         for kind in ('text-on-text', 'covered-shape', 'caption-band', 'brief', 'half-built-arrival', 'markup-crossing-text', 'structure') + extra:
             hits = [h for h in new_findings if h['kind'] == kind]
             print(f'  {kind}: {len(hits)} finding(s)')

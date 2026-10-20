@@ -15,6 +15,7 @@ they were.
 | REPO-3 | Updates come one way through `docs/UPDATE.md`; never `reset --hard`, `clean`, `checkout -- .` or drop a stash in an editor's copy | |
 | REPO-4 | `projects/` is local (git-ignored) except `_template` and the `_*-demo` engine demos; worked examples live in `examples/` | `.gitignore` |
 | REPO-5 | New reusable components go in `runtime/` (not inside a project) and are documented in README | eye |
+| REPO-6 | One local Chromium job (lint, render, stills, cover, contrast) at a time per machine; full renders go to the render host | `engine/slot.py` waits on `.local-render.lock` |
 | DEL-1 | Rendered ≠ approved ≠ posted. Deliver to Drive + Airtable (`In Review`) only when Ahmed asks | |
 | DEL-2 | Delivery runs from the private Kanz repo: `reports/kanz-motion-deliveries/README.md` (Ahmed's copy only) | |
 | DEL-3 | Receipts and the usage log are written in the Kanz repo, never in kanz-motion | `.gitignore` (`delivery.json`) |
@@ -94,6 +95,7 @@ they were.
 | TXT-3 | No label that repeats the caption word for word; a label adds what the caption doesn't say | `caption-repeat` |
 | TXT-4 | No text under objects, captions or other text | `covered`, `text-on-text`, `covered-shape` |
 | TXT-5 | Breathing room: a subheadline sits at least `K.GAP` (40 board px) under its headline; `K.under(head, html)` places it | `tight-gap` |
+| TXT-6 | Nothing crosses a headline: panel and card edges, grid and chart lines, objects and diagrams start at least `K.GAP` below its last line (move or shrink the panel, not the headline) | `headline-cross` |
 
 ## Sound
 
