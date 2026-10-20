@@ -2,7 +2,8 @@
 
 Reads the live page (no video render) and reports:
   safe   text outside the platform safe zones (K.SAFE, docs/LOOK-V2.md); objects whose centre is outside
-  dead   stretches longer than --dead seconds where nothing new appears and the camera holds
+  dead   stretches longer than --dead seconds where nothing new appears and the camera holds (1.5 s for the
+         2026-10-17+ defaults profile; legacy 2.5 s)
   fill   stretches longer than 1.5 s where visible content covers less than --fill of the safe area (MUST FIX
          since 2026-10-11: fill the frame when the voice names a thing, or justify it)
   hook   the first visual arriving later than --hook (0.3 s since 2026-10-11) and a first frame below --fill
@@ -13,13 +14,16 @@ Reads the live page (no video render) and reports:
            (covered / under / edge added 2026-10-13 from the us-dollar-decisions-pace v3 review)
   text-on-text  visible world labels/headline words intersecting captions or other text, even for one sample
   covered-shape  text hidden by .abs shapes, SVG marks or cards (also included in covered)
-  brief    a label fully on screen at opacity >= .95 for less than 0.8 s total (sampled at <= 0.1 s)
+  brief    TXT-7: a label fully on screen at opacity >= .95 for less than 0.8 s total (sampled at <= 0.1 s);
+           word-timed K.punch labels and explicit data-lint-brief="off" labels are exempt
   half-built-arrival  fill below --fill or a detectable chart less than half drawn 0.3 s after K.go arrives
   markup-crossing-text  SVG marks / .kframe / .kmark boxes crossing text; K.strike and marks sized to an element
                         (K.oval/K.rect/K.arrow with a target, which clear it by 16 px) are exempt
-  structure  K.look without K.pace, missing/non-final K.finish, logo images or slide-counter literals
+  structure  K.look without K.pace, missing/non-final K.finish, counter components / edge folios.
+             Logos require K.logoIntentional = true and measured contrast >= 4.5:1 (LOOK-4).
 With the 2026-10-17 defaults on (K.pace({defaults: "2026-10-17"}), review samples approved by Ahmed):
-  digits          on-screen text in the other digit system than K.DIGITS, or a Latin % next to Arabic text
+  digits          on-screen text (including titles) in the other digit system than K.DIGITS, or a Latin %;
+                  Latin-only source lines may keep % (ordinary labels, including bare percentages, may not)
   small-text      labels under 34 px, source lines under 28 px (board px)
   crowded-board   more than four labels on one board at once (titles, the headline and source lines not counted)
   caption-repeat  a label (two words or more) that repeats the caption on screen word for word
@@ -60,11 +64,12 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "engine"))
 from contact import sheet  # noqa: E402
 import guards  # noqa: E402
+import shortinfo  # noqa: E402
 
 SAFE = {"top": 270, "bottom": 1440, "left": 120, "right": 960, "upperLeft": 65, "upperRight": 1015, "upperBottom": 1000}
-TEXT = "#world .t, #world .tag, #world .card, #world .kcount, #world .ksrc, #headline .w, #overlay .t"
+TEXT = "#world .t, #world .head, #world .tag, #world .card, #world .kcount, #world .ksrc, #headline .w, #overlay .t, .kcounter, [data-role=counter]"
 COVER = "#world .t, #world .tag, #headline .w"  # labels that must stay readable (2026-10-13)
-OBJS = "#world img.obj,#world .kdoc, #world .kphoto, #world .ksnap, #world img.kmap, #world svg.mk path, #world svg.mk polyline, #world svg.mk rect, #world .kpin, #world .kmark, #world .kframe, #world .abs"
+OBJS = "#world img.obj,#world .kdoc, #world .kphoto, #world .ksnap, #world img.kmap, #world svg.mk path, #world svg.mk line, #world svg.mk polyline, #world svg.mk rect, #world .kpin, #world .kmark, #world .kframe, #world .abs, img#logo, img[src*=logo]"
 OCCLUDERS = "img.obj, .abs, .card, svg.mk path, svg.mk polyline, svg.mk rect, .kframe, .kmark"
 
 # Runtime helpers are observed before scene.js runs, without modifying runtime or project files.
@@ -74,12 +79,17 @@ INSTRUMENT = """() => {
   window.__lintArrivals = [];
   Object.defineProperty(window, 'K', { configurable: true, get: () => runtime, set: (k) => {
     runtime = k;
-    for (const name of ['go', 'strike', 'line', 'area']) {
+    for (const name of ['go', 'strike', 'line', 'area', 'punch', 'pace']) {
       let fn;
       Object.defineProperty(k, name, { configurable: true, get: () => fn, set: (impl) => {
         fn = function (...args) {
           const before = name === 'area' ? new Set(document.querySelectorAll('svg.mk')) : null;
+          const labels = name === 'punch' ? new Set(document.querySelectorAll('#overlay .t')) : null;
+          if (name === 'pace') window.__lintDefaults = String(args[0]?.defaults || '');
           const result = impl.apply(this, args);
+          if (labels) document.querySelectorAll('#overlay .t').forEach(e => {
+            if (!labels.has(e)) e.dataset.lintBrief = 'off';
+          });
           if (name === 'go' && Number.isFinite(result?.arrive))
             window.__lintArrivals.push({t: result.arrive + 0.3, board: args[1]});
           if (name === 'strike' && result) result.dataset.lintStrike = '1';
@@ -105,13 +115,20 @@ PROBE = """(t) => {
   const take = (sel, kind) => document.querySelectorAll(sel).forEach((el) => {
     if (el.closest('#safeguide')) return;
     if (el.matches('.kshadow, .kglow, .kfg')) return;
-    const r = el.getBoundingClientRect();
-    if (r.width < 3 || r.height < 3) return;
+    let r = el.getBoundingClientRect();
+    const cs = getComputedStyle(el);
+    if (el instanceof SVGElement && cs.stroke !== 'none' && (r.width === 0 || r.height === 0)) {
+      const m = el.getScreenCTM(), sw = parseFloat(cs.strokeWidth) || 0;
+      const pad = sw * (m ? Math.max(Math.hypot(m.a, m.b), Math.hypot(m.c, m.d)) : 1) / 2;
+      r = {left:r.left-pad, right:r.right+pad, top:r.top-pad, bottom:r.bottom+pad,
+        width:r.width+2*pad, height:r.height+2*pad};
+    }
+    if (r.width <= 0 || r.height <= 0) return;
     const x0 = Math.max(r.left, st.left), x1 = Math.min(r.right, st.right), y0 = Math.max(r.top, st.top), y1 = Math.min(r.bottom, st.bottom);
-    if (x1 <= x0 || y1 <= y0) return;
+    if ((x1 <= x0 || y1 <= y0) && kind !== 'caption') return;
     const o = eff(el); if (o < 0.15) return;
     if (!el.dataset.lid) el.dataset.lid = String(next++);
-    const cs = getComputedStyle(el), length = el.getTotalLength ? el.getTotalLength() : 0;
+    const length = el.getTotalLength ? el.getTotalLength() : 0;
     const chart = !!el.closest('[data-lint-chart]');
     const drawn = chart && length && cs.strokeDasharray !== 'none' ?
       Math.max(0, Math.min(1, 1 - Math.abs(parseFloat(cs.strokeDashoffset) || 0) / length)) : null;
@@ -135,7 +152,14 @@ PROBE = """(t) => {
         currency = { ok: same && a.right <= b.left + 3, where: !same ? 'on another line than its digits' : 'on the right of its digits' };
       }
     }
-    out.push({ id: +el.dataset.lid, kind, opacity: o, label: el.matches(COVERSEL), currency,
+    const background = el.matches('#paperworld, .kbackground, [data-role=background]') &&
+      r.left <= st.left && r.top <= st.top && r.right >= st.right && r.bottom >= st.bottom &&
+      Number(cs.zIndex) <= 0;
+    out.push({ id: +el.dataset.lid, kind, opacity: o, label: el.matches(COVERSEL), currency, background,
+      brief_exempt: !!el.closest('[data-lint-brief="off"]'),
+      counter: !!el.closest('.kcounter, [data-role=counter]'),
+      logo: el.matches('img') && (el.id === 'logo' || /logo/i.test(el.getAttribute('src') || '')),
+      intentional: K.logoIntentional === true,
       sc: el.offsetHeight ? r.height / el.offsetHeight : 1,
       over_face: !!el.closest('#headline, #overlay, #captions'),
       fs: parseFloat(cs.fontSize) || 0, src: el.matches('.ksrc'), head: !!el.closest('#headline, .head'), hl: !!el.closest('#headline'), card: el.matches('.card, .tag'),
@@ -181,7 +205,10 @@ PROBE = """(t) => {
   const cap = document.getElementById('captions'), cr = cap?.getBoundingClientRect();
   const captionBand = cap && cap.textContent.trim() && eff(cap) >= 0.5 ?
     (cr && cr.height ? {y0: cr.top - st.top, y1: cr.bottom - st.top} : {y0:1190,y1:1450}) : null;
-  return { items: out, covered, captionBand, face: K.faceAt ? K.faceAt(t) : null,
+  const fullFace = document.getElementById('face');
+  const faceOnly = !!fullFace && eff(fullFace) >= .5 && (K.faceWindows || []).some(([a,b]) => a <= t && t < b) &&
+    !(K.splitWindows || []).some(([a,b]) => a <= t && t < b);
+  return { items: out, covered, captionBand, face: K.faceAt ? K.faceAt(t) : null, face_only: faceOnly,
     cam: [gsap.getProperty(w, 'x'), gsap.getProperty(w, 'y'), gsap.getProperty(w, 'scaleX')] };
 }"""
 
@@ -198,12 +225,15 @@ GUIDE = """(S) => {
 }"""
 
 
-def outside(it):
-    """How a rectangle breaks the safe zone, or ''."""
+def outside(it, face_only=False):
+    """How a rectangle breaks the safe zone; SHORT-12 moves the bounded caption band down in face-only shots."""
     why = []
     if it["y0"] < SAFE["top"] - 1:
         why.append("top")
-    if it["y1"] > SAFE["bottom"] + 1:
+    bottom = SAFE["bottom"]
+    if it["kind"] == "caption" and face_only and guards.CAP_BAND_TOP - 2 <= it["y0"] <= guards.CAP_LOWEST:
+        bottom += max(0, it["y0"] - guards.CAP_BAND_TOP)
+    if it["y1"] > min(bottom, 1920) + 1:
         why.append("bottom")
     lower = it["y1"] > SAFE["upperBottom"]
     left, right = (SAFE["left"], SAFE["right"]) if lower else (SAFE["upperLeft"], SAFE["upperRight"])
@@ -340,14 +370,15 @@ def norm_words(text):
 
 def defaults_findings(t, frame, digits):
     """Checks for the 2026-10-17 defaults (one digit system, size floors, four labels per board, no caption echo)."""
-    items = [i for i in frame['items'] if i.get('opacity', 1) >= .5 and i['kind'] in ('text', 'caption') and i['txt']]
+    items = [i for i in frame['items'] if i.get('opacity', 1) >= .5 and i['kind'] in ('text', 'caption', 'title') and i['txt']]
     out = []
     wrong = re.compile('[٠-٩۰-۹]' if digits == 'en' else '[0-9]')
     for i in items:
         if wrong.search(i['txt']):
             out.append(dict(kind='digits', t=t, id=i['id'], what=i['txt'], why=f'digits other than K.DIGITS = {digits}'))
-        if '%' in i['txt'] and AR_LETTER.search(i['txt']):
-            out.append(dict(kind='digits', t=t, id=i['id'], what=i['txt'], why='Latin % next to Arabic text (use ٪)'))
+        latin_source = i.get('src') and re.search('[A-Za-z]', i['txt']) and not AR_LETTER.search(i['txt'])
+        if '%' in i['txt'] and not latin_source:
+            out.append(dict(kind='digits', t=t, id=i['id'], what=i['txt'], why='Latin % in Arabic-context text (use ٪)'))
         if i['kind'] == 'text' and i.get('fs'):
             floor = 28 if i.get('src') else 34
             if i['fs'] < floor - .5:
@@ -380,7 +411,7 @@ def brief_findings(frames, end, every):
     for n, (t, frame) in enumerate(frames):
         dt = min(every, (frames[n + 1][0] if n + 1 < len(frames) else end) - t)
         for it in frame['items']:
-            if not it.get('label') or not it['txt']:
+            if not it.get('label') or not it['txt'] or it.get('brief_exempt'):
                 continue
             label = labels.setdefault(it['id'], dict(kind='brief', id=it['id'], what=it['txt'],
                                                      t=t, duration=0, seen_to=t))
@@ -406,13 +437,12 @@ JS_TOKENS = re.compile(r'//[^\n]*|/\*[\s\S]*?\*/|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'
 
 
 def static_scene_findings(source):
-    code, strings = [], []
+    code = []
     for m in JS_TOKENS.finditer(source):
         token = m.group()
         if token.startswith(('//', '/*')):
             code.append(' ' * len(token))
         elif token[0] in '\"\'`':
-            strings.append((m.start(), token[1:-1]))
             code.append(' ' * len(token))
         else:
             code.append(token)
@@ -428,12 +458,81 @@ def static_scene_findings(source):
             add('K.look() without K.pace()')
         if not calls or calls[-1] != 'finish':
             add('K.finish() must be the last K call (missing or followed by another call)')
-    for offset, value in strings:
-        if re.search(r'\d+\s*/\s*\d+', value) and not re.search(r'\.(png|jpe?g|svg|webp)\b|https?://', value, re.I):
-            add('slide-counter text', line=source.count('\n', 0, offset) + 1, what=value[:80])
-        if re.search(r'logo', value, re.I) and (re.search(r'\.(png|jpe?g|svg|webp)\b|<img\b', value, re.I) or
-                                               re.search(r'\bK\s*\.\s*(?:img|el)\s*\([^;]*$', code[:offset])):
-            add('logo image', line=source.count('\n', 0, offset) + 1, what=value[:80])
+    return out
+
+
+def structure_findings(t, frame):
+    """LOOK-7 folios need position/component evidence; LOOK-4 permits an intentional, contrasting logo."""
+    out = []
+    for it in frame["items"]:
+        if it.get("opacity", 1) < .5:
+            continue
+        edge = it["y1"] <= SAFE["top"] or it["y0"] >= SAFE["bottom"] or it["x1"] <= SAFE["left"] or it["x0"] >= SAFE["right"]
+        if it.get("counter") or (edge and re.fullmatch(r"0\d\s+/\s+0\d", it["txt"])):
+            out.append(dict(kind="structure", t=t, id=it["id"], what=it["txt"], why="slide-counter text (LOOK-7)"))
+        if it.get("logo") and (not it.get("intentional") or (it.get("contrast") or 0) < 4.5):
+            why = "logo needs K.logoIntentional = true" if not it.get("intentional") else "logo contrast below 4.5:1 or unmeasured"
+            out.append(dict(kind="structure", t=t, id=it["id"], what=it["txt"], why=why + " (LOOK-4)"))
+    return out
+
+
+def logo_contrast(page, frame):
+    """LOOK-4: measure intentional logos against their actual rendered background, including photos and cards."""
+    logos = [i for i in frame["items"] if i.get("logo") and i.get("intentional") and i.get("opacity", 1) >= .5]
+    if not logos:
+        return
+    import io
+    import numpy as np
+    from PIL import Image
+    from contrast import lum
+    shot = lambda: np.asarray(Image.open(io.BytesIO(page.screenshot())).convert("RGB"), dtype=float)
+    front = shot()
+    saved = page.evaluate("""ids => ids.map(id => {
+      const e = document.querySelector(`[data-lid="${id}"]`);
+      const old = [id, e.style.getPropertyValue('visibility'), e.style.getPropertyPriority('visibility')];
+      e.style.setProperty('visibility', 'hidden', 'important'); return old;
+    })""", [i["id"] for i in logos])
+    try:
+        back = shot()
+    finally:
+        page.evaluate("""saved => saved.forEach(([id, value, priority]) => {
+          const e = document.querySelector(`[data-lid="${id}"]`);
+          if (value) e.style.setProperty('visibility', value, priority); else e.style.removeProperty('visibility');
+        })""", saved)
+    for it in logos:
+        x0, x1 = max(0, int(it["x0"])), min(1080, int(it["x1"]))
+        y0, y1 = max(0, int(it["y0"])), min(1920, int(it["y1"]))
+        fg, bg = front[y0:y1, x0:x1], back[y0:y1, x0:x1]
+        delta = np.max(np.abs(fg - bg), axis=2)
+        mask = delta > max(2, float(delta.max()) * .5) if delta.size else delta > 2
+        a, b = lum(fg[mask]), lum(bg[mask])
+        it["contrast"] = float(np.percentile((np.maximum(a, b) + .05) / (np.minimum(a, b) + .05), 10)) if a.size else 1.0
+
+
+def dead_limit(profile, explicit=None):
+    """REV-1: 1.5 s with the 2026-10-17+ profile; explicit --dead and legacy 2.5 s remain supported."""
+    return explicit if explicit is not None else (1.5 if profile >= "2026-10-17" else 2.5)
+
+
+def opening_findings(frames, info):
+    """SHORT-4: actual face, title and suppressed captions throughout the opening three seconds."""
+    end = min(guards.TITLE_END, info["duration"])
+    out = []
+    if sum(b - a for a, b in guards.window_union(info["faces"], end)) < end - 1e-6:
+        out.append(dict(kind="title", t=0, why="full face must cover the whole opening title window (SHORT-4)"))
+    for t, frame in frames:
+        if t >= end:
+            continue
+        items = [i for i in frame["items"] if i.get("opacity", 1) >= .5 and i["txt"]]
+        why = []
+        if not frame.get("face") or not frame.get("face_only"):
+            why.append("no visible full face")
+        if not any(i["kind"] == "title" for i in items):
+            why.append("no visible title")
+        if any(i["kind"] == "caption" for i in items):
+            why.append("caption visible under the opening title")
+        if why:
+            out.append(dict(kind="title", t=t, why="; ".join(why) + " (SHORT-4)"))
     return out
 
 
@@ -479,6 +578,8 @@ def legacy_findings(report, fill, hook_limit):
 
 SHORT_INFO = """() => ({ faces: (K.faceWindows || []).map(w => w.slice(0, 2)), splits: (K.splitWindows || []).map(w => w.slice(0, 2)),
   cut: window.CUT || null, fps: K.fps, freezes: (window.FREEZES || {}).runs || [], duration: K.duration, voice: window.DURATION || 0,
+  metadata: { faces: !!window.FACES?.face?.boxes?.length, half: !!window.FACES?.half?.boxes?.length,
+    freezes: Array.isArray(window.FREEZES?.runs) },
   live: !!(((window.FACES || {}).kind === 'live') || (K.splitWindows || []).length), gap: K.GAP || 40,
   cues: (K.cues || []).map(c => ({ t: c.t, cat: c.cat })),
   words: (window.TOKENS || []).filter(t => !t.tr && t.start != null).map(t => ({ w: t.w, start: t.start, end: t.end })) })"""
@@ -505,7 +606,7 @@ def visual_events(frames, info, every):
     return ev
 
 
-def short_findings(page, frames, fine, step, every, defaults_on):
+def short_findings(page, frames, fine, step, every, defaults_on, profile=""):
     """The 2026-10-18 checks (engine/guards.py) that need the page."""
     got = page.evaluate(SHORT_INFO)
     info = {"faces": [], "splits": [], "cut": None, "freezes": [], "duration": 0, "voice": 0, "live": False, "gap": 40,
@@ -519,6 +620,13 @@ def short_findings(page, frames, fine, step, every, defaults_on):
         out += merge_hits([h for t, f in frames for h in guards.headline_cross_findings(t, f, info["gap"])], every)
     out += guards.sfx_findings(info["cues"], visual_events(fine, info, step))
     if info["cut"]:
+        if profile >= "2026-10-18":
+            for name in ("faces", "freezes"):
+                if not (info.get("metadata") or {}).get(name):
+                    out.append(dict(kind="short-metadata", t=0, why=f"build/timing.js lacks {name} metadata: rebuild captions (SHORT-4/17)"))
+            if info["splits"] and not (info.get("metadata") or {}).get("half"):
+                out.append(dict(kind="short-metadata", t=0, why="split windows need half-face boxes in assets/faces.json (SHORT-12)"))
+            out += merge_hits(opening_findings(fine, info), step)
         out += guards.freeze_findings(info["faces"], info["splits"], info["freezes"])
         out += guards.end_cut_findings(info["duration"], info["voice"], info["cut"])
         out += guards.face_share_findings(info["faces"], info["splits"], info["duration"], info["live"])
@@ -543,7 +651,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("project")
     ap.add_argument("--every", type=float, default=0.25)
-    ap.add_argument("--dead", type=float, default=2.5)
+    ap.add_argument("--dead", type=float, help="dead seconds (2026-10-17+ defaults: 1.5; legacy: 2.5)")
     ap.add_argument("--fill", type=float, default=0.30)
     ap.add_argument("--hook", type=float, default=0.3)
     ap.add_argument("--no-sheet", action="store_true")
@@ -583,6 +691,8 @@ def main():
         frames = [(t, sampled[t]) for t in sample_times]
         new_findings = merge_hits([h for t, f in frames for h in frame_findings(t, f)], a.every)
         defaults_on = page.evaluate("Object.values(K.D || {}).some(Boolean)")
+        profile = page.evaluate("window.__lintDefaults || ''") or shortinfo.defaults_profile(proj)
+        a.dead = dead_limit(profile, a.dead)
         if defaults_on:
             digits = page.evaluate("K.DIGITS || 'en'")
             new_findings += merge_hits([h for t, f in frames for h in defaults_findings(t, f, digits)], a.every)
@@ -591,7 +701,13 @@ def main():
             if h['t'] in sampled:
                 new_findings += arrival_findings(h['t'], sampled[h['t']], a.fill, h['board'])
         new_findings += static_scene_findings((proj / 'scene.js').read_text(encoding='utf-8'))
-        found, short = short_findings(page, frames, [(t, sampled[t]) for t in fine_times], step, a.every, defaults_on)
+        new_findings += shortinfo.metadata_findings(proj, profile)
+        for t, frame in frames:
+            if any(i.get("logo") and i.get("intentional") for i in frame["items"]):
+                page.evaluate("(t) => K.seek(t)", t)
+                logo_contrast(page, frame)
+        new_findings += merge_hits([h for t, f in frames for h in structure_findings(t, f)], a.every)
+        found, short = short_findings(page, frames, [(t, sampled[t]) for t in fine_times], step, a.every, defaults_on, profile)
         new_findings += found
 
         times = [t for t, _ in frames]
@@ -599,11 +715,9 @@ def main():
         safe_hits = {}
         for t, f in frames:
             for it in f["items"]:
-                why = outside(it)
+                why = outside(it, face_only=f.get("face_only", False))
                 if not why:
                     continue
-                if it["kind"] == "caption" and why == "bottom" and it["y0"] <= guards.CAP_LOWEST + 1:
-                    continue  # SHORT-12: subtitles moved down below his chin (at most to y 1500) are the approved place
                 if it["kind"] == "obj":
                     cx, cy = (it["x0"] + it["x1"]) / 2, (it["y0"] + it["y1"]) / 2
                     if SAFE["upperLeft"] <= cx <= SAFE["upperRight"] and SAFE["top"] <= cy <= SAFE["bottom"]:
@@ -706,6 +820,7 @@ def main():
         new_findings += guards.still_image_findings(frames, words, skip=windows)
 
         report = {"project": proj.name, "look2": look2, "every": a.every, "voice_end": voice_end,
+                  "profile": profile, "review": shortinfo.review_stamp(proj),
                   "safe": safe, "dead": dead, "thin": thin, "hook_late": hook, "first_fill": first_fill, "bars": bars,
                   "covered": covered, "under_captions": under, "edge": edge,
                   "fill_median": sorted(cov)[len(cov) // 2] if cov else 0, "short": short}
@@ -755,7 +870,7 @@ def main():
         for h in edge:
             print(f"    {h['from']:6.2f}-{h['to']:6.2f}s  {h['what']}")
         extra = ('digits', 'small-text', 'crowded-board', 'caption-repeat') if defaults_on else ()
-        extra += ('on-face', 'freeze', 'title', 'end-cut', 'face-share', 'mid-word-cut', 'caption-switch', 'sfx-overlap',
+        extra += ('on-face', 'freeze', 'title', 'short-metadata', 'end-cut', 'face-share', 'face-overlap', 'mid-word-cut', 'caption-switch', 'sfx-overlap',
                   'sfx-orphan', 'stray-currency', 'tight-gap', 'headline-cross', 'long-tail', 'hook-replay', 'still-image')
         for kind in ('text-on-text', 'covered-shape', 'caption-band', 'brief', 'half-built-arrival', 'markup-crossing-text', 'structure') + extra:
             hits = [h for h in new_findings if h['kind'] == kind]

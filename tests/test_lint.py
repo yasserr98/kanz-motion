@@ -53,8 +53,8 @@ def test_static_checks_ignore_comments_and_strings_as_calls():
     K.img(b, 'logo-white.svg', {}); K.text(b, '2 / 7', {});
     '''
     hits = lint.static_scene_findings(src)
-    assert len(hits) == 4
-    assert {h['why'] for h in hits} >= {'K.look() without K.pace()', 'logo image', 'slide-counter text'}
+    assert len(hits) == 2
+    assert {h['why'] for h in hits} >= {'K.look() without K.pace()'}
     assert lint.static_scene_findings('K.look(); K.pace(); K.finish(); // K.text()') == []
     assert len(lint.static_scene_findings('K.look(); K.pace(); K.finish(); K.text(b,"hello",{});')) == 1
     assert lint.static_scene_findings('K.text(b,"hello",{});') == []

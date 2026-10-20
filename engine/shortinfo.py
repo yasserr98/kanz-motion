@@ -9,7 +9,9 @@ render as before):
   window.TITLE   the reel's title from shorts/_titles.json: its edited `text`, else option `pick` (1-based; option 1
                  until Ahmed picks). K.title() with no text uses it, so the title is never copied by hand (SHORT-4).
 """
+import hashlib
 import json
+import math
 import re
 from pathlib import Path
 
@@ -28,6 +30,64 @@ def load(path):
 def cut_from(proj):
     tr = load(Path(proj) / "transcript.json") or {}
     return tr.get("cut_from")
+
+
+def defaults_profile(proj):
+    """Literal K.pace defaults profile; comments and strings containing fake calls do not opt a legacy scene in."""
+    path = Path(proj) / "scene.js"
+    if not path.exists():
+        return ""
+    source = path.read_text(encoding="utf-8")
+    tokens = re.findall(r'//[^\n]*|/\*[\s\S]*?\*/|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|`(?:\\.|[^`\\])*`|[\s\S]', source)
+    code = "".join(" " * len(t) if t.startswith(("//", "/*", '"', "'", "`")) else t for t in tokens)
+    profiles = []
+    for m in re.finditer(r"\bK\s*\.\s*pace\s*\(\s*\{([^}]*?)\}", code):
+        opts = source[m.start(1):m.end(1)]
+        opts = re.sub(r"//[^\n]*|/\*[\s\S]*?\*/", "", opts)
+        p = re.search(r'\bdefaults\s*:\s*["\'](\d{4}-\d\d-\d\d)["\']', opts)
+        if p:
+            profiles.append(p[1])
+    return max(profiles, default="")
+
+
+def metadata_findings(proj, profile=None):
+    """SHORT-4/17: new cut-out shorts require face/freeze metadata. Legacy scenes explicitly remain optional."""
+    proj = Path(proj)
+    profile = defaults_profile(proj) if profile is None else profile
+    if not cut_from(proj) or profile < "2026-10-18":
+        return []
+    out = []
+    for name in ("faces", "freezes"):
+        data = load(proj / "assets" / f"{name}.json")
+        valid = isinstance(data, dict) and isinstance(data.get("fps"), (int, float)) and math.isfinite(data["fps"]) and data["fps"] > 0
+        if valid and name == "faces":
+            face = data.get("face")
+            boxes = face.get("boxes") if isinstance(face, dict) else None
+            valid = isinstance(boxes, list) and any(boxes) and all(b is None or (
+                isinstance(b, list) and len(b) == 4 and all(isinstance(v, (int, float)) and math.isfinite(v) for v in b)
+                and b[0] < b[2] and b[1] < b[3]) for b in boxes)
+        elif valid:
+            runs = data.get("runs")
+            valid = isinstance(runs, list) and all(isinstance(r, list) and len(r) == 2 and
+                all(isinstance(v, (int, float)) and math.isfinite(v) for v in r) and 0 <= r[0] < r[1] for r in runs)
+        if not valid:
+            out.append(dict(kind="short-metadata", t=0,
+                            why=f"missing or invalid assets/{name}.json: run engine/faces.py for this new short (SHORT-4/17)"))
+    return out
+
+
+def review_stamp(proj):
+    """Bind the ship review to its scene, timing, metadata and checker/runtime versions, without private paths."""
+    proj = Path(proj)
+    paths = ["scene.js", "index.html", "transcript.json", "build/timing.js", "assets/faces.json", "assets/freezes.json"]
+    digest = hashlib.sha256()
+    for base, names in ((proj, paths), (ROOT, ["engine/lint.py", "engine/guards.py", "engine/shortinfo.py"] +
+                        sorted(p.relative_to(ROOT).as_posix() for p in (ROOT / "runtime").glob("*") if p.is_file()))):
+        for name in names:
+            path = base / name
+            digest.update(name.encode())
+            digest.update(path.read_bytes() if path.is_file() else b"<missing>")
+    return {"version": 1, "sha256": digest.hexdigest()}
 
 
 def title_entry(slug, titles=None):
@@ -61,6 +121,9 @@ def extras_js(proj):
     if not cut:
         return ""
     out = ["window.CUT=" + json.dumps(cut, ensure_ascii=False) + ";"]
+    problems = metadata_findings(proj)
+    if problems:
+        out.append("window.SHORT_METADATA_FINDINGS=" + json.dumps(problems) + ";")
     for name, file in (("FACES", "faces.json"), ("FREEZES", "freezes.json")):
         data = load(proj / "assets" / file)
         if data is not None:

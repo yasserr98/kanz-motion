@@ -37,8 +37,6 @@ def on_face_findings(t, frame, box):
     for it in frame["items"]:
         if it["kind"] not in ("text", "caption", "title") or it.get("opacity", 1) < .5 or not it.get("over_face", it["kind"] != "text"):
             continue
-        if it["kind"] == "caption" and it["y0"] >= CAP_BAND_TOP - 2:
-            continue  # SHORT-12: subtitles at their usual height or moved down below his chin are the approved place
         area = (it["x1"] - it["x0"]) * (it["y1"] - it["y0"])
         if area and box_hit(it, box) > 0.02 * area:
             out.append(dict(kind="on-face", t=t, id=it["id"], what=it["txt"][:40], by=it["kind"]))
@@ -90,29 +88,33 @@ def tight_gap_findings(t, frame, gap):
 
 
 def headline_cross_findings(t, frame, gap):
-    """Anything that crosses a K.headline or starts less than `gap` px under its last line (`headline-cross`, TXT-6):
+    """Anything that crosses a K.headline or board .head, or starts less than `gap` board px under its last line (TXT-6):
     panel and card edges, chart and grid lines, objects, images, blocks. The headline box is the union of its visible
-    words; backgrounds (over 60% of the frame), captions, the headline's own glow and faint elements are ignored."""
+    words; identified full-bleed backgrounds, captions, the headline's own glow and faint elements are ignored."""
     words = [i for i in frame["items"] if i["kind"] == "text" and i.get("hl") and i.get("opacity", 1) >= .5 and i["txt"]]
-    if not words:
-        return []
-    h = dict(x0=min(w["x0"] for w in words), x1=max(w["x1"] for w in words),
-             y0=min(w["y0"] for w in words), y1=max(w["y1"] for w in words))
+    heads = [i for i in frame["items"] if i["kind"] == "text" and i.get("head") and not i.get("hl")
+             and i.get("board") and i.get("opacity", 1) >= .5 and i["txt"]]
+    if words:
+        heads.append(dict(x0=min(w["x0"] for w in words), x1=max(w["x1"] for w in words),
+                          y0=min(w["y0"] for w in words), y1=max(w["y1"] for w in words),
+                          txt=" ".join(w["txt"] for w in words), hl=True, sc=words[0].get("sc", 1)))
     out = []
-    for i in frame["items"]:
-        if i["kind"] == "caption" or i.get("hl") or i.get("over_face") or i.get("opacity", 1) < .5:
-            continue
-        if i["kind"] == "text" and not i.get("card"):
-            continue  # plain labels: text-on-text and tight-gap cover them
-        if (i["x1"] - i["x0"]) * (i["y1"] - i["y0"]) > .6 * 1080 * 1920:
-            continue
-        if min(h["x1"], i["x1"]) <= max(h["x0"], i["x0"]):
-            continue
-        if i["y1"] <= h["y0"] or i["y0"] >= h["y1"] + gap - .5:
-            continue
-        d = i["y0"] - h["y1"]
-        why = "crosses the headline" if d < 0 else f"less than {gap:.0f} px under the headline"
-        out.append(dict(kind="headline-cross", t=t, id=i["id"], what=i["txt"][:30], by=" ".join(w["txt"] for w in words)[:30], why=why))
+    for h in heads:
+        sc = h.get("sc") or 1
+        for i in frame["items"]:
+            if i is h or i["kind"] in ("caption", "title") or i.get("hl") or i.get("background") or i.get("opacity", 1) < .5:
+                continue
+            if not h.get("hl") and i.get("board") != h.get("board"):
+                continue
+            if i["kind"] == "text" and not i.get("card"):
+                continue  # plain labels: text-on-text and tight-gap cover them
+            if min(h["x1"], i["x1"]) <= max(h["x0"], i["x0"]):
+                continue
+            if i["y1"] <= h["y0"] or i["y0"] >= h["y1"] + (gap - .5) * sc:
+                continue
+            d = (i["y0"] - h["y1"]) / sc
+            why = "crosses the headline" if d < 0 else f"less than {gap:.0f} px under the headline"
+            out.append(dict(kind="headline-cross", t=t, id=i["id"], what=i["txt"][:30], by=h["txt"][:30], why=why))
     return out
 
 
@@ -155,21 +157,37 @@ def sfx_findings(cues, events, gap=SFX_GAP, reach=SFX_REACH):
     return out
 
 
+def window_union(windows, duration):
+    """Clip windows to the actual runtime and merge their union (SHORT-15)."""
+    merged = []
+    for a, b in sorted((max(0, a), min(b, duration)) for a, b, *_ in windows or []):
+        if b <= a:
+            continue
+        if merged and a <= merged[-1][1]:
+            merged[-1][1] = max(b, merged[-1][1])
+        else:
+            merged.append([a, b])
+    return merged
+
+
 def face_share(face_windows, split_windows, duration):
-    shown = sum(max(0.0, min(b, duration) - a) for a, b, *_ in (face_windows or [])) + \
-            sum(max(0.0, min(b, duration) - a) for a, b, *_ in (split_windows or []))
-    return shown / duration if duration else 0.0
+    windows = window_union(list(face_windows or []) + list(split_windows or []), duration)
+    return sum(b - a for a, b in windows) / duration if duration > 0 else 0.0
 
 
 def face_share_findings(face_windows, split_windows, duration, live, share=FACE_SHARE):
     """Workshop shorts: his face (full or in the split) at least half the runtime (`face-share`, SHORT-15; live F:
     "show Ahmed's face more and less animation")."""
-    if not live:
-        return []
+    out = []
+    for a in window_union(face_windows, duration):
+        for b in window_union(split_windows, duration):
+            if overlap(a, b) > 1e-6:
+                out.append(dict(kind="face-overlap", **{"from": max(a[0], b[0]), "to": min(a[1], b[1])},
+                                why="face and split windows overlap (SHORT-15)"))
     got = face_share(face_windows, split_windows, duration)
-    if got + 1e-6 >= share:
-        return []
-    return [dict(kind="face-share", t=0, why=f"his face shows {got:.0%} of {duration:.1f} s < {share:.0%} (SHORT-15)")]
+    if live and got + 1e-6 < share:
+        out.append(dict(kind="face-share", t=0, why=f"his face shows {got:.0%} of {duration:.1f} s < {share:.0%} (SHORT-15)"))
+    return out
 
 
 def lands_on_board(c, face_windows, split_windows):
@@ -343,16 +361,28 @@ def ending_problems(mono, sr, last=0.15, margin=6.0):
     return []
 
 
-def leak_problems(cut, gap=0.0):
-    """No part of the next source sentence inside the short: every range stops before the next source word."""
-    out = []
+def leak_checks(cut, gap=None):
+    """SHORT-3: keep next-word clearance, or the whole last word with an explicit listening warning."""
+    if gap is None:
+        import footage
+        gap = getattr(footage, "NEXT_WORD_GAP", 0.05)
+    out, warns = [], []
     for r in (cut or {}).get("ranges", []):
-        nxt = r.get("next_word_start")
-        if nxt is not None and r["end"] > nxt - gap + 1e-6:
-            out.append(f"range {r['start']:.2f}-{r['end']:.2f} runs {r['end'] - nxt:.2f} s into the next source word ({nxt:.2f} s)")
-        if r["end"] < r["last_word_end"] - 1e-6:
+        nxt, last, end = r.get("next_word_start"), r["last_word_end"], r["end"]
+        if end < last - 1e-6:
             out.append(f"range {r['start']:.2f}-{r['end']:.2f} ends before its last word ({r['last_word_end']:.2f} s)")
-    return out
+        elif nxt is not None and end > nxt - gap + 1e-6:
+            if nxt - last < gap and end <= last + .010 + 1e-6:
+                warns.append(f"ending: kept the whole last word; next word {(nxt - last) * 1000:.0f} ms later, listen")
+            else:
+                out.append(f"range {r['start']:.2f}-{end:.2f} leaves {nxt - end:.3f} s before the next source word "
+                           f"({nxt:.2f} s), needs {gap:.2f} s (SHORT-3)")
+    return out, warns
+
+
+def leak_problems(cut, gap=None):
+    """Failures only; ship uses leak_checks so a tight whole-word ending also reaches the human ear."""
+    return leak_checks(cut, gap)[0]
 
 
 def decimate_runs(flags, fps):

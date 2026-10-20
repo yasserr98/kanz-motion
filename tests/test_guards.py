@@ -34,9 +34,12 @@ def test_ending_guard_adds_tail_and_stops_before_the_next_word():
 def test_joined_ranges_open_a_pause_and_shift_words():
     words = [W("a", 1.0, 1.4), W("b", 5.0, 5.4), W("c", 5.5, 5.9), W("d", 9.0, 9.4)]
     s = footage.plan_segments(words, [(1.0, 1.4), (5.0, 5.9)])
-    assert s[0]["lead"] == 0 and s[1]["lead"] == footage.JOIN
-    assert s[1]["out_start"] == pytest.approx(0.8 + 0.25)            # range 1 (0.8 s with its tail) + the join pause
-    assert footage.short_duration(s) == pytest.approx(1.05 + 1.3)
+    assert s[0]["lead"] == 0
+    previous_word = s[0]["out_start"] + s[0]["last_word_end"] - s[0]["src_start"]
+    next_word = s[1]["out_start"] + words[1]["start"] - s[1]["src_start"]
+    assert next_word - previous_word == pytest.approx(footage.JOIN)  # tail + lead together make the join pause
+    assert s[1]["out_start"] == pytest.approx(.4 + footage.JOIN)
+    assert footage.short_duration(s) == pytest.approx(.4 + footage.JOIN + 1.3)
 
 
 def test_voice_fade_sits_inside_the_tail(monkeypatch):

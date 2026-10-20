@@ -8,7 +8,8 @@ Every project:
 Cut-out shorts (transcript.json cut_from) also:
   cuts       a 12-frame strip around every cut (face/split windows from out/lint.json, plus ffmpeg scene changes)
              -> out/cuts-<version>.jpg; charcoal, flash, half-built and one-frame flags fail (SHORT-10)
-  leak       every source range stops before the next source word
+  leak       every source range stops NEXT_WORD_GAP before the next source word; a tighter whole-word ending
+             (last word end + up to 10 ms) warns for human listening instead (SHORT-3)
   title      a K.title, with the text from shorts/_titles.json (SHORT-4)
   freeze     duplicate frames (mpdecimate) in face and split windows: a run of 0.5 s or more fails
   fps        footage frames at the render's frame rate; the source's own rate is reported
@@ -25,6 +26,7 @@ import numpy as np
 
 import guards
 import shortinfo
+import footage
 
 SR = 48000
 STRIP = 12
@@ -199,21 +201,47 @@ def notes(proj, mp4, version):
     return lines
 
 
+def review_problems(proj, report):
+    """New shorts require metadata and a matching lint report; legacy projects explicitly keep the old path."""
+    profile = max(shortinfo.defaults_profile(proj), report.get("profile") or "")
+    if not shortinfo.cut_from(proj) or profile < "2026-10-18":
+        return []
+    out = [h["why"] for h in shortinfo.metadata_findings(proj, profile)]
+    short = report.get("short") if isinstance(report.get("short"), dict) else {}
+    if (report.get("review") != shortinfo.review_stamp(proj) or not short.get("cut") or
+            not all(k in short for k in ("faces", "splits", "duration", "fps"))):
+        out.append("missing or stale out/lint.json for this new short: run lint --strict before ship (SHORT-4/17)")
+    return out
+
+
 def run(proj, mp4, version, allow=(), picture=True):
     """All checks (picture=False, for make.py remix: the sound checks only). Returns (problems, warnings, info lines)."""
     proj = Path(proj)
     lint_report = shortinfo.load(proj / "out" / "lint.json") or {}
-    short = lint_report.get("short") or {}
+    if not isinstance(lint_report, dict):
+        lint_report = {}
+    short = lint_report.get("short") if isinstance(lint_report.get("short"), dict) else {}
     fps = short.get("fps") or 24
     problems, warns, info = [], [], []
-    p, w = ending(proj, mp4)
-    problems += p + tail(proj, mp4)
+    ending_errors, w = ending(proj, mp4)
+    problems += ending_errors + tail(proj, mp4)
     warns += w
     if not picture:  # a remix cannot move the ending (the picture is copied): report it, do not fail
         return [], warns + [p + " (a remix keeps the cut; fix it in a new version)" for p in problems], info
     cut = shortinfo.cut_from(proj)
     if cut:
-        problems += guards.leak_problems(cut)
+        review = review_problems(proj, lint_report)
+        if review:
+            return problems + review, warns, info
+        gap = getattr(footage, "NEXT_WORD_GAP", 0.05)
+        p, w = guards.leak_checks(cut, gap=gap)
+        problems += p
+        warns += w
+        if ending_errors and guards.leak_checks({"ranges": cut.get("ranges", [])[-1:]}, gap=gap)[1]:
+            last = last_word_end(proj)
+            if last is not None and duration(mp4) >= last - 1e-6:
+                problems = [p for p in problems if p not in ending_errors]
+                info.append("ending energy reaches the tail; the whole last word is retained (SHORT-3, listen)")
         problems += title_problems(proj)
         p, total = freezes_in_mp4(mp4, short, fps)
         problems += p
