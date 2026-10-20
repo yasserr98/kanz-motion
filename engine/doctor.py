@@ -83,11 +83,11 @@ def checks(proj=None, shorts=False):
                            capture_output=True, timeout=30) if ssh else None
         bash = shutil.which("bash")
         yield ("OK" if r is not None and r.returncode == 0 and bash else "WARN", "render host",
-               f"{host} reachable, renders go there (--local to render here)" if r is not None and r.returncode == 0 and bash
-               else f"{host} set but bash not found: renders run locally" if not bash
-               else f"{host} not reachable over ssh: host renders fail; use --local explicitly to render here")
+               f"{host} reachable for explicit --host jobs; renders run locally by default" if r is not None and r.returncode == 0 and bash
+               else f"{host} set but bash not found: --host unavailable; renders run locally by default" if not bash
+               else f"{host} not reachable over ssh: --host jobs fail; renders run locally by default")
     else:
-        yield ("OK", "render host", "none set: renders run on this machine (KANZ_RENDER_HOST in .env to use a server)")
+        yield ("OK", "render host", "renders run locally; KANZ_RENDER_HOST plus explicit --host only when Ahmed asks")
     codex = version(["codex", "--version"])
     yield ("OK" if codex else "WARN", "Codex CLI", codex or "not found: the image pass (engine/codex_assets.py) needs it")
     import codex_assets

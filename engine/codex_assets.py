@@ -18,10 +18,13 @@ Set "gambling": true on shots.json or an individual shot to apply IMG-9 to free-
 A top-level true applies to every shot, even if a shot has gambling: false.
 
 Modes
-  kanz  ICONS: the fixed Kanz icon style (the MD rules), transparent cutout, attached approved references
+  kanz  ICONS AND DRAWN SCENES: the fixed Kanz icon style (the MD rules), transparent cutout, approved references.
+        For causes, actors and stories use one scene per beat, still once drawn in (EXPL-1, PACE-9).
+        Live C v10 references: library/scenes/README.md; e.g. "ref": "../scenes/scene-bank-helm.png".
   free  PHOTOS: a full-screen 9:16 photo of a generic place or setting, no Kanz style rules (Ahmed 2026-10-16:
         "the MD files were meant for icons rather than photos ... free photos are great"). Which type a shot gets:
-        docs/routes/images.md
+        docs/routes/images.md. A real place/setting for a past event may be generated when no photo of that
+        moment exists; record it as generated in CREDITS.md, never generate real people (IMG-8).
   edit  a REAL supplied photo of a place or object given the Kanz editorial treatment (Kanz
         brand/image-treatment/CREATE-A-BRANDED-IMAGE.md). Never for real people or real moments (IMG-8: real photos,
         never generated or repainted; the image tool also refuses to EDIT public figures, Messi 2026-10-16): show

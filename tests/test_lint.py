@@ -60,6 +60,42 @@ def test_static_checks_ignore_comments_and_strings_as_calls():
     assert lint.static_scene_findings('K.text(b,"hello",{});') == []
 
 
+@pytest.mark.parametrize("value", ["true", "8", "-4", ".5"])
+def test_idle_motion_warning_on_current_profile(value):
+    src = f'K.img(b, "hero.png", {{float: {value}}});'
+    hit, = lint.static_scene_findings(src, profile="2026-10-18")
+    assert (hit["kind"], hit["rule"], hit["level"]) == ("idle-motion", "PACE-9", "warn")
+    assert lint.unjustified([{**hit, "justified": False}]) == 0
+    assert lint.static_scene_findings(src) == []
+    assert lint.static_scene_findings(src, profile="2026-10-17") == []
+
+
+def test_idle_motion_ignores_comments_strings_and_disabled_float():
+    src = '''// float: true
+    /* float: 8 */ const note = "float: true";
+    K.img(b, "hero.png", {float: false}); K.img(b, "hero.png", {float: 0});'''
+    assert lint.static_scene_findings(src, profile="2026-10-18") == []
+
+
+@pytest.mark.parametrize("profile", ["", "2026-10-18"])
+def test_photo_opening_allows_captions_from_frame_one(profile):
+    src = 'K.look(); K.pace(); K.captionsFrom = 0; K.screen("place.jpg", {at: 0, out: 4}); K.finish();'
+    assert lint.static_scene_findings(src, profile=profile) == []
+    # K.screenWindows supplies first_fill=1; hook checks concern arrival/fill, not captions.
+    report = dict(safe=[], covered=[], edge=[], bars=[], dead=[], thin=[], hook_late=None, first_fill=1)
+    assert lint.legacy_findings(report, .3, .3) == []
+
+
+def test_current_youtube_short_checks_face_share():
+    class Page:
+        def evaluate(self, js):
+            return dict(cut={"start": 0}, faces=[[0, 3]], duration=20, voice=20, live=False)
+    hits, _ = lint.short_findings(Page(), [], [], .1, .25, True, "2026-10-18")
+    assert any(h["kind"] == "face-share" for h in hits)
+    hits, _ = lint.short_findings(Page(), [], [], .1, .25, False, "")
+    assert not any(h["kind"] == "face-share" for h in hits)
+
+
 def test_single_sample_text_overlap_and_opacity():
     a, cap = box(), box(2, 'caption')
     assert lint.frame_findings(74, dict(items=[a, cap]))[0]['kind'] == 'text-on-text'

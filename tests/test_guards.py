@@ -271,6 +271,15 @@ def test_face_share_for_workshop_shorts():
     assert not guards.face_share_findings([[0, 3]], [], 20, live=False)
 
 
+@pytest.mark.parametrize("profile,live,expected", [
+    ("", False, False), ("2026-10-17", False, False), ("", True, True),
+    ("2026-10-18", False, True), ("2026-10-18", True, True)])
+def test_face_share_all_current_shorts(profile, live, expected):
+    hits = guards.face_share_findings([[0, 3]], [], 20, live, profile=profile)
+    assert any(h["kind"] == "face-share" for h in hits) is expected
+    assert not guards.face_share_findings([[0, 3]], [[3, 10]], 20, live, profile=profile)
+
+
 def test_cut_inside_a_word():
     words = [W("a", 1.0, 1.5), W("b", 1.7, 2.1)]
     assert guards.mid_word_findings([1.2], words)

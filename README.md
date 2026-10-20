@@ -37,8 +37,10 @@ voice note ─► transcribe (word timings) ─► cut retakes, tighten pauses, 
   place and darkens the headline and caption bands as much as that photo needs; `K.snap35()` shows a real, licensed
   photo of a person or moment as a disposable-camera print (no date). `engine/codex_assets.py` generates a video's
   photos and icons with Codex from `shots.json`; `engine/contrast.py` checks every headline on the rendered frame (4.5:1).
-  The template loads it, so voice-note and script Reels use the same three visual types as the shorts (2026-10-17).
-- **Render on a server** (2026-10-16): `bash engine/vps_render.sh <slug> <name>` with `KANZ_RENDER_HOST` in `.env`.
+  The template loads it, so voice-note and script Reels use the same image-pass workflow as the shorts.
+- **Rendering** (quiz 2026-10-20, Q8): local by default, one Chromium job at a time across all checkouts.
+  `KANZ_RENDER_HOST` alone never routes a job remotely. Only when Ahmed asks, add `--host` to
+  `make.py render`, `ship` or `remix`; `--local` remains an accepted no-op.
 
 ## Setup (once, on a new computer)
 
@@ -100,6 +102,46 @@ The worked scenes are current teaching copies; the delivered Reels used an older
 
 Your own videos live in `projects/`, which Git ignores. **Before making videos in volume read [docs/EFFICIENCY.md](docs/EFFICIENCY.md)**:
 which model to use, how to keep each video cheap, and the usage log.
+
+Opus (medium) writes the storyboard and reviews; Sonnet 5.5 (medium) builds, renders and fixes notes, with one
+fresh session per video. A re-do with the same voice keeps the approved take and runs `make.py retime <slug>`
+(1.08 tempo, pauses to 0.3 s); voice notes retain 1.25x and use `make.py retime <slug> 1.0` (VOICE-10).
+
+Voice-note/script Reels prefer a photo of the story's place with a headline and captions from frame 1:
+`K.screen` from 0 and `K.captionsFrom = 0`, optionally with a live line or other explanatory change (HOOK-4).
+Question-hero openings remain allowed; only those hold captions until the question ends (HOOK-1..3).
+Pictures arrive and sit still, including the hook hero; legacy `float` still works but current-profile lint warns
+`idle-motion` (PACE-9). Prices, percentages and amounts use moving engine diagrams; causes, actors and stories
+use drawn scenes in the approved [Live C v10 style](library/scenes/README.md) (EXPL-1, IMG-4).
+A past event's real place/setting may be photo-real generated when no real photo of that moment exists; label
+it generated in `CREDITS.md`. Real people are never generated or repainted (IMG-8).
+
+Every cut-out short, YouTube or workshop, shows his face full screen or in the split for at least 50% of its
+runtime (SHORT-15; enforced on the current defaults, legacy workshop checks unchanged). Pick the ending by
+the last line: his opinion/punchline ends on his face, ~0.2 s after the last word; an explanation/number gets
+its own moving last board, never a hook replay or static held board (SHORT-7).
+
+## Small revisions
+
+A first delivery must pass `make.py ship <slug> v1`. For a revision changing only a few seconds (REV-3), record
+each changed interval in `notes.json`, render, then check the final MP4:
+
+```bash
+python engine/make.py note <slug> 12.5 "12.0-14.0 s: his words and the requested fix" v1
+# apply the fix; record version/interval and evidence matching the complaint in notes.json (REV-7)
+python engine/make.py note <slug> fixed 1
+python engine/make.py render <slug> v2
+# once the background render completes:
+python engine/make.py check <slug> v2 --partial
+```
+
+Run the render in the background, without polling. `check --partial` fails on problems and checks loudness, ending and
+MP4 frames; it also writes `out/check-v2.jpg` and `out/notes-v2.jpg` from the required notes entries. Ordinary `check` and `ship` retain all shorts checks
+(including a fresh lint stamp); `--partial` skips those full-short checks and is accepted only by `check`.
+Look at the check and notes sheets for the changed seconds; listen to audio changes and play motion changes,
+recording the version and interval as evidence. Use the actual note number instead of `1` above.
+The receipt in the private Kanz repo must say **"partial checks passed"**, never **"full ship passed"**.
+Changes beyond a few seconds use `ship` again.
 
 ## Live/workshop shorts: tracking and split
 

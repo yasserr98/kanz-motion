@@ -51,7 +51,7 @@ def test_doctor_explains_host_failure(monkeypatch, bash):
     monkeypatch.setattr(doctor.subprocess, "run", lambda *a, **k: SimpleNamespace(returncode=1))
     detail = next(detail for _, what, detail in doctor.checks() if what == "render host")
     assert "fall back to --local" not in detail
-    assert ("fail" in detail and "--local" in detail) if bash else "locally" in detail
+    assert "--host" in detail and "locally" in detail
 
 
 def test_host_render_failure_does_not_fall_back(project, monkeypatch):
@@ -63,7 +63,7 @@ def test_host_render_failure_does_not_fall_back(project, monkeypatch):
         raise subprocess.CalledProcessError(1, cmd)
     monkeypatch.setattr(make, "run", run)
     with pytest.raises(subprocess.CalledProcessError):
-        make.render(project, "v1")
+        make.render(project, "v1", host=True)
     assert len(calls) == 1 and "vps_render.sh" in str(calls[0])
 
 
@@ -74,7 +74,7 @@ def test_missing_bash_keeps_local_fallback(project, monkeypatch, capsys):
     monkeypatch.setattr(make, "run", lambda cmd: calls.append(cmd))
     make.render(project, "v1")
     assert calls == [[make.PY, "engine/render.py", project, "--name", "v1"]]
-    assert "rendering locally" in capsys.readouterr().err
+    assert not capsys.readouterr().err
 
 
 def test_fire_schedules_one_cue_with_explicit_legacy_pair():

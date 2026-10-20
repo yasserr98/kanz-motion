@@ -39,10 +39,13 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
 - **Simple hook (every video).** "the hook is the question headline plus ONE hero object, nothing else: no second
   object, character, tag, arrow, label, foreground blur or extra beat until the question ends. Glow, float and one slow
   push are the only movement. Ignore lint's hook `dead` flag for this stretch." Rule: HOOK-1.
+  - The all-video scope and idle float are **Superseded** by quiz 2026-10-20, Q2/Q4: photo openings preferred,
+    question-hero still allowed; no picture idles (HOOK-1..4, PACE-9).
   - "one slow push": **Superseded** 2026-10-13 by `K.settle` (the hero settles from oversized on frame 1).
 - **Hook reference.** "this can be the default": copy the hook of `projects/us-dollar-decisions` (v4): three-line
   question headline, keyword last in lavender, one 600 px hero with glow + float. Rule: HOOK-2 (now via
-  `examples/us-dollar-decisions-pace`, section 1).
+  `examples/us-dollar-decisions-pace`, section 1). **Superseded** for float by quiz 2026-10-20, Q2
+  (glow, no idle float; HOOK-2, PACE-9), and as the preferred default by Q4 (photo openings, HOOK-4).
 - **Numbers.** No "مثال افتراضي" tag on screen when the voice itself frames the figures as an example ("خلينا نقول",
   "لو"...) (Ahmed, 2026-10-11, all videos). Rule: NUM-2.
 - **Logo contrast.** When a video does add the logo, it must contrast with whatever is behind it (Ahmed 2026-10-11:
@@ -62,7 +65,8 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   - "a few snap zooms (`K.snap`)": **Superseded** 2026-10-17 (snap zooms off by default).
 - **Hook under pace.** The hero settles from oversized on frame 1 (`K.settle`) instead of the slow push, and
   `K.captionsFrom` hides the caption until the question ends (copy `projects/us-dollar-decisions-pace`, section 1).
-  Rule: HOOK-3.
+  Rule: HOOK-3. **Superseded** in scope by quiz 2026-10-20, Q4: the caption hold applies only to
+  question-hero openings; photo openings show captions from frame 1 (HOOK-4).
 - **Variety.** "apply all": one `K.punch` (with `riser: true`) on the key sentence; amounts as `K.stack`/`K.pile`;
   state changes as `K.swap`; places as map/globe + `K.pin`; real series through `engine/data.py` with a source line.
   Worked example: `projects/_suggestions-demo`. Rule: PACE-7.
@@ -105,6 +109,8 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   dissolve; whip, zoom-through and TV-glitch exist but were not picked); no snap zooms or face jump zooms by default
   ("glitch at 14 s", "weird zoom at 16 s"); pay off what the hook promises; every picture belongs to the line (the phone
   icon under the house was "irrelevant"). Rules: SHORT-1..10.
+  - "don't cut back to his face at the end" (SHORT-7): **Superseded** by quiz 2026-10-20, Q1: choose face
+    or board from the last line, not a blanket ban on face endings.
 
 ## 2026-10-17
 
@@ -147,7 +153,8 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   - M3: one current worked example per route; warnings when a scene has `K.look` without `K.pace`. Rule: PACE-1.
   - M4: `library/objects/manifest.json` with approved/candidate status. Rule: OBJ-2.
   - M5-M8: `make.py ship`, `make.py doctor`, renders on the render host when one is set, cached audio mix. Rules: REV-3,
-    REV-4.
+    REV-4. **Superseded** by quiz 2026-10-20, Q8/Q9: local by default, explicit host jobs only; first
+    delivery still ships, small revisions may use partial checks.
   - V6 one digit system: Western digits with the Arabic percent sign (`35`, `65٪`). Rule: NUM-3.
   - V7 size floors: source lines 28 px, labels 34 px. Rule: TXT-1.
   - V8 at most four labelled elements per board; split a busier board into two beats. Rule: TXT-2.
@@ -176,6 +183,7 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   - (a) Face vs. animation in workshop shorts (live F: "show Ahmed's face more and less animation"; live H: "more dynamic
     animation"): his face, full screen or in the split, is on screen at least 50% of a workshop short; boards only where
     the line explains a mechanism, says a number or names something, and those inserts move. Rule: SHORT-15.
+    **Superseded** in scope by quiz 2026-10-20, Q3: 50% face for every cut-out short, including YouTube.
   - (b) Transitions (casino: the clean cut; live C: "make the transitions more smooth"): clean picture cuts between face
     and board, eased moves into and out of the 50/50 split, and never a cut or move inside a word. Rule: SHORT-16.
   - (c) Press photos of real moments (Mandi, Messi): a standing yes. Press photos of real public moments may be used in
@@ -222,7 +230,8 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   still chart icon: "this needs to be dynamic to show the stock rising and falling etc rather than just an image"; on a
   still monitor icon: "not explanatory at all"). Mechanisms, prices, percentages and comparisons are animated diagrams or
   drawn illustrations; icons only support. **Replaces** "concept, mechanism or number -> Kanz icon" in IMG-4.
-  Rules: EXPL-1, EXPL-2, IMG-4, HOOK-2.
+  Rules: EXPL-1, EXPL-2, IMG-4, HOOK-2. **Superseded** in diagram/drawing choice by quiz 2026-10-20, Q7:
+  prices, percentages and amounts use engine diagrams; causes, actors and stories use drawn scenes.
 - **No replica ending, no dead silence** (same review: "the fact that we end the video with the same pic as the hook
   sucks I want it to be more dynamic", "last frame sucks we don't need a replica we need to keep the video going and
   remove the dead silence"). The last line gets its own moving visual and the video ends about 0.4 s after the last word.
@@ -233,7 +242,8 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
 - **Local renders one at a time** (after five parallel local renders and lints ran his 16 GB PC out of memory and
   crashed Claude, asked how to run them: "Local, one at a time"). Every engine script that opens Chromium waits for one
   machine-wide slot (`engine/slot.py`, lock file `.local-render.lock`); a crashed job frees it. Full renders still go
-  to the render host when `KANZ_RENDER_HOST` is set. Rule: REPO-6.
+  to the render host when `KANZ_RENDER_HOST` is set. Rule: REPO-6. **Superseded** for host routing by
+  quiz 2026-10-20, Q8: local by default, VPS only for an explicitly requested `--host` job.
 
 ## 2026-10-20
 
@@ -272,7 +282,53 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
     on a library object that is not approved. Rule: OBJ-2; engine implementation is a separate audit job.
   - **One machine, all checkouts** (B1 C2, B2 X17): a checkout-local lock allowed simultaneous jobs in different
     worktrees. The lock lives in the user's local app data and serializes all checkouts. Rule: REPO-6.
-    The render-host clause stays unchanged pending the open decision.
+    The render-host clause stayed unchanged pending the open decision. **Superseded** by quiz 2026-10-20, Q8
+    (local default; explicit `--host` only).
   - **Workshop title position follows the face** (B2 X10): Live E used y 190 because y 330 touched his face;
     approved in `4b0c5b47`, 2026-10-20 03:47. Start at y 330 and move wherever the actual face boxes leave the eyes
     and mouth clear throughout the three seconds; neither value is fixed. Rule: SHORT-4.
+
+## 2026-10-20 quiz
+
+Ahmed's picks from the quiz (Q1-Q10); these apply to current defaults and new work. Finished projects keep their
+existing runtime behavior. The four approved drawn-scene references are the explicit public-library exception.
+
+- **Q1, C** (quiz 2026-10-20, Q1): "Pick by the last line: face when the last line is his own opinion or punchline;
+  board when it still explains something or says a number." Face endings hold through ~0.2 s after the last word
+  (Casino E v10); board endings get their own moving last beat (Casino G v8), never a hook replay or static held
+  board. Replaces the 2026-10-16 blanket ban on returning to his face. Rules: SHORT-7, PACE-6.
+- **Q2, A** (quiz 2026-10-20, Q2): "Nothing idles: pictures arrive, then sit still; only the camera and real
+  explanatory changes move. Includes the hook hero." Replaces hook "glow + float" with glow, no idle float;
+  no float, bob, shake or wobble (Live C v10). Current-profile lint warns `idle-motion`; legacy `K.img` float
+  stays functional. EXPL-2's movement with the words means explanatory change. Rules: HOOK-2, PACE-9, EXPL-2.
+- **Q3, B** (quiz 2026-10-20, Q3): "50% face for all shorts". Replaces the workshop-only scope: every cut-out
+  short, YouTube and workshop, shows full face or split for at least half its runtime. Enforcement expands with
+  the 2026-10-18 defaults; legacy checks stay unchanged. Rule: SHORT-15.
+- **Q4, note** (quiz 2026-10-20, Q4): "B and C are amazing". B: a full-screen photo of the story's place with the
+  headline, captions from frame 1 (Gambler's Fallacy v7). C: a photo with a moving element on it, e.g. a live line
+  (Emotional Trading v16). These are the preferred voice-note/script openings. Replaces question-hero as the
+  preferred default, without banning it. Its caption hold applies only to question-hero openings; photos use
+  `K.screen` from 0 and `K.captionsFrom = 0`. Rules: HOOK-1..4.
+- **Q5, A** (quiz 2026-10-20, Q5): "Generated photo-real is fine when no real photo of the moment exists".
+  Amends the real-events-only-photo restriction for a real PLACE or setting of a past event (Monte Carlo 1913,
+  Gambler's Fallacy v7). Record it as generated in `CREDITS.md`; real PEOPLE are still never generated or
+  repainted. Rule: IMG-8.
+- **Q6, B** (quiz 2026-10-20, Q6): "Retime to today's pace". A re-do with "the same voice track" keeps the approved
+  take but uses `make.py retime <slug>`: 1.08 tempo, pauses to 0.3 s; voice notes retain 1.25x and use retime 1.0
+  (US Dollar v6). Replaces treating "same voice track" as a requirement to preserve old timing. Rule: VOICE-10.
+- **Q7, C** (quiz 2026-10-20, Q7): "Diagram for numbers, drawing for ideas". Prices, percentages and amounts use
+  moving engine diagrams; causes, actors and stories use a drawn scene in the Live C v10 style. Replaces treating
+  diagrams and drawings as interchangeable for every explanation. One scene per beat, Kanz icon style from the
+  approved sheet, sits still after drawing in; the four approved references and prompts live in `library/scenes/`.
+  Rules: EXPL-1, IMG-4, PACE-9.
+- **Q8, A** (quiz 2026-10-20, Q8): "Local only, one at a time; the VPS only when Ahmed asks for a job". Replaces
+  automatic host routing when `KANZ_RENDER_HOST` is set, including the 2026-10-19 full-render host clause. Local
+  is the default; `--host` on render/ship/remix opts that job in, `--local` stays an accepted no-op. Rules: REPO-6, REV-4.
+- **Q9, B** (quiz 2026-10-20, Q9): "Partial check for small fixes". First delivery still passes `make.py ship`;
+  a revision changing only a few seconds may use render + `make.py check <slug> <version> --partial` (loudness, ending, frames) + the notes
+  sheet for changed seconds. Replaces a full ship for every small revision. Its receipt says "partial checks
+  passed", never "full ship passed". Commands: README "Small revisions". Rules: REV-3, REV-7.
+- **Q10, C** (quiz 2026-10-20, Q10): "Opus plans, Sonnet builds". Opus (medium) writes the storyboard and does
+  review passes; Sonnet 5.5 (medium) builds the scene, renders and fixes notes. The previous Sonnet-only video
+  usage policy (Opus only for engine work) in AGENTS/EFFICIENCY is **Superseded** by this split. One fresh session
+  per video stays. Workflow guidance in AGENTS/EFFICIENCY; no new rule id.

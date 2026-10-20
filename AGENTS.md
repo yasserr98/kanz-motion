@@ -28,25 +28,28 @@ disagrees with RULES.md, RULES.md wins.
 
 Work in this folder, even if the chat opened in the Kanz repo or a Kanz worktree (use the absolute path).
 
-1. **Setup.** `python engine/make.py doctor` once per machine/session; fix every FAIL. If the chat runs on Opus, mention
-   once that `docs/EFFICIENCY.md` recommends Sonnet 5.5 (medium).
+1. **Setup.** `python engine/make.py doctor` once per machine/session; fix every FAIL. Opus (medium) writes
+   the storyboard and reviews; Sonnet 5.5 (medium) builds, renders and fixes notes ([EFFICIENCY](docs/EFFICIENCY.md)).
 2. **Inputs.** Voice note (file path), written script, or a long video for shorts. Ask only for what is missing.
 3. **Voice and script.** Follow the route file to the end of its retime step (VOICE, CAP rules).
 4. **Image pass.** `shots.json` from the whole script, a visual type per shot, Codex generates, before the scene is
    written ([images](docs/routes/images.md); IMG, OBJ rules).
 5. **Scene.** Copy the worked example's `scene.js` and adapt it; new projects start from `projects/_template`.
-   `K.look()`, `K.pace({ defaults: "2026-10-18" })`, `K.finish()` last (PACE-1, PACE-2). Simple hook (HOOK-1..3), boards
-   arrive built, one carried hero, no snap zooms (PACE-3..5), paper world at chapter turns, a moving last beat
-   that ends ~0.4 s after the last word, never a replay of the hook (PACE-6); mechanisms and numbers as animated
-   diagrams, icons only support (EXPL-1, EXPL-2). Western digits with ٪ (NUM-3), sizes 28/34 px (TXT-1), at most four labels a board (TXT-2), labels never
+   `K.look()`, `K.pace({ defaults: "2026-10-18" })`, `K.finish()` last (PACE-1, PACE-2). Photo opening preferred,
+   question-hero allowed (HOOK-1..4); no idle motion (PACE-9). Boards arrive built, one carried hero, no snap zooms
+   (PACE-3..5), paper world at chapter turns, a moving last board that ends ~0.4 s after the last word, never a hook
+   replay (PACE-6); shorts choose face or board by SHORT-7. Numbers as animated diagrams; ideas as drawn scenes
+   (`library/scenes/`), icons only support (EXPL-1, EXPL-2). Western digits with ٪ (NUM-3), sizes 28/34 px (TXT-1),
+   at most four labels a board (TXT-2), labels never
    repeat the caption (TXT-3), nothing crosses a headline (TXT-6, `headline-cross`), only numbers the voice says (NUM-1). Objects: approved in the manifest only (OBJ-2).
 6. **Review.** `python engine/lint.py projects/<slug>`; fix or justify every finding in `lint-ok.json` (REV-1). Then
    `make.py review <slug> <times>` -> look at `out/review.jpg`, fix, repeat (REV-2).
-7. **Ship.** `make.py ship <slug> v1`: lint --strict, render (on the render host when `KANZ_RENDER_HOST` is set;
-   `--local` to render here), 12 frames from the MP4, loudness, the ending, and for shorts the cut strips, title,
+7. **Ship.** `make.py ship <slug> v1`: lint --strict, render locally (explicit `--host` only when Ahmed asks for a VPS job;
+   `--local` remains a no-op), 12 frames from the MP4, loudness, the ending, and for shorts the cut strips, title,
    freezes and frame rate. It stops at the first failure (REV-3, REV-4). Look at `out/check-v1.jpg`, `out/cuts-v1.jpg`
    and `out/notes-v1.jpg`, then open the MP4 for Ahmed (`ii <path>`). Run it in the background; do not poll. Review
-   notes go in `notes.json` (`make.py note`); proof matches the complaint: final-MP4 still, listened audio or motion interval (REV-7).
+   notes go in `notes.json` (`make.py note`); small revisions may use render + `check --partial` + notes sheet
+   (README, REV-3); proof matches the complaint: final-MP4 still, listened audio or motion interval (REV-7).
 8. **Cover** (style A): `projects/<slug>/cover.json` -> `python engine/cover.py projects/<slug>`; check the crop lines in
    `out/cover-review.jpg`.
 9. **Record (Ahmed's copy only).** Add a row to the usage log and update the backlog in the Kanz repo
@@ -58,7 +61,8 @@ anything, and say where it really was if it differs (REV-5).
 
 ## Usage discipline (Claude Pro limits)
 
-- One fresh session per video; Sonnet 5.5 at medium effort, Opus only for engine work ([docs/EFFICIENCY.md](docs/EFFICIENCY.md)).
+- One fresh session per video; Opus (medium) storyboards and reviews; Sonnet 5.5 (medium) builds, renders and fixes
+  notes ([docs/EFFICIENCY.md](docs/EFFICIENCY.md)).
 - Review through one contact sheet, not image by image. One local Chromium job at a time per machine, across all checkouts:
   `engine/slot.py` queues them using a lock in local app data (REPO-6); "waiting for the local render slot" means queued.
 

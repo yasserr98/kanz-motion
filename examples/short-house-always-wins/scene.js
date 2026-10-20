@@ -43,7 +43,7 @@ K.cam(0, "house", { scale: 1.12 });
 // boards build ~0.3 s before their cut, under the face, so the clean cut lands on a finished board (SHORT-6)
 const PRE = 0.3;
 K.glow(B.house, 500, 470, 820, { at: c1 - PRE, out: tCo });
-const house = K.img(B.house, OBJ + "kanz-house-v01.png", { x: 500, y: 470, w: 520, float: true, shadow: false });
+const house = K.img(B.house, OBJ + "kanz-house-v01.png", { x: 500, y: 470, w: 520, shadow: false });
 K.settle(house, c1 - PRE, { fromScale: 1.45, fromY: 70, dur: 0.9 });
 // the three words he promises in the hook, each with its own titled beat (Ahmed 2026-10-16: "he only explains one")
 const EY = "rgba(255,255,255,.78)";

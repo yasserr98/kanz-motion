@@ -48,12 +48,17 @@ scene but not render it).
    - `K.pace({ defaults: "2026-10-18" })`. The first 3 s always show his face with the reel's title over it:
      `K.title()` with no text takes the pick from `shorts/_titles.json` and finds a height off his face (white sticker;
      it hides the subtitles until 3 s by itself). Never copy the title by hand. Call it after any line that sets
-     `K.captionsFrom` (SHORT-4). Leave `K.duration` and `end` unset: they follow the voice and its ending guard. In the 50/50 split, subtitles sit on the seam (SHORT-12, automatic in `kanz-split.js`).
+     `K.captionsFrom` (SHORT-4). Normally leave `K.duration` and `end` unset: they follow the voice and its ending
+     guard; for a face ending, use the verified last-word time plus ~0.2 s (SHORT-7), preserving the whole audible
+     word. In the 50/50 split, subtitles sit on the seam (SHORT-12, automatic in `kanz-split.js`).
      Workshop title placement starts at y 330, then follows the face boxes wherever his eyes and mouth stay clear
      through all three seconds (Live E used y 190); never treat either coordinate as fixed (SHORT-4).
    - Alternate face and motion: cut in the pauses before a word; face for the lines he delivers to camera, boards for the
      mechanism. Windows can carry a jump zoom `[a, b, 1.16]`, but none by default (PACE-5).
-   - The last board runs to the last frame; no cut back to the face, no takeaway tail (SHORT-7).
+   - Pick the ending from the last line (SHORT-7): his own opinion or punchline ends on his face, held to
+     ~0.2 s after the last word (Casino E v10); an explanation or number ends on a board with its own moving
+     last beat (Casino G v8, ~0.4 s tail). Never replay the hook or hold a static board. Make the source/audio
+     tail and scene end agree; verify the entire audible last word before trimming (SHORT-3).
    - Workshop/live footage (his X Live workshops): motion inserts alternate between a 50/50 split screen (his tracked
      face in one half, the board in the other) and a full-screen board, still with clean cuts in the pauses; the camera
      tracks him around the 16:9 frame. The shared helpers exist: `engine/footage_track.py` extracts tracked crops and
@@ -67,10 +72,12 @@ scene but not render it).
      styles exist but were not picked (comparison: `projects/short-house-always-wins`, transition-options, local).
    - Pay off what the hook promises: "three words" -> each gets its own titled beat ("الكلمة الأولى / التانية / التالتة")
      (SHORT-8). Every picture belongs to the line; not every line needs a headline (SHORT-9).
-   - Workshop shorts: his face (full or in the split) at least 50% of the runtime; boards only for mechanisms, numbers
-     and names (SHORT-15). Changes to or from his full face are clean cuts, never inside a word; split <-> board eases
+   - Every cut-out short (YouTube and workshop): his face (full or in the split) at least 50% of the runtime; boards
+     only for mechanisms, numbers and names (SHORT-15). Changes to or from his full face are clean cuts, never inside a word; split <-> board eases
      (SHORT-16). Dollar amounts on screen with `K.money(39.8)`; subheadlines with `K.under(head, html)` (NUM-5, TXT-5).
-6. **Review.** Lint (dead stretches are not flagged inside face and split windows), review, then `make.py ship`. Write
+6. **Review.** Lint (dead stretches are not flagged inside face and split windows), review, then `make.py ship` for
+   the first delivery. Small revisions may use render + `check --partial` + notes sheet; follow the exact commands in
+   [README](../../README.md#small-revisions) and record "partial checks passed" (REV-3). Write
    each of Ahmed's review notes into `notes.json` (`make.py note <slug> 39.8 "his words"`, then `make.py note <slug>
    fixed 1`). Ship pulls 12-frame strips around every cut into `out/cuts-<version>.jpg` and fails on charcoal, flash,
    half-built and one-frame flags (SHORT-10), checks the ending, the next-sentence leak, the title, duplicate frames in

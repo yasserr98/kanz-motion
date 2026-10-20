@@ -222,6 +222,19 @@ def test_c15_ship_surfaces_warning(tmp_path, monkeypatch):
     assert "kept the whole last word" in warnings[0]
 
 
+@pytest.mark.parametrize("ending,tail,notes", [([], [], ["notes sheet"]),
+    (["clipped ending"], [], ["notes sheet"]), ([], ["long tail"], ["notes sheet"]), ([], [], [])])
+def test_partial_check_keeps_ending_and_notes_without_stale_short_review(tmp_path, monkeypatch, ending, tail, notes):
+    proj = short_project(tmp_path)
+    monkeypatch.setattr(shipcheck, "ending", lambda *a: (ending, []))
+    monkeypatch.setattr(shipcheck, "tail", lambda *a: tail)
+    monkeypatch.setattr(shipcheck, "notes", lambda *a: notes)
+    monkeypatch.setattr(shipcheck, "review_problems", lambda *a: pytest.fail("partial check must not require a new lint"))
+    problems, _, info = shipcheck.run(proj, "unused.mp4", "v2", partial=True)
+    assert bool(problems) == bool(ending or tail or not notes)
+    assert info == notes
+
+
 @pytest.mark.parametrize("render_end,failed", [(2.01, False), (1.95, True)])
 def test_x1_ship_energy_does_not_force_a_cut_into_the_last_word(tmp_path, monkeypatch, render_end, failed):
     proj = short_project(tmp_path, "")

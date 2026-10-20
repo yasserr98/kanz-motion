@@ -190,16 +190,92 @@ def test_ship_stops_at_lint(project, monkeypatch, capsys):
     assert "SHIP STOPPED at lint" in capsys.readouterr().err
 
 
-@pytest.mark.parametrize("host,local,expect", [(None, False, "render.py"), ("vps", False, "vps_render.sh"),
-                                               ("vps", True, "render.py")])
-def test_render_goes_to_host_when_set(project, monkeypatch, host, local, expect):
+@pytest.mark.parametrize("configured,local,host,expect", [
+    (None, False, False, "render.py"), ("vps", False, False, "render.py"),
+    ("vps", True, False, "render.py"), ("vps", False, True, "vps_render.sh"),
+    ("vps", True, True, "vps_render.sh")])
+def test_render_host_requires_explicit_flag(project, monkeypatch, configured, local, host, expect):
     import make
     ran = []
-    monkeypatch.setattr(make, "render_host", lambda: host)
+    monkeypatch.setattr(make, "render_host", lambda: configured)
     monkeypatch.setattr(make.shutil, "which", lambda name: "bash")
     monkeypatch.setattr(make, "run", lambda cmd: ran.append(" ".join(str(c) for c in cmd)))
-    make.render(project, "demo-v1", local)
+    make.render(project, "demo-v1", local, host)
     assert expect in ran[0]
+
+
+@pytest.mark.parametrize("configured,bash", [(None, "bash"), ("vps", None)])
+def test_explicit_host_needs_configuration(monkeypatch, configured, bash):
+    import make
+    monkeypatch.setattr(make, "render_host", lambda: configured)
+    monkeypatch.setattr(make.shutil, "which", lambda name: bash)
+    with pytest.raises(SystemExit):
+        make.render_target(host=True)
+
+
+@pytest.mark.parametrize("step", ["render", "ship", "remix"])
+@pytest.mark.parametrize("flags,host", [([], False), (["--local"], False), (["--host"], True)])
+def test_cli_routes_host_flag(project, monkeypatch, step, flags, host):
+    import make
+    (project / "transcript.json").write_text("{}")
+    args = ["v1", "v2"] if step == "remix" else ["v2"]
+    monkeypatch.setattr(sys, "argv", ["make.py", step, "demo", *args, *flags])
+    monkeypatch.setattr(make, "project_dir", lambda name: project)
+    monkeypatch.setattr(make, "captions", lambda *args: None)
+    calls = []
+    monkeypatch.setattr(make, step, lambda *args, **kw: calls.append((args, kw)))
+    make.main()
+    assert calls[0][0][-1] is host
+    assert ("v2" in calls[0][0] or "demo-v2" in calls[0][0])
+
+
+@pytest.mark.parametrize("problems", [[], ["ending failed"], ["loudness failed"]])
+def test_partial_check_cli_labels_only_success(project, monkeypatch, capsys, problems):
+    import make
+    monkeypatch.setattr(sys, "argv", ["make.py", "check", "demo", "v2", "--partial"])
+    monkeypatch.setattr(make, "project_dir", lambda name: project)
+    seen = []
+    def check(*args, **kw):
+        seen.append(kw)
+        return problems, -16
+    monkeypatch.setattr(make, "check", check)
+    if problems:
+        with pytest.raises(SystemExit):
+            make.main()
+    else:
+        make.main()
+    assert seen == [{"partial": True}]
+    output = capsys.readouterr().out.lower()
+    assert ("partial checks passed" in output) == (not problems)
+    assert "ship passed" not in output
+
+
+def test_partial_flag_cannot_weaken_ship(project, monkeypatch):
+    import make
+    (project / "transcript.json").write_text("{}")
+    monkeypatch.setattr(sys, "argv", ["make.py", "ship", "demo", "v2", "--partial"])
+    monkeypatch.setattr(make, "project_dir", lambda name: project)
+    monkeypatch.setattr(make, "ship", lambda *a, **k: pytest.fail("partial is only for check"))
+    with pytest.raises(SystemExit, match="only for check"):
+        make.main()
+
+
+@pytest.mark.parametrize("lufs,blank", [(-16, False), (-12, False), (-16, True)])
+def test_partial_check_still_checks_frames_and_loudness(project, monkeypatch, lufs, blank):
+    import make
+    import shipcheck
+    (project / "out/demo-v2.mp4").write_bytes(b"fixture")
+    def run(cmd, **kw):
+        return SimpleNamespace(stdout="10", stderr=f"I: {lufs} LUFS")
+    monkeypatch.setattr(make.subprocess, "run", run)
+    frames = []
+    monkeypatch.setattr(make, "frame_stats", lambda mp4, t: frames.append(t) or (50, 0 if blank else 20))
+    monkeypatch.setattr(make, "sheet", lambda *args: "sheet.jpg")
+    seen = []
+    monkeypatch.setattr(shipcheck, "run", lambda *args: seen.append(args[-1]) or ([], [], ["notes sheet"]))
+    problems, measured = make.check(project, "demo", "v2", partial=True)
+    assert len(frames) == 12 and seen == [True] and measured == lufs
+    assert bool(problems) == (blank or lufs != -16)
 
 
 def test_project_dir_falls_back_to_examples(monkeypatch, tmp_path):
@@ -216,7 +292,7 @@ def test_check_cli_exit_status(project, monkeypatch, capsys, problems):
     import make
     monkeypatch.setattr(sys, "argv", ["make.py", "check", "demo"])
     monkeypatch.setattr(make, "project_dir", lambda name: project)
-    monkeypatch.setattr(make, "check", lambda *args: (problems, -16))
+    monkeypatch.setattr(make, "check", lambda *args, **kw: (problems, -16))
     try:
         make.main()
         code = 0

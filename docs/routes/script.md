@@ -21,4 +21,10 @@ the scene to copy for any new Reel).
    audio; do not regenerate its spelling and assume the result matches (VOICE-9).
 5. **Retime.** Once the voice is final: `make.py retime <slug>` (pauses to 0.3 s, tempo 1.08; ElevenLabs caps speed at
    1.2), and write the scene against the retimed timings (VOICE-5).
+   A re-do with "the same voice track" keeps the approved take and retimes it to today's pace (VOICE-10,
+   quiz 2026-10-20, Q6; US Dollar v6): `python engine/make.py retime <slug>`. Tempo 1.08, pauses to 0.3 s.
 6. Continue with the shared steps in [AGENTS.md](../../AGENTS.md): image pass, scene, review, ship.
+
+Prefer a photo opening: `K.screen` from 0, headline over the story's place, `K.captionsFrom = 0`; a live line
+or other explanatory element may move on the photo (HOOK-4). A question-hero opening stays allowed; only that
+opening holds captions until the question ends (HOOK-1..3). Pictures arrive and sit still (PACE-9).

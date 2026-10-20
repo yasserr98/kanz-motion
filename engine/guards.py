@@ -177,9 +177,9 @@ def face_share(face_windows, split_windows, duration):
     return sum(b - a for a, b in windows) / duration if duration > 0 else 0.0
 
 
-def face_share_findings(face_windows, split_windows, duration, live, share=FACE_SHARE):
-    """Workshop shorts: his face (full or in the split) at least half the runtime (`face-share`, SHORT-15; live F:
-    "show Ahmed's face more and less animation")."""
+def face_share_findings(face_windows, split_windows, duration, live, share=FACE_SHARE, profile=""):
+    """His face (full or split) at least half the runtime: all current cut-out shorts (SHORT-15, quiz 2026-10-20, Q3).
+    Legacy scenes keep the workshop-only check."""
     out = []
     for a in window_union(face_windows, duration):
         for b in window_union(split_windows, duration):
@@ -187,7 +187,7 @@ def face_share_findings(face_windows, split_windows, duration, live, share=FACE_
                 out.append(dict(kind="face-overlap", **{"from": max(a[0], b[0]), "to": min(a[1], b[1])},
                                 why="face and split windows overlap (SHORT-15)"))
     got = face_share(face_windows, split_windows, duration)
-    if live and got + 1e-6 < share:
+    if (live or profile >= "2026-10-18") and got + 1e-6 < share:
         out.append(dict(kind="face-share", t=0, why=f"his face shows {got:.0%} of {duration:.1f} s < {share:.0%} (SHORT-15)"))
     return out
 

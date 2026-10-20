@@ -26,15 +26,17 @@ research conversation. The same work in a **fresh session** re-reads far less.
 
 1. **New session per video** (Code tab → new session in `kanz-motion`). Never continue the research
    or a previous video's conversation.
-2. **Model: Sonnet 5.5, effort medium.** Opus draws down plan limits faster than Sonnet; Anthropic
-   does not publish the exact ratio. Switch to Opus only for engine work: new runtime components,
-   render bugs, anything Sonnet fails at twice.
+2. **Opus plans, Sonnet builds** (quiz 2026-10-20, Q10): Opus at medium effort writes the storyboard and does
+   the review passes. Sonnet 5.5 at medium effort builds the scene, renders and fixes notes. Keep the storyboard
+   and review notes in the project so the handoff preserves decisions. The former Sonnet-only video workflow is
+   **Superseded** by this split; one fresh session per video still applies.
 3. Give everything in the first message: the script, the voice/speed, and "follow AGENTS.md and
    docs/EFFICIENCY.md". Asking the agent to go and find things costs extra turns.
-4. The agent writes `scene.js` by copying the route's worked example in `examples/`.
-5. Review with **one contact sheet** (`make.py review`, then `make.py check`), never one image per
+4. Sonnet writes `scene.js` from the Opus storyboard by copying the route's worked example in `examples/`.
+5. Opus reviews with **one contact sheet** (`make.py review`, then `make.py check`), never one image per
    frame. Each image the agent looks at costs as much as a long message.
-6. Render runs in the background; the agent does not poll it.
+6. Sonnet runs the render locally in the background, one job at a time; it does not poll. Use `--host` only
+   when Ahmed asks for that VPS job (REV-4).
 7. Fix rounds: name the moment and the change ("at 0:23 the tag overlaps the bar, move it up").
    Vague feedback means more turns.
 

@@ -16,6 +16,8 @@ Cut-out shorts (transcript.json cut_from) also:
   track      face-track jumps over 6 px a frame inside face/split windows
 
 A cut flag can be excused in lint-ok.json as {"kind": "cut-strip", "t": <cut time>, "why": "..."}.
+Explicit partial checks for small revisions run ending/tail and notes only here; make.py still checks frames and
+loudness (REV-3, quiz 2026-10-20, Q9). Full check and ship keep all shorts checks.
 """
 import json
 import re
@@ -183,6 +185,8 @@ def notes(proj, mp4, version):
         return []
     from contact import sheet
     items = json.loads(f.read_text(encoding="utf-8"))
+    if not items:
+        return []
     d = proj / "out" / f"notes-{version}"
     d.mkdir(parents=True, exist_ok=True)
     for old in d.glob("*.jpg"):
@@ -214,7 +218,7 @@ def review_problems(proj, report):
     return out
 
 
-def run(proj, mp4, version, allow=(), picture=True):
+def run(proj, mp4, version, allow=(), picture=True, partial=False):
     """All checks (picture=False, for make.py remix: the sound checks only). Returns (problems, warnings, info lines)."""
     proj = Path(proj)
     lint_report = shortinfo.load(proj / "out" / "lint.json") or {}
@@ -228,6 +232,11 @@ def run(proj, mp4, version, allow=(), picture=True):
     warns += w
     if not picture:  # a remix cannot move the ending (the picture is copied): report it, do not fail
         return [], warns + [p + " (a remix keeps the cut; fix it in a new version)" for p in problems], info
+    if partial:  # REV-3: no fresh full-scene lint required for the changed-seconds review
+        info += notes(proj, mp4, version)
+        if not info:
+            problems.append("partial check needs notes.json entries for the changed seconds (REV-3/7)")
+        return problems, warns, info
     cut = shortinfo.cut_from(proj)
     if cut:
         review = review_problems(proj, lint_report)

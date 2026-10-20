@@ -85,7 +85,8 @@ the-cost-of-a-mistake v5 (old look) scores: median fill 31%, 4 dead stretches, 6
   for floating things (icons in the air, tags).
 - **Glow**: `K.img(..., { glow: true })` (or a diameter) puts a pulsing lavender light behind the focus.
   Standalone: `K.glow(board, x, y, size, { at, out })`. One focus at a time; lavender stays the only pointer.
-- **Float**: `K.img(..., { float: true })` (or px) gives a slow idle bob, so held shots don't freeze.
+- **Float (legacy only)**: `K.img(..., { float: true })` (or px) still renders old scenes. Current scenes
+  have no idle float, bob, shake or wobble; pictures arrive and sit still (PACE-9, quiz 2026-10-20, Q2).
 - Standalone contact shadow: `K.shadow(board, cx, groundY, w, { at, out })`.
 
 ## 5. Evidence on screen (Vox's credibility device, Kanz version)
@@ -138,13 +139,16 @@ about 30%. Small true differences get a bracket, never a stretched bar.
 Open on the most dramatic image of the story, then rewind into it. The first visual must land by 1.0 s
 (lint checks this). Big hero object + headline + glow by 0.3 s. Not a single word on an empty board.
 
-**Keep the hook simple (Ahmed 2026-10-11, all videos):** the question headline and ONE hero object, nothing else.
+**Question-hero opening (HOOK-1..3):** the question headline and ONE hero object, nothing else.
 No second object, character, tag, arrow, label, foreground blur or extra beat until the question has been asked;
-glow, float and one slow `K.push` are the only movement. He rejected the busy us-dollar-decisions v2 hook
+use glow without idle float, `K.settle` on arrival, then camera drift (PACE-9). He rejected the busy us-dollar-decisions v2 hook
 (dollar + wallet + rate arrow + two tags + foreground stack). Lint may report the hook as `dead`; that is expected.
 Approved as the default on 2026-10-11 (Ahmed: "this can be the default"): the us-dollar-decisions v4 hook is the reference
 (`projects/us-dollar-decisions/scene.js`, section 1): headline in three short lines with the keyword last in lavender, one
-hero object at 600 board px centred under it (`glow`, `float`, slight rotation), `K.push(0.4, "hook", 1.12, 3.8)`.
+hero object at 600 board px centred under it (glow, slight rotation). The old float/push is superseded by
+`K.settle` and no idle motion. Voice-note/script Reels now prefer photo openings (HOOK-4): `K.screen` from 0,
+a headline and `K.captionsFrom = 0`, optionally a moving explanatory element over the photo. Only the
+question-hero opening holds captions until the question ends.
 
 ## 8. Characters and objects that act
 

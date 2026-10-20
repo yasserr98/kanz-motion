@@ -32,7 +32,7 @@ Shorts cut from a long video (review hardening 2026-10-18, engine/guards.py):
   freeze          a face or split window showing a frozen source picture (window.FREEZES)
   title           a footage short without K.title (SHORT-4)
   end-cut         K.duration ends before the voice (the last word cut off)
-  face-share      a workshop short where his face shows under 50% of the runtime (SHORT-15)
+  face-share      a current cut-out short where his face shows under 50% of the runtime (SHORT-15; legacy: workshops)
   mid-word-cut    a face/split/board change inside a spoken word (SHORT-16)
   caption-switch  subtitles not on the seam exactly while the split shows (SHORT-12)
 Every scene: sfx-overlap (cues under 0.3 s apart), sfx-orphan (a cue on no visual event), stray-currency (a $ not on
@@ -44,6 +44,7 @@ Endings and explanations (re-do review 2026-10-18, engine/guards.py):
   hook-replay  the last frame is on the hook board, or shows the hook's hero at 60% of its hook size or more (PACE-6)
   still-image  a WARNING: over 2 s of speech while the only picture on screen is one unchanging icon (EXPL-2); it is
                listed but never counts as unjustified, so --strict does not fail on it
+  idle-motion  a WARNING: float in scene.js with the 2026-10-18 defaults (PACE-9); legacy float still works
 Dead and fill findings exclude the simple hook (t < K.captionsFrom) and K.footage / K.split windows. lint-ok.json cannot
 excuse a dead or fill stretch of more than 1.5 s outside the 0-3 s title window.
 Writes out/lint.json and, when there are findings, out/lint.jpg. Exit code defaults to 0.
@@ -436,7 +437,7 @@ def arrival_findings(t, frame, fill, board):
 JS_TOKENS = re.compile(r'//[^\n]*|/\*[\s\S]*?\*/|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|`(?:\\.|[^`\\])*`|[\s\S]')
 
 
-def static_scene_findings(source):
+def static_scene_findings(source, profile=""):
     code = []
     for m in JS_TOKENS.finditer(source):
         token = m.group()
@@ -449,6 +450,11 @@ def static_scene_findings(source):
     code = ''.join(code)
     calls = re.findall(r'\bK\s*\.\s*(\w+)\s*\(', code)
     out = []
+    if profile >= "2026-10-18":
+        for m in re.finditer(r'\bfloat\s*:\s*(true|-?(?:\d+(?:\.\d*)?|\.\d+))\b', code):
+            if m[1] == 'true' or float(m[1]) != 0:
+                out.append(dict(kind='idle-motion', t=0, rule='PACE-9', level='warn',
+                                why='pictures arrive and sit still, including the hook hero; remove float (PACE-9)'))
     def add(why, **extra):
         out.append(dict(kind='structure', t=0, why=why, **extra))
     if 'footage' in calls and 'title' not in calls:
@@ -634,7 +640,7 @@ def short_findings(page, frames, fine, step, every, defaults_on, profile=""):
             out += merge_hits(opening_findings(fine, info), step)
         out += guards.freeze_findings(info["faces"], info["splits"], info["freezes"])
         out += guards.end_cut_findings(info["duration"], info["voice"], info["cut"])
-        out += guards.face_share_findings(info["faces"], info["splits"], info["duration"], info["live"])
+        out += guards.face_share_findings(info["faces"], info["splits"], info["duration"], info["live"], profile=profile)
         edges = guards.window_edges(info["faces"], info["splits"], info["duration"])
         out += guards.mid_word_findings(edges, info["words"])
         seam = []
@@ -705,7 +711,7 @@ def main():
         for h in arrivals:
             if h['t'] in sampled:
                 new_findings += arrival_findings(h['t'], sampled[h['t']], a.fill, h['board'])
-        new_findings += static_scene_findings((proj / 'scene.js').read_text(encoding='utf-8'))
+        new_findings += static_scene_findings((proj / 'scene.js').read_text(encoding='utf-8'), profile)
         new_findings += shortinfo.metadata_findings(proj, profile)
         for t, frame in frames:
             if any(i.get("logo") and i.get("intentional") for i in frame["items"]):
@@ -876,7 +882,7 @@ def main():
             print(f"    {h['from']:6.2f}-{h['to']:6.2f}s  {h['what']}")
         extra = ('digits', 'small-text', 'crowded-board', 'caption-repeat') if defaults_on else ()
         extra += ('on-face', 'freeze', 'title', 'short-metadata', 'end-cut', 'face-share', 'face-overlap', 'mid-word-cut', 'caption-switch', 'sfx-overlap',
-                  'sfx-orphan', 'stray-currency', 'tight-gap', 'headline-cross', 'long-tail', 'hook-replay', 'still-image')
+                  'sfx-orphan', 'stray-currency', 'tight-gap', 'headline-cross', 'long-tail', 'hook-replay', 'still-image', 'idle-motion')
         for kind in ('text-on-text', 'covered-shape', 'caption-band', 'brief', 'half-built-arrival', 'markup-crossing-text', 'structure') + extra:
             hits = [h for h in new_findings if h['kind'] == kind]
             print(f'  {kind}: {len(hits)} finding(s)')

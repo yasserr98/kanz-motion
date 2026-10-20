@@ -23,13 +23,13 @@ const hook = K.board("hook", 0, 0), b2 = K.board("two", -1100, 0);
 K.cam(0, "hook");
 
 // ---------- hook: complete from frame 1 (no `at` on the hero or the headline parts) ----------
-// Simple hook (Ahmed 2026-10-11): the headline + ONE hero object, nothing else. Pace: the hero settles from oversized,
+// Question-hero option (HOOK-1..3; photo preferred: K.screen from 0, K.captionsFrom = 0, HOOK-4): the headline + ONE hero object, nothing else. Pace: the hero settles from oversized,
 // and the caption waits until the question is over (the headline already says it).
 const g2 = K.go(T("الكلمة"), "two", { scale: 1.3, dx: 220, dy: -60 }); // first word of the next chapter; start close
 K.headline([{ html: "عنوان" }, { html: "السؤال؟", kw: true }], { out: g2.start });
 K.captionsFrom = g2.start;
 K.glow(hook, 500, 500, 840, { out: g2.start });
-const hero = K.img(hook, OBJ + "kanz-house-v01.png", { x: 500, y: 500, w: 580, float: true, shadow: false }); // 500-600 px
+const hero = K.img(hook, OBJ + "kanz-house-v01.png", { x: 500, y: 500, w: 580, shadow: false }); // 500-600 px
 K.settle(hero, 0, { fromScale: 1.45, fromY: 70, dur: 1.2 });
 
 // ---------- next chapter: arrives built, starts close, pulls out as the next idea arrives ----------

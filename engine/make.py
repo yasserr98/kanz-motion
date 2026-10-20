@@ -17,14 +17,15 @@ Both routes
                                                     # (script route default; voice notes: tempo 1.0), then captions
     python engine/sfx_gen.py <category> <name> "<prompt>"   # generate a missing sound effect into library/sfx
     python engine/make.py review <name> 2,10,30     # stills -> one contact sheet out/review.jpg
-    python engine/make.py render <name> [version] [--local]  # full MP4 in projects/<name>/out/; on the render host
-                                                    # (KANZ_RENDER_HOST in .env) when one is set, --local renders here
-    python engine/make.py check <name> [version]    # 12 frames pulled from the MP4 -> out/check-<version>.jpg + loudness,
+    python engine/make.py render <name> [version] [--host]  # full MP4 in projects/<name>/out/; local by default
+                                                    # --host uses KANZ_RENDER_HOST only when Ahmed asks; --local is a no-op
+    python engine/make.py check <name> [version] [--partial]  # 12 frames -> out/check-<version>.jpg + loudness,
                                                     # then engine/shipcheck.py: ending, cut strips (out/cuts-<version>.jpg),
                                                     # notes stills; for cut-out shorts leak, title, freezes, fps, track
-    python engine/make.py ship <name> [version] [--local]  # the gate: lint --strict, render, frame check, loudness;
+                                                    # --partial: small revisions only, frames/loudness/ending/notes (REV-3)
+    python engine/make.py ship <name> [version] [--host]  # the gate: lint --strict, render, frame check, loudness;
                                                     # stops at the first failure
-    python engine/make.py remix <name> <from> <to> [--local]  # sound only: copy <from>'s picture bit for bit, redo the
+    python engine/make.py remix <name> <from> <to> [--host]  # sound only: copy <from>'s picture bit for bit, redo the
                                                     # mix with the current engine (scene and voice unchanged), check
     python engine/make.py note <name> <seconds> "<his words>" [version]   # add a review note (notes.json, open)
     python engine/make.py note <name> fixed <n>    # mark note n fixed; ship then shows it with a still from the MP4
@@ -130,21 +131,21 @@ def render_host():
     return os.environ.get("KANZ_RENDER_HOST") or eleven.env().get("KANZ_RENDER_HOST") or None
 
 
-def render_target(local=False):
-    """Current routing policy, shared by full renders and remixes: (host, bash), or (None, None) for local."""
-    host, bash = render_host(), shutil.which("bash")
-    if host and not local and bash:
-        return host, bash
-    if host and not local:
-        print("render: KANZ_RENDER_HOST is set but bash was not found; rendering locally", file=sys.stderr)
-    return None, None
+def render_target(local=False, host=False):
+    """Local unless --host was requested (REPO-6, REV-4); --local remains an accepted no-op."""
+    if not host:
+        return None, None
+    target, bash = render_host(), shutil.which("bash")
+    if not target or not bash:
+        sys.exit("render: --host requires KANZ_RENDER_HOST and bash")
+    return target, bash
 
 
-def render(proj, name, local=False):
-    """Render the MP4 (workflow review M7): on the render host when KANZ_RENDER_HOST is set, here with --local or without one."""
-    host, bash = render_target(local)
+def render(proj, name, local=False, host=False):
+    """Render locally by default; the host is opt-in for this job (quiz 2026-10-20, Q8)."""
+    host, bash = render_target(local, host)
     if host:
-        print(f"render: on {host} (engine/vps_render.sh); --local renders on this machine", flush=True)
+        print(f"render: on {host} (engine/vps_render.sh, explicit --host)", flush=True)
         run([bash, "engine/vps_render.sh", proj.name, name])
         return
     run([PY, "engine/render.py", proj, "--name", name])
@@ -174,7 +175,7 @@ def frame_stats(mp4, t):
 LUFS_TOLERANCE = 1.0
 
 
-def check(proj, name, version, picture=True):
+def check(proj, name, version, picture=True, partial=False):
     """12 frames from the MP4 -> out/check-<version>.jpg, plus loudness. Returns (problems, lufs)."""
     out = proj / "out"
     mp4 = find_mp4(out, name, version)
@@ -205,7 +206,7 @@ def check(proj, name, version, picture=True):
     print(f"{mp4.name}: {dur:.1f}s, integrated loudness {lufs if lufs is not None else '?'} LUFS (target -16)")
     print("check sheet ->", sheet(cd, out / f"check-{version}.jpg"))
     import shipcheck  # review hardening 2026-10-18: ending, cut strips, notes; leak, title, freezes, fps for shorts
-    more, warns, info = shipcheck.run(proj, mp4, version, lint_allowances(proj), picture)
+    more, warns, info = shipcheck.run(proj, mp4, version, lint_allowances(proj), picture, partial)
     for line in info:
         print(line)
     for w in warns:
@@ -254,7 +255,7 @@ def project_warnings(proj):
     return warns
 
 
-def ship(proj, name, version, local=False):
+def ship(proj, name, version, local=False, host=False):
     """The gate before delivery (workflow review M5): every step must pass; stops at the first failure."""
     def stop(step, why):
         print(f"\nSHIP STOPPED at {step}: {why}", file=sys.stderr)
@@ -278,7 +279,7 @@ def ship(proj, name, version, local=False):
     print("ship 2/4: render", flush=True)
     try:
         captions(proj)
-        render(proj, f"{name}-{version}", local)
+        render(proj, f"{name}-{version}", local, host)
     except subprocess.CalledProcessError as e:
         stop("render", f"{' '.join(str(c) for c in e.cmd[:3])} exited {e.returncode}")
     print("ship 3/4 + 4/4: frames from the MP4, loudness", flush=True)
@@ -288,7 +289,7 @@ def ship(proj, name, version, local=False):
     print(f"\nSHIP PASSED: {name}-{version}. Look at out/check-{version}.jpg before delivery; rendered is not approved.")
 
 
-def remix(proj, name, src_version, version, local=False):
+def remix(proj, name, src_version, version, local=False, host=False):
     """Redo only the sound of an approved render (Ahmed 2026-10-18: "mix and master all videos properly ... even the
     ones you're uploading now fix it then re-upload"): the picture is copied, so it stays exactly what he approved."""
     src = find_mp4(proj / "out", name, src_version)
@@ -296,7 +297,7 @@ def remix(proj, name, src_version, version, local=False):
     if newest.stat().st_mtime > src.stat().st_mtime:
         sys.exit(f"{newest.name} changed after {src.name} was rendered: its cues may not match the picture. Ship a new version instead.")
     out_name = f"{name}-{version}"
-    host, bash = render_target(local)
+    host, bash = render_target(local, host)
     if host:
         run([bash, "engine/vps_render.sh", proj.name, out_name, "--remix", src.name])
     else:
@@ -316,8 +317,12 @@ def main():
         print(__doc__)
         return
     local = "--local" in sys.argv
-    argv = [a for a in sys.argv if a != "--local"]
+    host = "--host" in sys.argv
+    partial = "--partial" in sys.argv
+    argv = [a for a in sys.argv if a not in ("--local", "--host", "--partial")]
     step, name = argv[1], argv[2]
+    if partial and step != "check":
+        sys.exit("--partial is only for check on a small revision; first deliveries use ship (REV-3)")
     arg = argv[3] if len(argv) > 3 else None
     proj = project_dir(name)
     out = proj / "out"
@@ -374,23 +379,25 @@ def main():
         for w in project_warnings(proj):
             print("WARNING:", w, file=sys.stderr)
         captions(proj)
-        render(proj, f"{name}-{arg or 'v1'}", local)
+        render(proj, f"{name}-{arg or 'v1'}", local, host)
     elif step == "check":
         for w in project_warnings(proj):
             print("WARNING:", w, file=sys.stderr)
-        problems, _ = check(proj, name, arg or "v1")
+        problems, _ = check(proj, name, arg or "v1", partial=partial)
         for prob in problems:
             print("CHECK:", prob, file=sys.stderr)
         if problems:
             sys.exit(1)
+        if partial:
+            print(f"partial checks passed: {name}-{arg or 'v1'}. Review the check/notes sheets and changed intervals (REV-3/7).")
     elif step == "ship":
-        ship(proj, name, arg or "v1", local)
+        ship(proj, name, arg or "v1", local, host)
     elif step == "note":
         note(proj, argv[3:])
     elif step == "remix":
         if len(argv) < 5:
             sys.exit("usage: make.py remix <name> <from-version> <to-version>")
-        remix(proj, name, arg, argv[4], local)
+        remix(proj, name, arg, argv[4], local, host)
     else:
         print(__doc__)
 

@@ -55,13 +55,34 @@ Then (both routes):
 Recent changes (2026-10-18 to 2026-10-20). Every rule below is a line in `docs/RULES.md`; the reasons are in
 `docs/DECISIONS.md`.
 
+- **Local renders (Q8):** one job at a time, even when `KANZ_RENDER_HOST` is set. Use `--host` on render/ship/remix
+  only when Ahmed asks for that VPS job; `--local` is still accepted as a no-op.
+- **Short endings (Q1):** pick by the last line: face for his opinion/punchline (~0.2 s after the last word), a moving
+  last board for an explanation/number; never replay the hook or hold a static board (SHORT-7).
+- **No idle pictures (Q2):** arrivals settle, then pictures sit still, hook hero included; camera drift and real
+  explanatory changes move. Current-profile lint warns `idle-motion` on `float`; old scenes still render (PACE-9).
+- **50% face for all shorts (Q3):** YouTube and workshop cut-outs, counting full face and split together. New
+  enforcement uses the 2026-10-18 profile; legacy checks stay unchanged (SHORT-15).
+- **Photo openings (Q4):** preferred for voice-note/script Reels, with headline and captions from frame 1
+  (`K.screen` from 0, `K.captionsFrom = 0`), optionally a live explanatory line. Question-hero remains allowed (HOOK-4).
+- **Past-event places (Q5):** photo-real generated settings are allowed when no real photo of that moment exists;
+  record them as generated in `CREDITS.md`. Real people are never generated or repainted (IMG-8).
+- **Re-dos keep the take, update the pace (Q6):** `make.py retime <slug>` (1.08, pauses to 0.3 s); voice notes retain
+  1.25x and use `make.py retime <slug> 1.0` (VOICE-10).
+- **Diagrams for numbers, drawings for ideas (Q7):** prices, percentages and amounts use moving engine diagrams;
+  causes, actors and stories use the four approved Live C v10 references in `library/scenes/` (EXPL-1, IMG-4).
+- **Small revisions (Q9):** render + `make.py check <slug> <version> --partial` + the changed-seconds notes sheet may replace a full ship.
+  Follow [the exact commands](../README.md#small-revisions); receipts say "partial checks passed" (REV-3).
+- **Opus plans, Sonnet builds (Q10):** Opus (medium) storyboards and reviews; Sonnet 5.5 (medium) builds, renders
+  and fixes notes. Keep one fresh session per video.
+
 - **New template defaults** (`K.pace({ defaults: "2026-10-18" })`, already in `projects/_template`): `K.title()` for the
   shorts title sticker, subtitles that move down (never up over his face), eased split moves, `K.money(39.8)` for dollar
   amounts and `K.under(head, html)` for a subheadline with breathing room. Older scenes render as before.
-- **Endings and explanations:** no replay of the hook at the end; the last line gets its own moving visual and the video
-  ends about 0.4 s after the last word (PACE-6). Anything that moves or works (a price, a loss, a percentage, money
-  flowing) is an animated diagram or a drawn scene, icons only support (EXPL-1, EXPL-2). Real people and real moments are
-  real photos only, in the slim print (`K.snap35({ slim: true })`, IMG-8, IMG-11).
+- **Endings and explanations:** no replay of the hook at the end; board endings get their own moving last visual and end about 0.4 s
+  after the last word (PACE-6; face endings use SHORT-7 above). Numbers use moving diagrams; causes, actors and
+  stories use drawn scenes, icons only support (EXPL-1, EXPL-2). Real people use real photos in the slim print
+  (`K.snap35({ slim: true })`, IMG-8, IMG-11); the past-event setting exception is above.
 - **Nothing crosses a headline** (TXT-6): panels, chart lines and objects start at least 40 px below it. A label stays
   fully visible for at least 0.8 s (TXT-7).
 - **Sound:** one effect at a time, the voice gently compressed, two-pass loudness to -16 LUFS; room tone 40% quieter.
@@ -92,8 +113,8 @@ Recent workflow changes (2026-10-17, no re-render needed):
 - **Worked examples** are in `examples/` (`us-dollar-decisions-pace` to copy for a voice note or script,
   `short-house-always-wins` for shorts). Don't copy older projects: most predate pace.
 - **New commands:** `python engine/make.py doctor` checks your setup; `python engine/make.py ship <name> v1` lints,
-  renders, checks the frames and the loudness, and stops at the first failure. With `KANZ_RENDER_HOST` in `.env`, renders
-  go to that server (`--local` renders on your machine).
+  renders, checks the frames and the loudness, and stops at the first failure. Renders are local by default;
+  explicit `--host` uses `KANZ_RENDER_HOST` only when Ahmed asks for that job (updated 2026-10-20).
 - **Objects:** `library/objects/manifest.json` says which objects are approved; `make.py ship` stops when a
   scene uses a library object that is not approved (OBJ-2). Ask Ahmed before shipping one.
 - **Your projects stay yours:** Git now ignores `projects/` (except the template and demos), so nothing you make can be

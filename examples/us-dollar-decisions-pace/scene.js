@@ -40,7 +40,7 @@ K.headline([{ html: "ليه رفع سعر الفايدة" }, { html: "في أم�
 K.captionsFrom = gEgp.start; // the headline already says the question: no duplicate caption under it
 K.glow(B.hook, 500, 500, 870, { out: gEgp.start });
 const hookSh = K.shadow(B.hook, 500, 680, 500, { out: gEgp.start });
-const dollar = K.img(B.hook, USD, { x: 500, y: 500, w: 600, float: true, rot: -5, shadow: false });
+const dollar = K.img(B.hook, USD, { x: 500, y: 500, w: 600, rot: -5, shadow: false });
 K.settle(dollar, 0, { fromScale: 1.45, fromY: 70, dur: 1.2 });
 
 // ---------- 2. you earn and spend in pounds; maybe you never bought a dollar ----------

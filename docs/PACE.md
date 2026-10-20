@@ -11,6 +11,11 @@ github repo"). The template loads `runtime/kanz-pace.js` after `kanz-look.js` an
 `K.pace({ defaults: "2026-10-18" })` after `K.look()`. Bare `K.pace()` is legacy compatibility.
 Finished projects keep their existing calls and render as before.
 
+**Quiz 2026-10-20:** pictures arrive and sit still, including the hook hero; only camera drift and explanatory
+changes move (PACE-9). `float` stays available for legacy scenes; current-profile lint warns `idle-motion`.
+Voice-note/script Reels prefer photo openings (`K.screen` from 0, `K.captionsFrom = 0`, optionally a live line).
+Question-hero openings stay allowed; only those hold captions until the question ends (HOOK-1..4).
+
 ## What the study found (why this exists)
 
 | Problem in our Reels | What the references do | Pace tool |
@@ -48,7 +53,7 @@ K.finish();                                                             // adds 
 - `K.img(..., { enter: "fly", fromScale, fromX, fromY })`: from 1.9× and 170 px low, settles in 0.85 s (`power3.out`).
   Small tags and labels keep the bounce.
 - `K.settle(el, 0, {fromScale})`: the hook hero is complete on frame 1 and settles from oversized (simple-hook
-  composition unchanged: headline + one hero). Set `K.captionsFrom` to the end of the question.
+  composition unchanged: headline + one hero). For this question-hero opening only, set `K.captionsFrom` to the end of the question.
 - `K.pointer(board)`: one lavender ring that hops `p.to(t, x, y, w, h)` between targets, `p.out(t)`.
 - Drift: 2 %/s scale, capped at 7 %, 8 px/s sideways, alternating. Higher crops edge objects.
 - Grain stays at 12 steps/s and boil at 8, so the texture keeps its hand-made step while motion is smooth.
