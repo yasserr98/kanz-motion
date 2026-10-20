@@ -17,7 +17,8 @@ the scene to copy for any new Reel).
    only changed paragraphs); after, Scribe re-transcribes and prints WORD / STUMBLE / PAUSE / FLAT / EAR findings. Fix with
    voice-only spelling in `say.json` (captions keep `script.md`), delete that paragraph's `audio/_tts/pNN.json`, re-run.
    Tell Ahmed the EAR times; add each failure he hears to the lexicon (`replace` if a respelling fixes it, `watch` if it
-   only needs flagging) (VOICE-7).
+   only needs flagging) (VOICE-7). Once Ahmed picks a pronunciation take, preserve and splice that exact cache/take
+   audio; do not regenerate its spelling and assume the result matches (VOICE-9).
 5. **Retime.** Once the voice is final: `make.py retime <slug>` (pauses to 0.3 s, tempo 1.08; ElevenLabs caps speed at
    1.2), and write the scene against the retimed timings (VOICE-5).
 6. Continue with the shared steps in [AGENTS.md](../../AGENTS.md): image pass, scene, review, ship.

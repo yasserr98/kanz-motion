@@ -23,6 +23,7 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
 - **Look v2** for new videos (safe zones, light, depth, evidence and number components; `LOOK-V2.md`). Rule: LOOK-1.
 - **No music.** Sound stays voice + SFX. Rule: SND-1.
 - **Codex objects.** "create whatever you need from codex" (batch 2026-10-10, `library/objects/PROVENANCE-2026-10-10.md`).
+  **Approved 2026-10-17 (DECISIONS); generation-time status below.**
   The batch is still marked candidate; statuses now live in `library/objects/manifest.json` (2026-10-17).
 
 ## 2026-10-11
@@ -57,6 +58,7 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   clear before building), hero entrances fly in (`enter: "fly"`), a few snap zooms (`K.snap`), camera drift between moves
   (`K.finish()` as the last line), 24 fps motion, room-tone bed, paper world at chapter turns, ending = cut back to the
   hook on the last word, ~1.3 s tail. Worked example: `projects/us-dollar-decisions-pace`. Rules: PACE-1..6.
+  - "cut back to the hook on the last word, ~1.3 s tail": **Superseded** 2026-10-18 by PACE-6 (moving last beat, ~0.4 s tail).
   - "a few snap zooms (`K.snap`)": **Superseded** 2026-10-17 (snap zooms off by default).
 - **Hook under pace.** The hero settles from oversized on frame 1 (`K.settle`) instead of the slow push, and
   `K.captionsFrom` hides the caption until the question ends (copy `projects/us-dollar-decisions-pace`, section 1).
@@ -224,7 +226,7 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
 - **No replica ending, no dead silence** (same review: "the fact that we end the video with the same pic as the hook
   sucks I want it to be more dynamic", "last frame sucks we don't need a replica we need to keep the video going and
   remove the dead silence"). The last line gets its own moving visual and the video ends about 0.4 s after the last word.
-  **Replaces** "ending = cut back to the hook on the last word, ~1.3 s tail" (2026-10-17). Rule: PACE-6.
+  **Replaces** "ending = cut back to the hook on the last word, ~1.3 s tail" (2026-10-13). Rule: PACE-6.
 
 ## 2026-10-19
 
@@ -239,3 +241,34 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   the chart panel's top edge runs through the last headline line "ممكن تاخده؟": "ship it but for future reference I
   dont want that overlap"). Panel and card edges, chart and grid lines, objects and diagrams sit fully below the
   headline with `K.GAP` to spare. v6 shipped as it is; this applies from the next video. Rule: TXT-6.
+- **Mechanical audit follow-up** (2026-10-20 fix brief; evidence in the local `A-report.md`, `B1-report.md` and
+  `B2-report.md`, not public assets). These clarify the current rules; delivered projects keep their existing profile:
+  - **Whole last word first** (B2 X1): Casino F's last word ended at source 709.48 s and the next began at 709.52 s;
+    the 0.05 s margin would cut inside the word. Listen to the untrimmed source, preserve the entire audible last word,
+    add quiet after a verified cut and report guard conflicts for a human ear. No next-sentence leak. Rule: SHORT-3.
+  - **Joins need source listening** (B2 X2): Casino H's repair needed short listening options, not ASR edges. The
+    selected v12 had a 0.2 s gap (selection 2026-10-20 11:18, approval 11:37 in transcript `4b0c5b47`), replacing that
+    Reel's earlier half-second request. Total join silence stays about 0.25 s; confirm source waveform boundaries,
+    check for source jump cuts and show listening options when a syllable sounds clipped. Rule: SHORT-13.
+  - **Speech cleanup** (B2 X3): Live F's third repetition was removed, while Live B's stammer remained flagged;
+    the 2026-10-20 12:32 request in `4b0c5b47` asks for silence/stuttering fixes on the new picks. Remove accidental
+    stutters, false starts and repeated phrases where a natural cut exists, record cuts and disclose what remains;
+    no rewriting or removing deliberate emphasis. Rule: SHORT-18.
+  - **Proof matches the complaint** (B2 X4): Casino A/E/G ending reports disclosed stills or measurements without
+    listening; those cannot prove audio fixed. Record final-MP4 layout stills, listened audio intervals (with source
+    comparison when edited), or played motion/cut intervals or frame strips, including version and interval.
+    An accepted defect is `accepted`, never `fixed`. Rule: REV-7.
+  - **Keep the exact selected take** (A-report, Emotional Trading v7): "the second one on the file this is the one I
+    want in the video why didnt you add it" (`dd045029`, 2026-10-11 04:32); the repair spliced `r2-2.mp3`. Preserve and
+    splice the approved cache/take audio; regenerating the same spelling is not the same take. Rule: VOICE-9.
+  - **Readable holds and dead stretches** (B1 C28/C29; choices explicitly specified in this fix brief): labels stay fully
+    visible at least 0.8 s except word-timed punch labels (`brief`); current defaults detect dead stretches from
+    1.5 s instead of the legacy 2.5 s. Rules: TXT-7, REV-1.
+  - **Approval is a ship gate** (B1 C18): warnings alone let unapproved library objects ship. `make.py ship` stops
+    on a library object that is not approved. Rule: OBJ-2; engine implementation is a separate audit job.
+  - **One machine, all checkouts** (B1 C2, B2 X17): a checkout-local lock allowed simultaneous jobs in different
+    worktrees. The lock lives in the user's local app data and serializes all checkouts. Rule: REPO-6.
+    The render-host clause stays unchanged pending the open decision.
+  - **Workshop title position follows the face** (B2 X10): Live E used y 190 because y 330 touched his face;
+    approved in `4b0c5b47`, 2026-10-20 03:47. Start at y 330 and move wherever the actual face boxes leave the eyes
+    and mouth clear throughout the three seconds; neither value is fixed. Rule: SHORT-4.

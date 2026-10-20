@@ -1,5 +1,7 @@
 # Objects 2026-10-13: provenance
 
+> Approved 2026-10-17 ([DECISIONS](../../docs/DECISIONS.md#2026-10-17)); generation-time status below.
+
 From the motion review of `us-dollar-decisions-pace` v3 (Kanz repo backlog, "Vox-style motion research"). Ahmed 2026-10-13
 ("love everything, apply all", except the ground plane): fill the library gaps that finance topics keep improvising around
 (for example "imported" shown as a sack and a dollar stack).

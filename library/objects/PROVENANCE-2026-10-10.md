@@ -1,5 +1,7 @@
 # Codex asset batch 2026-10-10: provenance
 
+> Approved 2026-10-17 ([DECISIONS](../../docs/DECISIONS.md#2026-10-17)); generation-time status below.
+
 Requested by Ahmed on 2026-10-10: "create whatever you need from codex", then upload them to the Drive that holds all the assets.
 Status: **candidates**. Generated and checked here, uploaded for the editors; Ahmed's visual review of the sheet is still open.
 Plan and reasons: `docs/CODEX-ASSET-REQUESTS.md`; how to use them: `docs/LOOK-V2.md` section 8 (`K.swap`, `K.walk`).

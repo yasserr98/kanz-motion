@@ -7,8 +7,9 @@ Built 2026-10-13 from the short-form pacing study (Kanz repo `reports/shorts-pac
 conversion.doc, Vox Shorts and 0x100x against our 7 Reels). Ahmed asked to "apply all the changes"; the first
 video built with it is `projects/us-dollar-decisions-pace/` (the delivered v4 rebuilt; v4 itself is unchanged).
 **Default for new videos since 2026-10-13** (Ahmed approved the before/after: "update the engine locally and the
-github repo"). The template loads `runtime/kanz-pace.js` after `kanz-look.js` and calls `K.pace()` after `K.look()`.
-Finished projects don't load it and render exactly as before.
+github repo"). The template loads `runtime/kanz-pace.js` after `kanz-look.js` and calls
+`K.pace({ defaults: "2026-10-18" })` after `K.look()`. Bare `K.pace()` is legacy compatibility.
+Finished projects keep their existing calls and render as before.
 
 ## What the study found (why this exists)
 
@@ -27,7 +28,7 @@ Finished projects don't load it and render exactly as before.
 
 ```js
 K.look();
-K.pace();                                   // 24 fps motion, smooth camera, mix 2, room tone, drift
+K.pace({ defaults: "2026-10-18" });           // 24 fps motion, smooth camera, mix 2, room tone, drift
 // boards in a snake: neighbours 1,100 px apart in a row, rows 1,800 apart (less is visible under the captions)
 const g = K.go(T("word"), "board2", { scale: 1.3, dx: 230, dy: -60 }); // close on the first object
 K.img(B.board2, src, { x, y, w, at: g.lead, enter: "fly" });            // lands with the camera
@@ -64,9 +65,10 @@ never compound. Script route: run it right after `make.py tts` (and after any vo
 
 ## Sound
 
-`K.bed = "room"` (set by `K.pace()`): `engine/render.py` mixes a generated, non-musical room tone (filtered brown +
+`K.bed = "room"` (set by pace): `engine/render.py` mixes a generated, non-musical room tone (filtered brown +
 pink noise, seeded, fully owned) 21 dB under the voice's median speech level, so pauses never drop to digital
-silence. No music (Ahmed 2026-10-10). `K.pace({ bed: null })` turns it off. `K.bedUnder = 30` (after `K.pace()`) sets the level
+silence. No music (Ahmed 2026-10-10). `K.pace({ defaults: "2026-10-18", bed: null })` turns it off.
+`K.bedUnder = 30` (after the pace call) sets the level
 per video in dB under the voice (Ahmed 2026-10-13 on gamblers-fallacy v1 at 21 dB: "extremely cool but too loud").
 
 ## Variety (2026-10-13, default for new videos)
@@ -89,6 +91,7 @@ Use these where the script gives a reason; the aim is that a video uses several 
 | cites a real series | `K.area({ ..., source })` with data from `engine/data.py` | source line on screen + `CREDITS.md` |
 | shows a real photo | `K.photo` (now with a camera-shutter sound) | needs a licensed, sourced photo file first |
 
+**Approved 2026-10-17 ([DECISIONS](DECISIONS.md#2026-10-17)); generation-time status below.**
 New objects 2026-10-13 (`library/objects/PROVENANCE-2026-10-13.md`): approved copies from the Kanz explainer library
 (bank card, cash, EGP coin, payment terminal, empty tomato basket, F01 checking a receipt) and Codex **candidates** until Ahmed
 reviews them: container ship, globe, gold bars, oil barrel, phone with a blank screen, rate dial, stock exchange.
@@ -106,7 +109,7 @@ price tag off the right edge at 48–54 s). A one-frame crossing during a fast c
 
 An editor's neckline Reel showed the camera pushing people, chart labels and an arrow past the frame edge: drift keeps
 panning 8 px/s for the whole gap and zooms up to 7 %, `K.snap` zooms 1.3x on the frame centre, and close framing does not
-know how wide the board is. `runtime/kanz-pace.js` now guards every `K.pace()` video. Before the first frame it steps
+know how wide the board is. `runtime/kanz-pace.js` guards every pace video, including legacy bare `K.pace()`. Before the first frame it steps
 through the video (every 1/12 s, held shots only) and measures each visible object, label, card and chart mark. Where
 one would cross lint's side margin (x 65..1015 above y 1000, 120..960 below), it adds the smallest pan, then a zoom-out
 (never below 0.8x), on `#camwrap`. It starts ~0.45 s early and eases, so it reads as camera work. Camera moves blend from
@@ -117,15 +120,16 @@ reviewed 2026-10-14).
 - Ignored: `K.fg` blur, glows, shadows, maps (`.kmap`), elements mostly (>70 %) outside the frame, and elements still
   oversized from a fly-in or `K.settle`.
 - A framing that should crop on purpose: `K.cam(t, id, { crop: true })` / `K.frame(..., { crop: true })` (no guard until
-  the next camera move). One element: `K.free(el)`. The whole video: `K.pace({ keep: false })`.
+  the next camera move). One element: `K.free(el)`. The whole video: `K.pace({ defaults: "2026-10-18", keep: false })`.
 - Lint and renders use the guard automatically (they call `K.seek`). `K._keepKind(t)` says whether a time is a held
   shot, a move, a snap or a free framing, for review scripts.
 
 ## Visual defaults (2026-10-17, new videos)
 
-From a visual review of 7 shipped Reels (2026-10-17). The template calls `K.pace({ defaults: "2026-10-17" })`. Finished
-projects call `K.pace()` without `defaults` and render exactly as before (golden stills of 7 finished projects, byte for
-byte, before/after this change). Each default switches off on its own: `K.pace({ defaults: "2026-10-17", fly: false })`.
+From a visual review of 7 shipped Reels (2026-10-17). The template now calls `K.pace({ defaults: "2026-10-18" })`,
+which includes these defaults and the shorts refinements. Legacy finished projects call `K.pace()` without `defaults`
+and render exactly as before (golden stills of 7 finished projects, byte for byte, before/after the original change).
+Each default switches off on its own: `K.pace({ defaults: "2026-10-18", fly: false })`.
 Before/after stills of all five: `projects/_visual-defaults-demo` (`index.html` vs `index.html?old`).
 
 | Key | What it fixes (seen in) | What it does |

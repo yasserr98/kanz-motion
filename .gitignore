@@ -16,6 +16,11 @@ projects/*/audio/_tts/
 # shorts from long videos: source media stays local, never pushed (public repo)
 shorts/*/source/
 shorts/*/clips/
+shorts/_titles.json
+shorts/_lives.json
+shorts/_x-posted/
+shorts/*/work/
+source/
 # footage shorts: face frames are extracted from the source video, never pushed
 projects/*/assets/face/
 shorts/*/photos/
@@ -23,8 +28,6 @@ shorts/*/photos/
 projects/*/assets/codex/**/*.log
 # long-video transcripts (whole video, not just the short) and check frames stay local
 shorts/*/transcript.*
-shorts/*/work/*.png
-shorts/*/work/*.jpg
 .pytest_cache/
 tests/.tmp*/
 

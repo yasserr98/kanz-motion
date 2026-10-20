@@ -2,11 +2,11 @@
 > current rules: the look, pace, hook and ending have changed since (`docs/LOOK-V2.md`, `docs/PACE.md`, `AGENTS.md`).
 > Where they differ, those win. Its "awaiting Ahmed's review" status below is the status it had on 2026-10-05.
 
-> Copied from the Kanz repo (`reports/vox-style-research-2026-10-05/FINDINGS.md`). Links to `research/` point to evidence that stays in the Kanz repo.
+> Copied from private Kanz repo: `reports/vox-style-research-2026-10-05/FINDINGS.md`. Evidence stays in that repo.
 
 # Vox style for Kanz: research findings
 
-Date: 2026-10-05 · Status: **findings, awaiting Ahmed's review** · Plan: [PLAN.md](PLAN.md)
+Date: 2026-10-05 · Status: **findings, awaiting Ahmed's review** · Plan: private Kanz repo: `reports/vox-style-research-2026-10-05/PLAN.md`
 
 ## What was studied
 
@@ -19,8 +19,10 @@ Date: 2026-10-05 · Status: **findings, awaiting Ahmed's review** · Plan: [PLAN
 | Tutorials (Vox Creative, Chris Moran, Claude Code + Remotion, After Effects builds) | 9 | captions read; key techniques extracted |
 
 Apify spend: about $0.67 of the $2 (video lists only). All downloads, frames and captions were done locally for free.
-Evidence: [notes.md](research/notes.md) (per-video observations), [measurements.md](research/measurements.md) (cut statistics),
-`research/out/<id>/` (labelled frame sheets). Raw videos stay local in `research/raw/` (gitignored, study only).
+Evidence: private Kanz repo: `reports/vox-style-research-2026-10-05/research/notes.md` (per-video observations),
+private Kanz repo: `reports/vox-style-research-2026-10-05/research/measurements.md` (cut statistics),
+private Kanz repo: `reports/vox-style-research-2026-10-05/research/out/<id>/` (labelled frame sheets).
+Raw videos stay local: private Kanz repo: `reports/vox-style-research-2026-10-05/research/raw/` (gitignored, study only).
 
 ## The ten things that make it "Vox"
 

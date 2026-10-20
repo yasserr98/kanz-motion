@@ -1,12 +1,13 @@
-/* us-dollar-decisions, PACE version (2026-10-13): the delivered v4 rebuilt with every change from the short-form
+/* Current copy example (2026-10-20): PACE-1..6, HOOK-1..3, EXPL-1. The delivered Reel used an older look.
+ * us-dollar-decisions, PACE version (2026-10-13): the delivered v4 rebuilt with every change from the short-form
  * pacing study (Kanz repo reports/shorts-pacing-study-2026-10-13). Same script, voice take, objects and look; only
  * timing, camera and continuity change, plus the decisions Ahmed asked to apply ("apply all the changes"):
  *  - voice retimed: long pauses cut to 0.3 s and 1.08x tempo (engine/retime.py), 75.0 -> 65.8 s
- *  - K.pace(): 24 fps motion, camera drift between moves, 0.5 s moves inside the voice's pauses, room-tone bed
+ *  - K.pace({ defaults: "2026-10-18" }): 24 fps motion, camera drift, moves inside the voice's pauses, room-tone bed
  *  - every board arrives built (K.go + `at: g.lead`), starts close on its first object and pulls out
  *  - one dollar is carried from board to board instead of being rebuilt; obsolete objects dim, never clear
  *  - hook hero settles from oversized from frame 1; no caption under the question headline
- *  - three paper chapters (mechanism, key idea, "one factor"); snap zooms on the emphasis words
+ *  - three paper chapters (mechanism, key idea, "one factor"); no snap zooms (PACE-5)
  *  - ends 0.4 s after the last word (PACE-6, 2026-10-18: the last line builds its own diagram; no cut back to the hook,
  *    no silent tail). The Fed's rate and the cost of making it rise as growing bars, not arrow icons (EXPL-1)
  * Review fixes (v4 of this rebuild, 2026-10-13): "أمريكا مش طرف" as K.punch with the riser (the carried dollar crossed
@@ -22,7 +23,7 @@ const WHITE = "rgba(255,255,255,.55)";
 const USD = OBJ + "kanz-usd-banknote-v01.png";
 
 K.look();
-K.pace();
+K.pace({ defaults: "2026-10-18" });
 
 // ---------- world: snake layout, neighbours 1,100 px apart in a row, rows 1,800 apart, no diagonal whips ----------
 const B = {
@@ -114,7 +115,6 @@ tl.to(buy, { opacity: 1, scale: "+=0.12", duration: 0.35, ease: "back.out(2)" },
 K.glow(B.demand, 215, 520, 440, { at: tStrong });
 const tStronger = N("اقوى");
 K.text(B.demand, "أقوى", { x: 215, y: 780, size: 96, head: true, color: L, at: tStronger - 0.1, from: "pop", sfx: "hit", gain: 0.3 });
-K.snap(tStronger, 1.3, 0.55);
 
 // ---------- 6. charcoal again: an Egyptian company buys from another country, both pay in dollars ----------
 const tCo = N("ولما");
@@ -227,7 +227,7 @@ K.img(B.made, OBJ + "kanz-factory-v01.png", { x: 260, y: 330, w: 400, at: tEg - 
 K.tag(B.made, "بيتصنّع في مصر", { x: 260, y: 580, size: 44, at: N("مصر") });
 const tImp = N("خامات");
 K.frame(tImp - 0.2, "made", { scale: 1.05, dx: -30, dy: 110 });
-// imported parts: the container ship (Codex candidate 2026-10-13) instead of a raw-material sack
+// imported parts: the container ship (approved 2026-10-17) instead of a raw-material sack
 K.img(B.made, OBJ + "kanz-container-ship-v01.png", { x: 250, y: 770, w: 320, at: tImp, enter: "fly", fromX: -80 });
 tl.to(buy, { opacity: 1, duration: 0.3 }, N("مكوّنات") - 0.1);
 K.tag(B.made, "مستوردة", { x: 690, y: 770, lav: true, size: 46, at: N("مستوردة") });
@@ -246,7 +246,6 @@ K.world(gFac.start, "paper");
 K.img(B.factor, OBJ + "kanz-bank-v01.png", { x: 500, y: 260, w: 340, at: gFac.lead, glow: true, enter: "fly" });
 const tFactor = N("عامل");
 K.text(B.factor, "عامل مؤثّر", { x: 500, y: 70, size: 76, head: true, color: L, at: tFactor });
-K.snap(tFactor, 1.25, 0.6);
 const tDiff = N("بيختلف");
 K.frame(tDiff - 0.3, "factor");
 [["kanz-landmark-egypt-v01.png", 790], ["kanz-landmark-uk-v01.png", 500], ["kanz-landmark-japan-v01.png", 210]].forEach(([img, x], i) => {
@@ -267,7 +266,6 @@ K.frame(tPart - 0.35, "bill", { dur: 0.6 });
 K.img(B.bill, OBJ + "kanz-receipt-v01.png", { x: 300, y: 400, w: 420, at: tPart - 0.2, glow: true, enter: "fly", fromX: -60 });
 const tYourBill = N("فاتورتك");
 K.text(B.bill, "فاتورتك", { x: 300, y: 80, size: 70, head: true, color: L, at: tYourBill });
-K.snap(tYourBill, 1.25, 0.55);
 K.tl.to(wal, { left: 860, top: 300, scale: 0.6, opacity: 0.35, duration: 0.6, ease: "power2.inOut" }, tPart - 0.3);
 K.dim(noUsd, tPart - 0.3, 0, 0.3);
 // ---------- ending (PACE-6, 2026-10-18): the last line builds its own diagram into the last word, no cut back ----------

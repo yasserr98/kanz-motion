@@ -56,7 +56,7 @@ tighten these numbers if needed.
 `engine/lint.py` steps through the scene every 0.25 s (no video render, about a minute) and reports:
 
 - **safe**: text outside the zones above; focal objects cut by them.
-- **dead**: more than 2.5 s with nothing new on screen and the camera still (Vox rule: something new every 1.5–3 s).
+- **dead**: from 1.5 s with nothing new on screen and the camera still under the current defaults (legacy: 2.5 s; REV-1).
 - **thin**: 1.5 s or longer where content covers less than 30% of the safe area.
 - **hook**: the first visual arriving after 1.0 s.
 
@@ -148,6 +148,7 @@ hero object at 600 board px centred under it (`glow`, `float`, slight rotation),
 
 ## 8. Characters and objects that act
 
+**Approved 2026-10-17 ([DECISIONS](DECISIONS.md#2026-10-17)); generation-time status below.**
 Codex batch 2026-10-10 (Ahmed: "create whatever you need"). The files are in `library/objects/`; their prompts and
 checks are in `library/objects/PROVENANCE-2026-10-10.md`. They are candidates until Ahmed reviews the sheet.
 
@@ -194,7 +195,7 @@ these applied; not for posting).
   purple, and chart lines turn ink (CSS in `runtime/kanz-look.css`). Captions keep their dark pill. Use it for 1-2
   chapter turns a video, e.g. a definition or the key idea. Pass `color: K.INK` only if an element keeps a
   light colour. Worked example: `projects/_paper-demo/` (not for posting).
-- **Takeaway ending** (superseded 2026-10-17 by the pace ending and 2026-10-18 by PACE-6; kept for old projects). After the last word, `K.cam(t, <hook board>, { via: 0.42 })` returns to the opening
+- **Takeaway ending** (superseded 2026-10-13 by the pace ending and 2026-10-18 by PACE-6; kept for old projects). After the last word, `K.cam(t, <hook board>, { via: 0.42 })` returns to the opening
   composition and `K.takeaway(board, html, { x, y, size, at })` shows the video's question or thesis in big type,
   in words the voice actually said. Extend `K.duration` by about 2 s for the hold.
 - **Smooth camera** (approved 2026-10-11 from a side-by-side trial): `K.camSmooth = true` after `K.look()`

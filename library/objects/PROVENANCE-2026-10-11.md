@@ -1,5 +1,7 @@
 # Codex objects 2026-10-11: provenance
 
+> Approved 2026-10-17 ([DECISIONS](../../docs/DECISIONS.md#2026-10-17)); generation-time status below.
+
 Requested for `projects/emotional-trading` (hook rework). Ahmed 2026-10-11: "if you want to create more icons or images you're
 free to do so". Status: `kanz-trading-screen-blank-v01` and `kanz-npc-crowd-back-v01` **approved in use** (Ahmed picked hook "F", which shows both,
 2026-10-11). `kanz-investment-chart-down-v01` is still a **candidate** (not yet shown in a video).

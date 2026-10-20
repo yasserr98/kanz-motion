@@ -31,7 +31,7 @@ research conversation. The same work in a **fresh session** re-reads far less.
    render bugs, anything Sonnet fails at twice.
 3. Give everything in the first message: the script, the voice/speed, and "follow AGENTS.md and
    docs/EFFICIENCY.md". Asking the agent to go and find things costs extra turns.
-4. The agent writes `scene.js` by copying the closest finished project, not from a blank page.
+4. The agent writes `scene.js` by copying the route's worked example in `examples/`.
 5. Review with **one contact sheet** (`make.py review`, then `make.py check`), never one image per
    frame. Each image the agent looks at costs as much as a long message.
 6. Render runs in the background; the agent does not poll it.

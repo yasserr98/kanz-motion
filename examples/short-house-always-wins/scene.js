@@ -1,4 +1,5 @@
-/* short-house-always-wins (short B, 2026-10-16): cut from the Kanz long video "الكازينو بيكسب في الآخر"
+/* Current copy example (2026-10-20): PACE-1/5, SHORT-3/4/6/7/8. The delivered Reel used an older look.
+ * short-house-always-wins (short B, 2026-10-16): cut from the Kanz long video "الكازينو بيكسب في الآخر"
  * (01:13.25-01:47.10; v7 opens on the source's TV-set shot, Ahmed: "leave the TV part and the zoom in"), Ahmed Shaaban's own voice and face. First short on the footage layer (runtime/kanz-footage.js).
  * Ahmed's brief: alternate between his face and the motion; the first 3 s always show his face; keep the source's
  * burned-in labels ("حجم الرهان" looks cool); trim the last second (ends before "13 يونيو 2018").
@@ -9,12 +10,12 @@ const { N, T } = K;
 const tl = K.tl;
 const OBJ = "../../library/objects/";
 const L = "#d5adef";
-// Visual types (AGENTS.md, Ahmed 2026-10-16): full-screen photo for a place (Codex `free`), disposable print for a
-// real person or moment, Kanz icon (Codex `kanz` / library) for a concept or mechanism on the charcoal board.
+// Visual types (docs/routes/images.md): full-screen photo for a place, slim print for a real person or moment,
+// diagrams for mechanisms; approved Kanz icons support them (EXPL-1/2).
 const ICON = "assets/codex/kanz/", PHOTO = "assets/codex/free/";
 
 K.look();
-K.pace();
+K.pace({ defaults: "2026-10-18" });
 
 // ---------- face / motion rhythm (cuts sit in the pauses before a word) ----------
 const c1 = T("دي") - 0.04;                 // 3.0  face (hook) -> house board
@@ -26,10 +27,10 @@ const c3 = T("كل", f3) - 0.04;             // 17.9 -> bettors board
 const f4 = T("المهم") - 0.04;              // 24.0 -> face: "المهم إن المحل يكون فيه رجل الزبون"
 const c4 = T("فبالتالي") - 0.04;           // 27.1 -> full-shop board
 // no final face window (Ahmed 2026-10-16): the crowd photo carries "وإن الزبون تيجي رجليه" to the end
-const END = 33.85;                         // the voice file (from 01:13.25): ends before "13 يونيو"
-K.footage({ dir: "assets/face", n: 814, end: END, faceY: 1500, xstyle: "cut", // Ahmed 2026-10-16: the clean cut (option 1) // zoom about the source label so it stays whole
-  windows: [[0, c1], [f2, c2a], [f3, c3], [f4, c4, 1.1]] }); // no jump zoom at 16 s; no cut back to the face at the end (Ahmed 2026-10-16)
-K.captionsFrom = 0;
+const END = window.DURATION;               // voice end, including the verified ending guard (SHORT-3)
+K.footage({ dir: "assets/face", n: 814, faceY: 1500, xstyle: "cut",
+  windows: [[0, c1], [f2, c2a], [f3, c3], [f4, c4]] }); // no face jump zoom (PACE-5)
+K.title(); // registry pick from shorts/_titles.json; rebuild captions after choosing it (SHORT-4)
 
 const B = {
   house: K.board("house", 0, 0), money: K.board("money", -1100, 0),
@@ -39,7 +40,7 @@ const B = {
 // ---------- 1. البيت = شركة المراهنات (3.0-5.2): the concept as an icon, then the place itself ----------
 const tCo = T("لشركة");
 K.cam(0, "house", { scale: 1.12 });
-// boards build ~0.3 s before their cut, under the face, so the dissolve lands on a finished board (2026-10-16)
+// boards build ~0.3 s before their cut, under the face, so the clean cut lands on a finished board (SHORT-6)
 const PRE = 0.3;
 K.glow(B.house, 500, 470, 820, { at: c1 - PRE, out: tCo });
 const house = K.img(B.house, OBJ + "kanz-house-v01.png", { x: 500, y: 470, w: 520, float: true, shadow: false });
@@ -107,5 +108,4 @@ tl.to([shop, w1, w2], { autoAlpha: 0, duration: 0.1 }, tFull - 0.1);
 K.screen(PHOTO + "casino-floor-crowd-men.png", tFull - 0.1, END + 1); // runs to the last frame; women removed (Ahmed 2026-10-16)
 K.tag(B.full, "المحل مليان", { x: 500, y: 250, size: 60, lav: true, at: tFull });
 
-K.duration = END;
 K.finish();

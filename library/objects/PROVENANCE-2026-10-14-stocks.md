@@ -1,5 +1,7 @@
 # Stock-market objects 2026-10-14: provenance
 
+> Approved 2026-10-17 ([DECISIONS](../../docs/DECISIONS.md#2026-10-17)); generation-time status below.
+
 Requested by Ahmed for `projects/portfolio-rebalancing` v2 (2026-10-14): "all props arent related to the actual stock maket,
 create whatever elements you need to adjust that". Status: **candidates** until Ahmed reviews them
 (sheet: `prompts-2026-10-14-stocks/out/compare.jpg`, local).

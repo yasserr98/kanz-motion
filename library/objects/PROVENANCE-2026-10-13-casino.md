@@ -1,5 +1,7 @@
 # Casino objects 2026-10-13: provenance
 
+> Approved 2026-10-17 ([DECISIONS](../../docs/DECISIONS.md#2026-10-17)); generation-time status below.
+
 Requested by Ahmed for `projects/gamblers-fallacy` v2 (2026-10-13): "generate people that would actually look like gamblers
 rather than the ones we're using ... let do men", "a roulette board ... or even a table with an attendant".
 Status: **candidates** until Ahmed reviews them (sheet: `projects/gamblers-fallacy/out/casino-objects.jpg`, local).

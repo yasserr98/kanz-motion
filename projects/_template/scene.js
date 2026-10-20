@@ -7,7 +7,7 @@
  * between boards, 24 fps motion, room-tone bed; script-route voices are retimed (make.py retime) before the scene.
  * Variety (Ahmed 2026-10-13, docs/PACE.md): one K.punch({riser: true}) on the key sentence, K.stack/K.pile for amounts,
  * K.swap for state changes, map/globe + K.pin for places, real series via engine/data.py with `source`. No ground plane.
- * Worked example: projects/us-dollar-decisions-pace/ (also _sample-real-estate-v3/, _paper-demo/, _chart-demo/). */
+ * Worked example: examples/us-dollar-decisions-pace/ (also projects/_paper-demo/, projects/_chart-demo/). */
 const { N, T, num } = K;
 const tl = K.tl;
 const OBJ = "../../library/objects/";
@@ -44,14 +44,14 @@ K.img(b2, OBJ + "kanz-house-v01.png", { x: 760, y: 330, w: 420, at: g2.lead, ent
 // const S = K.scale(1200000, 390); // one scale per comparison; bars share the zero baseline y
 // const a = K.bar(b2, { x: 560, y: 720, w: 190, value: 1100000, scale: S, at: g2.lead });
 
-// ---------- visual types (AGENTS.md, "Images and icons: always ask Codex"; shots.json -> engine/codex_assets.py) ----------
+// ---------- visual types (docs/routes/images.md; shots.json -> engine/codex_assets.py) ----------
 // PLACE -> full-screen photo on a board of its own that holds only text/tags (board icons would sit on the photo):
 // const gPlace = K.go(T("الكازينو"), "place");
 // K.screen("assets/codex/free/casino-exterior.png", gPlace.start, T("التالية"));
 // K.text(K.boards.place.el, "عنوان", { x: 500, y: 130, size: 80, head: true, at: gPlace.lead });
-// REAL PERSON or MOMENT -> disposable print of a licensed photo (never generated); credit goes to CREDITS.md, not the frame.
+// REAL PERSON or MOMENT -> real openly licensed or public-moment press photo (IMG-8); credit in CREDITS.md, not the frame.
 // Keep it in the board's upper two thirds so it clears the captions; tags on it sit on top:
-// K.snap35(b2, "assets/photos/person.jpg", { x: 500, y: 560, w: 520, h: 640, rot: -4, at: g2.lead, flash: false });
+// K.snap35(b2, "assets/photos/person.jpg", { x: 500, y: 560, w: 520, h: 640, rot: -4, at: g2.lead, slim: true, flash: false });
 // CONCEPT, MECHANISM or NUMBER -> an animated diagram built in the engine (K.area, K.bar/K.delta, K.count, K.stack,
 // arrows) or a drawn illustration; Kanz icons only support it (EXPL-1, EXPL-2: no still icon explaining for over 2 s).
 

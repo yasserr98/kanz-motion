@@ -21,8 +21,8 @@ Route A (Git, no account):
 1. `git status --short`, then `git fetch https://github.com/yasserr98/kanz-motion.git main`.
    Show me the new commits: `git log --oneline HEAD..FETCH_HEAD`. If there are none, say I'm up to date and stop.
 2. If tracked files have local changes, list them, then `git stash push -m "before update <today>"`.
-3. `git merge --ff-only FETCH_HEAD`. If a stash was made, `git stash pop`; if that conflicts, stop, show me the files
-   and keep the stash.
+3. `git merge --ff-only FETCH_HEAD`. If a stash was made, `git stash apply`; if that conflicts, stop and show me the
+   files. Keep the stash after success too (REPO-3).
 4. If the merge refuses because a file from GitHub would overwrite one of my untracked files (same project name),
    stop and tell me which; do not move, rename or delete anything without asking.
 5. Never run `git reset --hard`, `git clean`, `git checkout -- .`, `git push` or `git commit`; never drop a stash.
@@ -45,9 +45,41 @@ Route B (no Git, download the ZIP):
 
 Then (both routes):
 6. If package-lock.json changed, run `npm ci`; if requirements.txt changed, `python -m pip install -r requirements.txt`.
+   If I make shorts and requirements-shorts.txt is new or changed, `python -m pip install -r requirements-shorts.txt`,
+   then `python engine/make.py doctor --shorts`.
+   After a Playwright upgrade, run `python -m playwright install chromium`, then `python engine/make.py doctor`.
 7. Re-read AGENTS.md, README.md and the "Recent changes" list in docs/UPDATE.md, then tell me in a few lines what is new
    and which of my videos I should re-render to get a fix.
 ```
+
+Recent changes (2026-10-18 to 2026-10-20). Every rule below is a line in `docs/RULES.md`; the reasons are in
+`docs/DECISIONS.md`.
+
+- **New template defaults** (`K.pace({ defaults: "2026-10-18" })`, already in `projects/_template`): `K.title()` for the
+  shorts title sticker, subtitles that move down (never up over his face), eased split moves, `K.money(39.8)` for dollar
+  amounts and `K.under(head, html)` for a subheadline with breathing room. Older scenes render as before.
+- **Endings and explanations:** no replay of the hook at the end; the last line gets its own moving visual and the video
+  ends about 0.4 s after the last word (PACE-6). Anything that moves or works (a price, a loss, a percentage, money
+  flowing) is an animated diagram or a drawn scene, icons only support (EXPL-1, EXPL-2). Real people and real moments are
+  real photos only, in the slim print (`K.snap35({ slim: true })`, IMG-8, IMG-11).
+- **Nothing crosses a headline** (TXT-6): panels, chart lines and objects start at least 40 px below it. A label stays
+  fully visible for at least 0.8 s (TXT-7).
+- **Sound:** one effect at a time, the voice gently compressed, two-pass loudness to -16 LUFS; room tone 40% quieter.
+  `python engine/make.py remix <name> <from> <to>` gives an approved render the new sound without touching its picture.
+  `K.fire()` now plays one sound (`legacyPair: true` keeps the old two).
+- **Stricter checks:** lint flags empty stretches from 1.5 s (was 2.5 s), headline crossings, titles over the face,
+  frozen footage, overlapping sound effects and stray `$` signs; `make.py check` now fails when it finds a problem and
+  `make.py ship` stops on a library object that is not approved. Fix the finding or justify it in `lint-ok.json`.
+- **One browser job at a time:** render, lint, stills, cover and contrast queue for one slot per computer, across every
+  copy of the folder. "waiting for the local render slot" means queued, not stuck.
+- **Voice notes:** an `audio/edl.json` without `"speed"` now plays at 1.25x (VOICE-2); it was silently 1.0x. If one of
+  your voice notes must stay at its old pace, add `"speed": 1.0` before re-running the edit. A chosen pronunciation take is
+  spliced as that exact audio, never regenerated (VOICE-9).
+- **Shorts:** install `requirements-shorts.txt` (OpenCV, yt-dlp) and run `make.py doctor --shorts`; copy
+  `shorts/_titles.example.json` to `shorts/_titles.json` for the title options. Tightened workshop footage no longer lets the
+  sound drift ahead of the picture (about 6 ms per cut before), a voice join gets about 0.25 s of silence in all, and the
+  ending never cuts into the last word. Re-cut and re-render a tightened workshop short if its sound looked out of sync
+  toward the end. Stutters and repeated phrases come out where a natural cut exists (SHORT-18).
 
 Recent workflow changes (2026-10-17, no re-render needed):
 
@@ -61,8 +93,8 @@ Recent workflow changes (2026-10-17, no re-render needed):
 - **New commands:** `python engine/make.py doctor` checks your setup; `python engine/make.py ship <name> v1` lints,
   renders, checks the frames and the loudness, and stops at the first failure. With `KANZ_RENDER_HOST` in `.env`, renders
   go to that server (`--local` renders on your machine).
-- **Objects:** `library/objects/manifest.json` says which objects are approved; `make.py check` and `ship` warn when a
-  scene uses a candidate. Ask Ahmed before shipping one.
+- **Objects:** `library/objects/manifest.json` says which objects are approved; `make.py ship` stops when a
+  scene uses a library object that is not approved (OBJ-2). Ask Ahmed before shipping one.
 - **Your projects stay yours:** Git now ignores `projects/` (except the template and demos), so nothing you make can be
   committed by accident.
 

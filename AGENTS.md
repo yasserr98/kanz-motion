@@ -46,7 +46,7 @@ Work in this folder, even if the chat opened in the Kanz repo or a Kanz worktree
    `--local` to render here), 12 frames from the MP4, loudness, the ending, and for shorts the cut strips, title,
    freezes and frame rate. It stops at the first failure (REV-3, REV-4). Look at `out/check-v1.jpg`, `out/cuts-v1.jpg`
    and `out/notes-v1.jpg`, then open the MP4 for Ahmed (`ii <path>`). Run it in the background; do not poll. Review
-   notes go in `notes.json` (`make.py note`); report one fixed only with its still (REV-7).
+   notes go in `notes.json` (`make.py note`); proof matches the complaint: final-MP4 still, listened audio or motion interval (REV-7).
 8. **Cover** (style A): `projects/<slug>/cover.json` -> `python engine/cover.py projects/<slug>`; check the crop lines in
    `out/cover-review.jpg`.
 9. **Record (Ahmed's copy only).** Add a row to the usage log and update the backlog in the Kanz repo
@@ -59,8 +59,8 @@ anything, and say where it really was if it differs (REV-5).
 ## Usage discipline (Claude Pro limits)
 
 - One fresh session per video; Sonnet 5.5 at medium effort, Opus only for engine work ([docs/EFFICIENCY.md](docs/EFFICIENCY.md)).
-- Review through one contact sheet, not image by image. Never more than one local Chromium (render, lint or stills) at a time: the engine
-  queues them itself (`engine/slot.py`, REPO-6); a job printing "waiting for the local render slot" is queued, not stuck.
+- Review through one contact sheet, not image by image. One local Chromium job at a time per machine, across all checkouts:
+  `engine/slot.py` queues them using a lock in local app data (REPO-6); "waiting for the local render slot" means queued.
 
 ## Brand authority (Kanz repo, when it is alongside)
 
