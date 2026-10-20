@@ -23,9 +23,10 @@ one path, so the full-screen face and the split half stay in sync.
   --face-y   where the face sits in the half, 0 = top, 1 = bottom (default 0.42)
   --video-from  as footage.py: the first clean source second; the first clean frame is held until then.
   --also, --tail, --join, --exact-end   as footage.py: the ending guard (last word + 0.4 s, stopped before the next
-             source word) and joined ranges with a 0.25 s pause at each join (SHORT-13); the camera path restarts at a join.
-  --no-tighten  workshop shorts run engine/tighten_footage.py by default (dead air: pauses over 0.3 s are shortened);
-             this keeps every pause.
+             source word, never into the last word) and joined ranges with about 0.25 s of silence in all at each join
+             (SHORT-13); the camera path restarts at a join.
+  --no-tighten  workshop shorts run engine/tighten_footage.py by default (dead air: gaps over 0.42 s are trimmed to
+             0.30 s, frame-rounded); this keeps every pause.
 Then engine/faces.py writes assets/faces.json (eyes-and-mouth boxes) and assets/freezes.json. track.json also keeps
 "diff", the per-frame change of the source picture inside the crop, so a stalled stream is found although the crop glides.
 (No --tv-until: the TV-set opening is a fixed wide shot, use footage.py for that.)

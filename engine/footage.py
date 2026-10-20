@@ -6,11 +6,12 @@
   start, end    seconds in the source. The audio ends after the last word that ends inside start..end, plus the ending
                 guard (--tail, default 0.4 s: Arabic final consonants decay past the ASR word end; Ahmed's "last word
                 cut off" on casino A/E/F/H and live shorts), stopped 0.05 s before the next source word so no part of
-                the next sentence leaks in. The fade (at most 0.15 s) sits inside that tail, never on the word.
+                the next sentence leaks in. If that margin reaches into the word, keep the whole word plus a 10 ms
+                fade and warn. The fade (at most 0.15 s) sits inside that tail, never on the word.
                 --exact-end keeps the old behaviour: the audio runs to <end> exactly, with a 0.08 s fade.
-  --also S E    another source range joined after the first (repeatable, SHORT-13): each range gets its own ending
-                guard, and a 0.25 s pause (--join) opens every join so the sound has room to turn; the picture cuts
-                clean at the join (the pause shows the next range's own lead-in frames).
+  --also S E    another source range joined after the first (repeatable, SHORT-13): budget 0.25 s total (--join),
+                up to 0.15 s after the last word and 0.1 s before the next; shorter source gaps stay shorter.
+                The final range keeps its own ending guard. The picture cuts clean at the join.
   --video-from  first source second with clean footage (e.g. after a transition); the first frame is held
                 until then so the short opens on the face (Ahmed 2026-10-16: first 3 s always show his face)
   --tv-until    keep the source's own wide opening (e.g. the speaker inside a TV set) up to this source second:
@@ -33,8 +34,9 @@ import numpy as np
 from provenance import stamp
 
 TAIL = 0.4    # s of ending guard after the last word (P0, 2026-10-18)
-GAP = 0.05    # s the audio stops before the next source word
-JOIN = 0.25   # s of pause opened at every voice join (SHORT-13)
+NEXT_WORD_GAP = 0.05  # s the audio stops before the next source word (SHORT-3)
+GAP = NEXT_WORD_GAP   # compatibility for callers using the old name
+JOIN = 0.25   # s of total pause at every voice join (SHORT-13)
 FADE = 0.15   # s, the longest fade-out; it always sits inside the tail
 SR = 48000
 
@@ -43,12 +45,12 @@ def source_words(tr):
     return sorted((w for s in tr["segments"] for w in s["words"]), key=lambda w: w["start"])
 
 
-def plan_segments(words, ranges, tail=TAIL, gap=GAP, join=JOIN, exact=False):
+def plan_segments(words, ranges, tail=TAIL, gap=NEXT_WORD_GAP, join=JOIN, exact=False):
     """Where each source range really ends, and where it lands in the short.
 
     words: every source word ({start, end}), sorted. ranges: [(start, end), ...] in source seconds.
     Returns one dict per range: src_start, src_end (where its audio stops), last_word_end, next_word_start (None at
-    the end of the source), lead (pause before it in the short: 0 for the first, `join` after), out_start (where its
+    the end of the source), lead (added silence before it, within the join budget), out_start (where its
     first source second lands in the short), words (the range's words) and clamped (True when the next word cut the
     tail short)."""
     segs, out = [], 0.0
@@ -58,18 +60,28 @@ def plan_segments(words, ranges, tail=TAIL, gap=GAP, join=JOIN, exact=False):
             raise ValueError(f"range {s}-{e}: no transcript word ends inside it")
         last, mine = max(w["end"] for w in inside), {id(w) for w in inside}
         nxt = next((w["start"] for w in words if w["start"] >= last - 1e-6 and id(w) not in mine), None)
+        word_guard = False
         if exact:
             end, clamped = e, False
         else:
-            end = last + tail
+            end = last + (min(tail, join * 0.6) if k < len(ranges) - 1 else tail)
             clamped = nxt is not None and nxt - gap < end
             if clamped:
-                end = max(last, nxt - gap)
+                word_guard = nxt - gap < last
+                end = last + 0.01 if word_guard else nxt - gap
         lead = join if k else 0.0
+        if k and not exact:
+            prev = segs[-1]
+            first = min(w["start"] for w in inside)
+            source_gap = first - prev["last_word_end"]
+            total = min(join, source_gap) if source_gap >= 0 else join
+            before = min(join * 0.4, max(0.0, total - (prev["src_end"] - prev["last_word_end"])))
+            s = min(first, max(s, first - before))
+            lead = round(max(0.0, before - (first - s)), 3)
         out += lead
         segs.append({"src_start": s, "src_end": round(end, 3), "last_word_end": last, "next_word_start": nxt,
-                     "lead": lead, "out_start": round(out, 3), "words": inside, "clamped": clamped})
-        out += end - s
+                     "lead": lead, "out_start": round(out, 3), "words": inside, "clamped": clamped, "word_guard": word_guard})
+        out += round(end, 3) - s
     return segs
 
 
@@ -101,6 +113,8 @@ def voice_audio(src, segs, exact=False):
         a[:fi] *= ramp(fi, True)
         if exact:
             fade = 0.08
+        elif g.get("word_guard"):
+            fade = 0.01
         else:
             fade = min(FADE, max(0.0, g["src_end"] - g["last_word_end"]) / 2)
         fo = min(len(a), int(fade * SR))
@@ -139,10 +153,13 @@ def write_transcript(proj, tr, source, segs, video_from):
 def report(segs):
     for g in segs:
         tail = g["src_end"] - g["last_word_end"]
-        why = f" (stopped {GAP:.2f} s before the next word)" if g["clamped"] else ""
+        why = f" (stopped {NEXT_WORD_GAP:.2f} s before the next word)" if g["clamped"] and not g.get("word_guard") else ""
         print(f"range {g['src_start']:.2f}-{g['src_end']:.2f}: last word ends {g['last_word_end']:.2f}, tail {tail:.2f} s{why}"
               + (f", {g['lead']:.2f} s pause before it" if g["lead"] else ""))
-        if g["clamped"] and tail < 0.15:
+        if g.get("word_guard"):
+            ms = (g["next_word_start"] - g["last_word_end"]) * 1000
+            print(f"  WARNING: ending: next word starts {ms:.0f} ms after the last word; kept the whole word, listen to the join")
+        elif g["clamped"] and tail < 0.15:
             print(f"  WARNING: only {tail:.2f} s after the last word before the next one starts: check the ending by ear")
 
 

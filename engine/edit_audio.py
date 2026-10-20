@@ -21,6 +21,7 @@ import numpy as np
 
 SR = 48000
 HOP = 480  # 10 ms
+SPEED = 1.25  # VOICE-2: voice notes play at 1.25x unless the EDL overrides it
 
 
 def decode(path):
@@ -89,6 +90,7 @@ def apply_mutes(path, mutes):
 def main(proj):
     proj = Path(proj)
     edl = json.loads((proj / "audio" / "edl.json").read_text(encoding="utf-8"))
+    speed = edl.get("speed", SPEED)
     x = decode(proj / "audio" / edl["source"])
     rms = rms_frames(x)
     parts, snapped = [], []
@@ -117,7 +119,7 @@ def main(proj):
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "s16le", "-ar", str(SR), "-ac", "1", "-i", "-", str(tmp)],
                    input=pcm, check=True)
     out = proj / "audio" / "voice.wav"
-    af = f"atempo={edl.get('speed', 1.0)},highpass=f=70,loudnorm=I=-16:TP=-1.5:LRA=11"
+    af = f"atempo={speed},highpass=f=70,loudnorm=I=-16:TP=-1.5:LRA=11"
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(tmp), "-af", af, "-ar", str(SR), str(out)], check=True)
     tmp.unlink()
     if edl.get("mute"):
@@ -126,8 +128,8 @@ def main(proj):
                                capture_output=True, text=True, encoding="utf-8").stdout)
     (proj / "audio" / "voice-edit.json").write_text(json.dumps(
         {"source_seconds": round(len(x) / SR, 2), "kept": snapped, "cut_seconds": round(len(y) / SR, 2),
-         "speed": edl.get("speed", 1.0), "final_seconds": round(dur, 2)}, indent=1), encoding="utf-8")
-    print(f"source {len(x)/SR:.1f}s -> cut {len(y)/SR:.1f}s -> final {dur:.1f}s at {edl.get('speed', 1.0)}x")
+         "speed": speed, "final_seconds": round(dur, 2)}, indent=1), encoding="utf-8")
+    print(f"source {len(x)/SR:.1f}s -> cut {len(y)/SR:.1f}s -> final {dur:.1f}s at {speed}x")
 
 
 if __name__ == "__main__":
