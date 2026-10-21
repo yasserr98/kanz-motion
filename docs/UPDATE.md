@@ -65,6 +65,9 @@ Then (both routes):
 
 Recent changes (2026-10-21, no re-render needed):
 
+- **Openings are a moving illustration (HOOK-1..4):** voice-note and script Reels start on a drawn scene in the Live C
+  v10 style under the headline, moving with the opening words; never a still photo or a static icon. The template shows
+  it. Shorts still open on his face.
 - **History cleaned:** old video projects, private ids and a server path were removed from every past commit, so a copy
   cloned before today cannot merge: the prompt above moves it over without touching your files.
 - **Headline font downloaded, not shipped:** Thmanyah Display's licence forbids sharing the file. Download it once from
@@ -85,8 +88,7 @@ Recent changes (2026-10-18 to 2026-10-20). Every rule below is a line in `docs/R
   explanatory changes move. Current-profile lint warns `idle-motion` on `float`; old scenes still render (PACE-9).
 - **50% face for all shorts (Q3):** YouTube and workshop cut-outs, counting full face and split together. New
   enforcement uses the 2026-10-18 profile; legacy checks stay unchanged (SHORT-15).
-- **Photo openings (Q4):** preferred for voice-note/script Reels, with headline and captions from frame 1
-  (`K.screen` from 0, `K.captionsFrom = 0`), optionally a live explanatory line. Question-hero remains allowed (HOOK-4).
+- **Photo openings (Q4):** replaced on 2026-10-21 by the illustrated opening (see above).
 - **Past-event places (Q5):** photo-real generated settings are allowed when no real photo of that moment exists;
   record them as generated in `CREDITS.md`. Real people are never generated or repainted (IMG-8).
 - **Re-dos keep the take, update the pace (Q6):** `make.py retime <slug>` (1.08, pauses to 0.3 s); voice notes retain

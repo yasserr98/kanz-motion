@@ -14,8 +14,8 @@ Finished projects keep their existing calls and render as before.
 
 **Quiz 2026-10-20:** pictures arrive and sit still, including the hook hero; only camera drift and explanatory
 changes move (PACE-9). `float` stays available for legacy scenes; current-profile lint warns `idle-motion`.
-Voice-note/script Reels prefer photo openings (`K.screen` from 0, `K.captionsFrom = 0`, optionally a live line).
-Question-hero openings stay allowed; only those hold captions until the question ends (HOOK-1..4).
+**2026-10-21:** voice-note/script Reels open on a moving illustration (a drawn scene in the Live C v10 style), never a
+still photo or a static icon (HOOK-1..4); captions hold until the end of the question only when the headline shows it.
 
 ## What the study found (why this exists)
 
@@ -53,8 +53,8 @@ K.finish();                                                             // adds 
 - `K.dim(els, t, op)` fades obsolete objects (to 0 when replacing) while their replacement arrives: never clear first.
 - `K.img(..., { enter: "fly", fromScale, fromX, fromY })`: from 1.9× and 170 px low, settles in 0.85 s (`power3.out`).
   Small tags and labels keep the bounce.
-- `K.settle(el, 0, {fromScale})`: the hook hero is complete on frame 1 and settles from oversized (simple-hook
-  composition unchanged: headline + one hero). For this question-hero opening only, set `K.captionsFrom` to the end of the question.
+- `K.settle(el, 0, {fromScale})`: the opening illustration is on screen on frame 1 and settles from oversized (headline +
+  one drawn scene, HOOK-1). When the headline shows the question being voiced, set `K.captionsFrom` to its end (HOOK-3).
 - `K.pointer(board)`: one lavender ring that hops `p.to(t, x, y, w, h)` between targets, `p.out(t)`.
 - Drift: 2 %/s scale, capped at 7 %, 8 px/s sideways, alternating. Higher crops edge objects.
 - Grain stays at 12 steps/s and boil at 8, so the texture keeps its hand-made step while motion is smooth.

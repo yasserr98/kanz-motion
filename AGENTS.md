@@ -35,8 +35,8 @@ Work in this folder, even if the chat opened in the Kanz repo or a Kanz worktree
 4. **Image pass.** `shots.json` from the whole script, a visual type per shot, Codex generates, before the scene is
    written ([images](docs/routes/images.md); IMG, OBJ rules).
 5. **Scene.** Copy the worked example's `scene.js` and adapt it; new projects start from `projects/_template`.
-   `K.look()`, `K.pace({ defaults: "2026-10-18" })`, `K.finish()` last (PACE-1, PACE-2). Photo opening preferred,
-   question-hero allowed (HOOK-1..4); no idle motion (PACE-9). Boards arrive built, one carried hero, no snap zooms
+   `K.look()`, `K.pace({ defaults: "2026-10-18" })`, `K.finish()` last (PACE-1, PACE-2). Open on a moving
+   illustration (a drawn scene), never a still photo or static icon (HOOK-1..4); no idle motion (PACE-9). Boards arrive built, one carried hero, no snap zooms
    (PACE-3..5), paper world at chapter turns, a moving last board that ends ~0.4 s after the last word, never a hook
    replay (PACE-6); shorts choose face or board by SHORT-7. Numbers as animated diagrams; ideas as drawn scenes
    (`library/scenes/`), icons only support (EXPL-1, EXPL-2). Western digits with ٪ (NUM-3), sizes 28/34 px (TXT-1),

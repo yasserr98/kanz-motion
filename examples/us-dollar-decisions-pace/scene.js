@@ -1,4 +1,4 @@
-/* Current copy example (2026-10-20): PACE-1..6, HOOK-1..3, EXPL-1, TXT-3/6/7, SND-5. The delivered Reel used an older look.
+/* Current copy example (2026-10-20): PACE-1..6, EXPL-1 (its static-icon opening predates HOOK-1..4 of 2026-10-21: open on a moving illustration, see projects/_template), TXT-3/6/7, SND-5. The delivered Reel used an older look.
  * us-dollar-decisions, PACE version (2026-10-13): the delivered v4 rebuilt with every change from the short-form
  * pacing study (Kanz repo reports/shorts-pacing-study-2026-10-13). Same script, voice take, objects and look; only
  * timing, camera and continuity change, plus the decisions Ahmed asked to apply ("apply all the changes"):

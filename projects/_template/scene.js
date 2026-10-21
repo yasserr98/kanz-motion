@@ -22,15 +22,18 @@ K.pace({ defaults: "2026-10-18" });
 const hook = K.board("hook", 0, 0), b2 = K.board("two", -1100, 0);
 K.cam(0, "hook");
 
-// ---------- hook: complete from frame 1 (no `at` on the hero or the headline parts) ----------
-// Question-hero option (HOOK-1..3; photo preferred: K.screen from 0, K.captionsFrom = 0, HOOK-4): the headline + ONE hero object, nothing else. Pace: the hero settles from oversized,
-// and the caption waits until the question is over (the headline already says it).
+// ---------- opening: on screen from frame 1 (no `at` on the illustration or the headline parts) ----------
+// HOOK-1..4 (Ahmed 2026-10-21): open on an ILLUSTRATION, a drawn scene in the Live C v10 style, never a still photo or a
+// static icon. Use the video's own scene from its image pass (assets/codex/kanz/scene-*.png); the approved references
+// are in library/scenes/. It arrives (K.settle), then something on it moves with the opening words (a path drawing on,
+// a carried piece, a live diagram for a number) while the camera drifts. Nothing else competes until the first line ends.
+const SCENES = "../../library/scenes/";
 const g2 = K.go(T("الكلمة"), "two", { scale: 1.3, dx: 220, dy: -60 }); // first word of the next chapter; start close
 K.headline([{ html: "عنوان" }, { html: "السؤال؟", kw: true }], { out: g2.start });
-K.captionsFrom = g2.start;
-K.glow(hook, 500, 500, 840, { out: g2.start });
-const hero = K.img(hook, OBJ + "kanz-house-v01.png", { x: 500, y: 500, w: 580, shadow: false }); // 500-600 px
-K.settle(hero, 0, { fromScale: 1.45, fromY: 70, dur: 1.2 });
+K.captionsFrom = g2.start; // the headline already says the question (HOOK-3); a first line that is not on screen: K.captionsFrom = 0
+const hero = K.img(hook, SCENES + "scene-crossroads.png", { x: 500, y: 560, w: 620, shadow: false });
+K.settle(hero, 0, { fromScale: 1.1, fromY: 40, dur: 1.2 });
+K.strike(hook, 860, 900, 560, 760, { at: Math.max(0.3, T("السؤال") - 0.2), dur: 1.0, color: "#D5ADEF", width: 10 }); // the path draws on with the words
 
 // ---------- next chapter: arrives built, starts close, pulls out as the next idea arrives ----------
 // K.carry(hero, "two", g2.start, { x: 500, y: 760, w: 260, opacity: 0.3 }); // carry the hero when it returns later
@@ -45,8 +48,8 @@ K.img(b2, OBJ + "kanz-house-v01.png", { x: 760, y: 330, w: 420, at: g2.lead, ent
 // const a = K.bar(b2, { x: 560, y: 720, w: 190, value: 1100000, scale: S, at: g2.lead });
 
 // ---------- visual types (docs/routes/images.md; shots.json -> engine/codex_assets.py) ----------
-// PLACE -> full-screen photo on a board of its own that holds text, tags and any explanatory overlay such as a live line
-// (HOOK-4), never decorative icons. For the preferred photo OPENING start it at 0 and set K.captionsFrom = 0:
+// PLACE -> full-screen photo on a board of its own that holds text, tags and any explanatory overlay such as a live line,
+// never decorative icons. Never the opening shot (HOOK-4): it comes after the illustrated opening.
 // const gPlace = K.go(T("الكازينو"), "place");
 // K.screen("assets/codex/free/casino-exterior.png", gPlace.start, T("التالية"));
 // K.text(K.boards.place.el, "عنوان", { x: 500, y: 130, size: 80, head: true, at: gPlace.lead });

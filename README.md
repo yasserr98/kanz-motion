@@ -141,9 +141,9 @@ Opus (medium) writes the storyboard and reviews; Sonnet 5.5 (medium) builds, ren
 fresh session per video. A re-do with the same voice keeps the approved take and runs `make.py retime <slug>`
 (1.08 tempo, pauses to 0.3 s); voice notes retain 1.25x and use `make.py retime <slug> 1.0` (VOICE-10).
 
-Voice-note/script Reels prefer a photo of the story's place with a headline and captions from frame 1:
-`K.screen` from 0 and `K.captionsFrom = 0`, optionally with a live line or other explanatory change (HOOK-4).
-Question-hero openings remain allowed; only those hold captions until the question ends (HOOK-1..3).
+Voice-note/script Reels open on an illustration: a drawn scene in the Live C v10 style under the headline, visible on
+frame 1 and moving with the opening words; never a still photo or a static icon as the first shot (HOOK-1..4, Ahmed
+2026-10-21). Captions wait for the end of the question only when the headline already shows it (HOOK-3).
 Pictures arrive and sit still, including the hook hero; legacy `float` still works but current-profile lint warns
 `idle-motion` (PACE-9). Prices, percentages and amounts use moving engine diagrams; causes, actors and stories
 use drawn scenes in the approved [Live C v10 style](library/scenes/README.md) (EXPL-1, IMG-4).

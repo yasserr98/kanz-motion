@@ -18,10 +18,9 @@ whatever `library/objects/` already has. Rules: [RULES.md](../RULES.md) IMG and 
    | **Drawn explanatory scene** | *causes, actors and stories* | Codex mode `kanz`, one connected scene per beat; use an approved [Live C v10 reference](../../library/scenes/README.md) as `ref`, e.g. `../scenes/scene-bank-helm.png` | Kanz icon style from the approved sheet; arrives/draws in, then sits still; no idle motion (EXPL-1, PACE-9) |
 
    Let the sentences set the shot plan: establish a place when it matters, animate the relationship being explained,
-   and show an authentic photo when a real person or event is named. For voice-note/script Reels, prefer a photo opening with the headline and `K.captionsFrom = 0`:
-   `K.screen` starts at 0 (Gambler's Fallacy v7), optionally with a moving element such as a live line
-   (Emotional Trading v16). The question-hero opening stays allowed, and only it holds captions until the question
-   ends (HOOK-1..4). Lint already recognizes `K.screenWindows`; no extra opening flag is needed. Shorts keep SHORT-4.
+   and show an authentic photo when a real person or event is named. The first shot of a voice-note/script Reel is
+   always a drawn scene (Live C v10 style) under the headline, moving with the opening words; never a still photo or a
+   static icon (HOOK-1..4). Put that opening scene first in `shots.json`. Shorts keep SHORT-4.
    Plan diagrams in the engine; generate only the supporting assets or explanatory drawings that the shot needs,
    keeping the approved references (a new illustration aesthetic is not implied). The template loads
    `runtime/kanz-snap.js`. Because the world stays visible over a photo, a place photo gets a board of its own that holds

@@ -140,18 +140,19 @@ about 30%. Small true differences get a bracket, never a stretched bar.
 ## 7. The first two seconds
 
 Open on the most dramatic image of the story, then rewind into it. The first visual lands by 0.3 s (lint `hook`
-checks this): the headline and the hero or photo are complete on frame 1. Not a single word on an empty board.
+checks this): the headline and the opening illustration are on screen on frame 1. Not a single word on an empty board.
 
-**Question-hero opening (HOOK-1..3):** the question headline and ONE hero object, nothing else.
+**Opening (HOOK-1..4, current since 2026-10-21):** the headline over ONE drawn illustration in the Live C v10 style,
+on screen from frame 1 and moving with the opening words; never a still photo or a static icon. The history below is
+the question-hero opening it grew from: the question headline and ONE hero object, nothing else.
 No second object, character, tag, arrow, label, foreground blur or extra beat until the question has been asked;
 use glow without idle float, `K.settle` on arrival, then camera drift (PACE-9). He rejected the busy us-dollar-decisions v2 hook
 (dollar + wallet + rate arrow + two tags + foreground stack). Lint may report the hook as `dead`; that is expected.
 Approved as the default on 2026-10-11 (Ahmed: "this can be the default"): the us-dollar-decisions v4 hook is the reference
 (local to Ahmed's copy; the public copy of it is section 1 of `examples/us-dollar-decisions-pace/scene.js`): headline in three short lines with the keyword last in lavender, one
 hero object at 600 board px centred under it (glow, slight rotation). The old float/push is superseded by
-`K.settle` and no idle motion. Voice-note/script Reels now prefer photo openings (HOOK-4): `K.screen` from 0,
-a headline and `K.captionsFrom = 0`, optionally a moving explanatory element over the photo. Only the
-question-hero opening holds captions until the question ends.
+`K.settle` and no idle motion. The photo openings of quiz 2026-10-20 Q4 and the static hero icon are replaced by the
+illustrated opening (2026-10-21); captions hold until the end of the question only when the headline shows it.
 
 ## 8. Characters and objects that act
 

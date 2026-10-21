@@ -1,7 +1,7 @@
 [
  {"kind": "hook-replay", "range": [0, 4.4], "why": "Template stub only (never copy this file into a project): with no voice the scene is a 4 s stub (tLast falls back to 4), so its last frame is still the hook board and its hero. A real video's last line builds its own moving visual (PACE-6; worked example: examples/us-dollar-decisions-pace)."},
  {"kind": "fill", "range": [0, 4.4], "why": "Template stub only: no voice, so the word anchors (T(\"الكلمة\")) fall back to 0 and the 4 s stub shows a half-set-up hook and one placeholder object. A real voice spaces the boards and fills them."},
- {"kind": "hook", "range": [0, 4.4], "why": "Template stub only: without a voice the stub's first frame is not the finished question + hero composition a real hook has (HOOK-1..3)."},
+ {"kind": "hook", "range": [0, 4.4], "why": "Template stub only: without a voice the stub's first frame is not the finished headline + illustration a real opening has (HOOK-1..4)."},
  {"kind": "brief", "range": [0, 4.4], "why": "Template stub only: the placeholder headline words leave when the failed anchor moves the camera at once; a real question stays until its last word."},
  {"kind": "half-built-arrival", "range": [0, 4.4], "why": "Template stub only: board \"two\" holds a single placeholder object; a real board arrives built with the objects its line names (PACE-3)."},
  {"kind": "edge", "range": [0, 4.4], "why": "Template stub only: the placeholder house sits under the framing the failed anchor leaves behind; real word times frame it inside the margins."}

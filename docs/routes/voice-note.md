@@ -20,6 +20,6 @@ is written exactly like a script one.
    quiz 2026-10-20, Q6; US Dollar v6): `python engine/make.py retime <slug> 1.0`. Keep the existing 1.25x; retime at 1.0, pauses to 0.3 s.
 6. Continue with the shared steps in [AGENTS.md](../../AGENTS.md): image pass, scene, review, ship.
 
-Prefer a photo opening: `K.screen` from 0, headline over the story's place, `K.captionsFrom = 0`; a live line
-or other explanatory element may move on the photo (HOOK-4). A question-hero opening stays allowed; only that
-opening holds captions until the question ends (HOOK-1..3). Pictures arrive and sit still (PACE-9).
+Open on an illustration: a drawn scene in the Live C v10 style under the headline, visible on frame 1 and moving
+with the opening words; never a still photo or a static icon (HOOK-1..4). Captions wait for the end of the question
+only when the headline shows it (HOOK-3). Pictures arrive and sit still; the explanation moves (PACE-9).

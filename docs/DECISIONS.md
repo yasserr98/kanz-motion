@@ -42,6 +42,8 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   - The all-video scope and idle float are **Superseded** by quiz 2026-10-20, Q2/Q4: photo openings preferred,
     question-hero still allowed; no picture idles (HOOK-1..4, PACE-9).
   - "one slow push": **Superseded** 2026-10-13 by `K.settle` (the hero settles from oversized on frame 1).
+  - The ONE hero object: **Superseded** 2026-10-21: the opening's one picture is a moving illustration, not a static
+    icon (HOOK-1, HOOK-4).
 - **Hook reference.** "this can be the default": copy the hook of `projects/us-dollar-decisions` (v4): three-line
   question headline, keyword last in lavender, one 600 px hero with glow + float. Rule: HOOK-2 (now via
   `examples/us-dollar-decisions-pace`, section 1). **Superseded** for float by quiz 2026-10-20, Q2
@@ -315,6 +317,7 @@ existing runtime behavior. The four approved drawn-scene references are the expl
   (Emotional Trading v16). These are the preferred voice-note/script openings. Replaces question-hero as the
   preferred default, without banning it. Its caption hold applies only to question-hero openings; photos use
   `K.screen` from 0 and `K.captionsFrom = 0`. Rules: HOOK-1..4.
+  - **Superseded** 2026-10-21: openings are a moving illustration, never a still photo or static icon (HOOK-1, HOOK-4).
 - **Q5, A** (quiz 2026-10-20, Q5): "Generated photo-real is fine when no real photo of the moment exists".
   Amends the real-events-only-photo restriction for a real PLACE or setting of a past event (Monte Carlo 1913,
   Gambler's Fallacy v7). Record it as generated in `CREDITS.md`; real PEOPLE are still never generated or
@@ -351,3 +354,9 @@ existing runtime behavior. The four approved drawn-scene references are the expl
   allows personal and commercial design use, including our videos, and forbids redistributing, uploading or hosting
   the files. The file left the repo; each machine downloads it into `brand/fonts/` (README, Setup), and `make.py doctor`
   checks it. IBM Plex Sans Arabic stays, with its OFL licence beside it (`brand/fonts/OFL-IBM-Plex.txt`). Rule: REPO-1.
+- **Openings are an illustration, never a static image** (Ahmed 2026-10-21: "videos should always start with an
+  illustration rather than a static image", "we dont need the static icon at the very beginning"). Voice-note and
+  script Reels open on a drawn scene in the Live C v10 style under the headline, visible on frame 1 and moving with the
+  opening words; no still photo, still picture or static hero icon as the first shot. **Replaces** photo openings as
+  the preferred default (quiz 2026-10-20, Q4) and the static hero icon (2026-10-11). Place photos stay for later boards.
+  Shorts keep his face in the first 3 s (SHORT-4). Rules: HOOK-1..4.
