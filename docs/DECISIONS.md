@@ -23,8 +23,8 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
 - **Look v2** for new videos (safe zones, light, depth, evidence and number components; `LOOK-V2.md`). Rule: LOOK-1.
 - **No music.** Sound stays voice + SFX. Rule: SND-1.
 - **Codex objects.** "create whatever you need from codex" (batch 2026-10-10, `library/objects/PROVENANCE-2026-10-10.md`).
-  **Approved 2026-10-17 (DECISIONS); generation-time status below.**
-  The batch is still marked candidate; statuses now live in `library/objects/manifest.json` (2026-10-17).
+  Marked candidate when generated; **approved 2026-10-17** with every library object (see 2026-10-17 below).
+  Statuses live in `library/objects/manifest.json`.
 
 ## 2026-10-11
 
@@ -64,7 +64,8 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   - "cut back to the hook on the last word, ~1.3 s tail": **Superseded** 2026-10-18 by PACE-6 (moving last beat, ~0.4 s tail).
   - "a few snap zooms (`K.snap`)": **Superseded** 2026-10-17 (snap zooms off by default).
 - **Hook under pace.** The hero settles from oversized on frame 1 (`K.settle`) instead of the slow push, and
-  `K.captionsFrom` hides the caption until the question ends (copy `projects/us-dollar-decisions-pace`, section 1).
+  `K.captionsFrom` hides the caption until the question ends (copy `projects/us-dollar-decisions-pace`, section 1;
+  now `examples/us-dollar-decisions-pace`).
   Rule: HOOK-3. **Superseded** in scope by quiz 2026-10-20, Q4: the caption hold applies only to
   question-hero openings; photo openings show captions from frame 1 (HOOK-4).
 - **Variety.** "apply all": one `K.punch` (with `riser: true`) on the key sentence; amounts as `K.stack`/`K.pile`;
@@ -97,6 +98,8 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
 - **Three visual types.** "the MD files were meant for icons rather than photos; free photos are great; the Kanz
   disposable is super great too but without the date". Full-screen photo for a place, disposable print for a real person
   or moment, Kanz icon for a concept. Rule: IMG-4.
+  - "Kanz icon for a concept": **Superseded** 2026-10-18 (explain with moving diagrams, icons only support) and by
+    quiz 2026-10-20, Q7 (diagrams for numbers, drawn scenes for causes, actors and stories). Rules: EXPL-1, IMG-4.
 - **No credit line on screen.** "just the image" / "don't add the image source, just the image": credits go in the post
   caption from `projects/<slug>/CREDITS.md`. Rule: IMG-6.
 - **Headline lift.** "make sure the text of the headline doesn't blend in the image": `K.screen` darkens the bands each
@@ -119,6 +122,7 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   other). In shorts cut from his X Live workshops, motion inserts alternate between that split screen and a full-screen
   board, still with clean cuts in the pauses; the camera tracks him (he moves around the 16:9 frame). Use the shared
   split/tracking helpers built for `projects/short-volume-doesnt-matter` once they exist; do not build a second version.
+  (They exist now: `engine/footage_track.py` and `runtime/kanz-split.js`.)
   Rule: SHORT-11.
 - **Title in the first 3 seconds; subtitles off under it.** "add a caption in the first 3 seconds and that caption cancels the
   subtitles when its there". Every short opens with a title over his face for 3 s and no subtitles while it shows; three
@@ -134,6 +138,8 @@ Component details and the reasons behind look v2 and pace stay in [LOOK-V2.md](L
   an Approve button there marks a rendered version for Drive + Airtable delivery, whose Brief carries the captions.
 - **Workshop titles at the top.** "titles for workshop video should be on the same level as this one" (live A v3, title under
   the platform bar). Live/workshop shorts use `K.title(text, { y: 330 })`; long-video shorts keep the mid-frame default. Rule: SHORT-4.
+  - The fixed y 330: **Superseded** 2026-10-20 ("Workshop title position follows the face"): start at y 330, then move
+    wherever the face boxes leave his eyes and mouth clear.
 - **Egyptian Arabic subtitles on cut-out shorts.** "subtitles should be arabic egyptian arabic even if it was said in
   English for these so that people can understand; this rule is only valid for things we cut out" (live H v1, 10 s).
   Rule: SHORT-14. Replaces the verbatim-English caption lines in the live shorts.

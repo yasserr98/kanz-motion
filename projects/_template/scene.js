@@ -45,15 +45,17 @@ K.img(b2, OBJ + "kanz-house-v01.png", { x: 760, y: 330, w: 420, at: g2.lead, ent
 // const a = K.bar(b2, { x: 560, y: 720, w: 190, value: 1100000, scale: S, at: g2.lead });
 
 // ---------- visual types (docs/routes/images.md; shots.json -> engine/codex_assets.py) ----------
-// PLACE -> full-screen photo on a board of its own that holds only text/tags (board icons would sit on the photo):
+// PLACE -> full-screen photo on a board of its own that holds text, tags and any explanatory overlay such as a live line
+// (HOOK-4), never decorative icons. For the preferred photo OPENING start it at 0 and set K.captionsFrom = 0:
 // const gPlace = K.go(T("الكازينو"), "place");
 // K.screen("assets/codex/free/casino-exterior.png", gPlace.start, T("التالية"));
 // K.text(K.boards.place.el, "عنوان", { x: 500, y: 130, size: 80, head: true, at: gPlace.lead });
 // REAL PERSON or MOMENT -> real openly licensed or public-moment press photo (IMG-8); credit in CREDITS.md, not the frame.
 // Keep it in the board's upper two thirds so it clears the captions; tags on it sit on top:
 // K.snap35(b2, "assets/photos/person.jpg", { x: 500, y: 560, w: 520, h: 640, rot: -4, at: g2.lead, slim: true, flash: false });
-// CONCEPT, MECHANISM or NUMBER -> an animated diagram built in the engine (K.area, K.bar/K.delta, K.count, K.stack,
-// arrows) or a drawn illustration; Kanz icons only support it (EXPL-1, EXPL-2: no still icon explaining for over 2 s).
+// PRICE, PERCENTAGE or AMOUNT -> a moving diagram built in the engine (K.area, K.bar/K.delta, K.count, K.stack, arrows).
+// CAUSES, ACTORS and STORIES -> a drawn scene in the Live C v10 style (library/scenes/), one per beat, still once drawn in.
+// Kanz icons only support either (EXPL-1, EXPL-2: no still picture explaining for over 2 s).
 
 // ---------- ending (PACE-6, 2026-10-18): the last line gets its own moving visual, building into the last word ----------
 // Never cut back to the hook or replay its hero (lint `hook-replay`); the video stops 0.4 s after the last word

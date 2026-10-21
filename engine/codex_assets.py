@@ -10,7 +10,7 @@ shots.json:
   "shots": [
     {"name": "casino-exterior", "line": "the voice line it illustrates", "subject": "what to draw, concretely",
      "accent": "the one detail that carries lavender", "modes": ["kanz", "free"], "ref": "kanz-bank-v01.png"},
-    {"name": "messi-final", "mode": "edit", "source": "path/to/real-photo.jpg", "accent": "...", "ratio": "4:5 portrait"}
+    {"name": "trading-floor", "mode": "edit", "source": "path/to/real-place-photo.jpg", "accent": "...", "ratio": "4:5 portrait"}
   ]
 }
 
@@ -28,7 +28,7 @@ Modes
   edit  a REAL supplied photo of a place or object given the Kanz editorial treatment (Kanz
         brand/image-treatment/CREATE-A-BRANDED-IMAGE.md). Never for real people or real moments (IMG-8: real photos,
         never generated or repainted; the image tool also refuses to EDIT public figures, Messi 2026-10-16): show
-        those untouched in a slim K.snap35 print (IMG-11) or with K.photo's CSS grade.
+        those untouched in a slim K.snap35 print (IMG-11).
 
 Each run writes <name>.png, <name>.prompt.txt and <name>.log beside it, and appends a row to
 <project>/assets/codex/PROVENANCE.md (prompt file, references, Codex session id, seconds). Outputs are candidates:

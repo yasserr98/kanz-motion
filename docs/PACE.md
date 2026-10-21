@@ -5,7 +5,8 @@
 
 Built 2026-10-13 from the short-form pacing study (Kanz repo `reports/shorts-pacing-study-2026-10-13/`:
 conversion.doc, Vox Shorts and 0x100x against our 7 Reels). Ahmed asked to "apply all the changes"; the first
-video built with it is `projects/us-dollar-decisions-pace/` (the delivered v4 rebuilt; v4 itself is unchanged).
+video built with it is `us-dollar-decisions-pace` (the delivered v4 rebuilt; v4 itself is unchanged), now the worked
+example in `examples/us-dollar-decisions-pace/`.
 **Default for new videos since 2026-10-13** (Ahmed approved the before/after: "update the engine locally and the
 github repo"). The template loads `runtime/kanz-pace.js` after `kanz-look.js` and calls
 `K.pace({ defaults: "2026-10-18" })` after `K.look()`. Bare `K.pace()` is legacy compatibility.
@@ -75,6 +76,7 @@ pink noise, seeded, fully owned) 21 dB under the voice's median speech level, so
 silence. No music (Ahmed 2026-10-10). `K.pace({ defaults: "2026-10-18", bed: null })` turns it off.
 `K.bedUnder = 30` (after the pace call) sets the level
 per video in dB under the voice (Ahmed 2026-10-13 on gamblers-fallacy v1 at 21 dB: "extremely cool but too loud").
+Since 2026-10-18 every mix 2 render then multiplies the bed by 0.6 (40% quieter, about -4.4 dB) after `K.bedUnder` (SND-3).
 
 ## Variety (2026-10-13, default for new videos)
 
@@ -94,12 +96,12 @@ Use these where the script gives a reason; the aim is that a video uses several 
 | names places | `K.img(... kanz-map-usa ...)` / `kanz-globe` + `K.pin` + `K.arrow` | base map: Natural Earth still to download |
 | turns a chapter | `K.wipe(t)` (fixed 2026-10-13: it left a 200 px band) or `K.world` paper | |
 | cites a real series | `K.area({ ..., source })` with data from `engine/data.py` | source line on screen + `CREDITS.md` |
-| shows a real photo | `K.photo` (now with a camera-shutter sound) | needs a licensed, sourced photo file first |
+| shows a real photo | a place: `K.screen`; a real person or moment: `K.snap35(..., { slim: true })` (IMG-4, IMG-11). `K.photo` is legacy | licensed or press photo, credit in `CREDITS.md`, none on screen (IMG-6, IMG-8) |
 
-**Approved 2026-10-17 ([DECISIONS](DECISIONS.md#2026-10-17)); generation-time status below.**
 New objects 2026-10-13 (`library/objects/PROVENANCE-2026-10-13.md`): approved copies from the Kanz explainer library
-(bank card, cash, EGP coin, payment terminal, empty tomato basket, F01 checking a receipt) and Codex **candidates** until Ahmed
-reviews them: container ship, globe, gold bars, oil barrel, phone with a blank screen, rate dial, stock exchange.
+(bank card, cash, EGP coin, payment terminal, empty tomato basket, F01 checking a receipt) and Codex objects that were
+candidates when generated and are **approved since 2026-10-17** ([DECISIONS](DECISIONS.md#2026-10-17)): container ship,
+globe, gold bars, oil barrel, phone with a blank screen, rate dial, stock exchange.
 
 New sounds: `riser` (generated swell, for the one key reveal) and `shutter` (camera, used by `K.photo`), both in their own
 categories in `library/sfx/generated.json`.

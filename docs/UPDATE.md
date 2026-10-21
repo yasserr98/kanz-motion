@@ -20,6 +20,10 @@ Pick the route:
 Route A (Git, no account):
 1. `git status --short`, then `git fetch https://github.com/yasserr98/kanz-motion.git main`.
    Show me the new commits: `git log --oneline HEAD..FETCH_HEAD`. If there are none, say I'm up to date and stop.
+   Then list files the update would delete: `git diff --name-status HEAD FETCH_HEAD | grep "^D"`. Ahmed's old
+   projects left GitHub on 2026-10-17, so an older copy loses `projects/<name>/` folders it still tracks. Before going on,
+   copy every folder under `projects/` that appears there to `_update-backup-<today>/` outside `projects/`, tell me,
+   and after the update put the copies back in `projects/` (Git ignores them there now).
 2. If tracked files have local changes, list them, then `git stash push -m "before update <today>"`.
 3. `git merge --ff-only FETCH_HEAD`. If a stash was made, `git stash apply`; if that conflicts, stop and show me the
    files. Keep the stash after success too (REPO-3).

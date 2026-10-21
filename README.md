@@ -6,8 +6,8 @@ Turns a voice note into a Kanz-branded, Vox-style explainer Reel (1080×1920), u
 approved fonts, colours and editorial objects, with timed Arabic captions and sound effects.
 
 The visual system started from the 2026-10-05 research on how Vox builds its explainers
-([docs/VOX-RESEARCH-FINDINGS.md](docs/VOX-RESEARCH-FINDINGS.md), historical: where it differs, `docs/LOOK-V2.md`,
-`docs/PACE.md` and `AGENTS.md` win).
+([docs/VOX-RESEARCH-FINDINGS.md](docs/VOX-RESEARCH-FINDINGS.md), historical: where it differs, `docs/RULES.md` wins,
+then `docs/LOOK-V2.md` and `docs/PACE.md` for how components work).
 
 ## What it does
 
@@ -22,12 +22,13 @@ voice note ─► transcribe (word timings) ─► cut retakes, tighten pauses, 
 - **Everything is timed to the voice**: `T("word")` returns when that word is spoken.
 - **Vox devices, Kanz look**: hand-drawn ovals, underlines and arrows that "boil", lavender
   highlights, paper cards with tape, charts that draw on, big numbers, a hook headline,
-  captions with one keyword in lavender, 12 fps stepped motion and fine grain.
+  captions with one keyword in lavender, 24 fps motion with the grain and "boil" kept stepped, and fine grain
+  (`docs/PACE.md`).
 - **Sound**: every element registers a cue (paper, tape, marker, click, pop, whoosh, coin, hit, fire);
-  the renderer mixes them under the voice from the CC0 library in `library/sfx/`.
+  the renderer mixes them under the voice from `library/sfx/` (CC0 sounds plus licensed generated effects, see Licences).
 - **Effects**: `K.fire(board, cx, baseY, w, {at, out, h})` draws brand-coloured fire (lavender core to deep plum,
-  flickering tongues, rising embers, pulsing glow) with a CC0 crackle (BigSoundBank s0987); first used in
-  `projects/the-cost-of-a-mistake` for the volcano.
+  flickering tongues, rising embers, pulsing glow) with a CC0 crackle (BigSoundBank s0987); first used for the
+  volcano in the Risk Management Reel (a project local to Ahmed's copy).
 
 - **Shorts from a long video** (2026-10-16): `engine/footage.py` cuts the speaker's face, voice and word timings
   from a long Kanz video into a project; `runtime/kanz-footage.js` (`K.footage`) alternates that face with the motion
@@ -146,7 +147,8 @@ Changes beyond a few seconds use `ship` again.
 ## Live/workshop shorts: tracking and split
 
 For shorts cut from Ahmed's 16:9 X Live workshops (Ahmed 2026-10-17: the camera tracks him; inserts alternate between a
-50/50 split and a full-screen board). Built for `projects/short-volume-doesnt-matter`; reuse it, do not rebuild it.
+50/50 split and a full-screen board). Built for the Volume short (a project local to Ahmed's copy); reuse it, do not
+rebuild it.
 
 1. **Frames (use instead of `footage.py`, same arguments):**
    `python engine/footage_track.py projects/short-<slug> shorts/<live>/source/video.mp4 shorts/<live>/transcript.raw.json <start> <end> [--video-from S]`
@@ -197,10 +199,11 @@ with its check; `projects/_guards-demo` shows every one, clean and broken):
 
 | Path | What |
 | --- | --- |
-| `engine/` | `make.py` (step runner), `transcribe` (Scribe / Whisper), `tts`, `align` (forced alignment), `captions`, `edit_audio`, `breaths` (sighs to mute), `retime` (pace: pauses + tempo), `voicecheck` (TTS failures, `library/voice/lexicon.json`), `render`, `contact` (review sheets), `lint` (pre-render checks), `doctor` (setup check), `objects` (object approval status), `contrast` (headline contrast over photos), `cover` (Reel cover, style A), `data` (real series for charts, with sources), `codex_assets` (images and icons through Codex, from `shots.json`), `footage` (shorts cut from a long video), `sfx_library`, `sfx_gen` (generated SFX), `eleven` (API client), `provenance` (hashes for voice-derived timings), `console` (UTF-8 output), `vps_render.sh` (render on a server) |
-| `runtime/` | `kanz.js` (timeline + components) and `kanz.css` (brand tokens, layout); `kanz-look.js/.css` look v2 (safe zones, light, depth, documents, photos, maps, counting numbers, piles), see [docs/LOOK-V2.md](docs/LOOK-V2.md); `kanz-pace.js` pacing layer (arrive built, drift, carry, room tone, frame guard), see [docs/PACE.md](docs/PACE.md); `kanz-3d.js` (`K.flip`, `K.browser`, `K.fold`, worked example `projects/_3d-demo`); `kanz-snap.js` (`K.screen` full-screen photos, `K.snap35` disposable prints); `kanz-footage.js` (`K.footage`, face windows for shorts) |
+| `engine/` | `make.py` (step runner), `transcribe` (Scribe / Whisper), `tts`, `align` (forced alignment), `captions`, `edit_audio`, `breaths` (sighs to mute), `retime` (pace: pauses + tempo), `voicecheck` (TTS failures, `library/voice/lexicon.json`), `render`, `contact` (review sheets), `lint` (pre-render checks), `doctor` (setup check), `objects` (object approval status), `contrast` (headline contrast over photos), `cover` (Reel cover, style A), `data` (real series for charts, with sources), `codex_assets` (images and icons through Codex, from `shots.json`), `footage` (shorts cut from a long video), `footage_track` (workshop shorts with a tracked camera), `tighten_footage` (dead air out of footage shorts), `faces` (face boxes and freezes), `shortinfo` (what the engine knows about a short), `guards` (lint checks from Ahmed's recurring notes), `shipcheck` (checks on the rendered MP4), `slot` (one Chromium job per machine), `sfx_library`, `sfx_gen` (generated SFX), `eleven` (API client), `provenance` (hashes for voice-derived timings), `console` (UTF-8 output), `vps_render.sh` (render on a server, only with explicit `--host`) |
+| `runtime/` | `kanz.js` (timeline + components) and `kanz.css` (brand tokens, layout); `kanz-look.js/.css` look v2 (safe zones, light, depth, documents, photos, maps, counting numbers, piles), see [docs/LOOK-V2.md](docs/LOOK-V2.md); `kanz-pace.js` pacing layer (arrive built, drift, carry, room tone, frame guard), see [docs/PACE.md](docs/PACE.md); `kanz-3d.js` (`K.flip`, `K.browser`, `K.fold`, worked example `projects/_3d-demo`); `kanz-snap.js` (`K.screen` full-screen photos, `K.snap35` disposable prints); `kanz-footage.js` (`K.footage`, face windows for shorts); `kanz-split.js` (`K.split`, the 50/50 workshop split) |
 | `brand/` | Kanz fonts, logo and colour tokens (copied from the Kanz repo's `assets/kanz-brand-current`) |
 | `library/objects/` | grayscale editorial objects (from the Kanz motion library), `manifest.json` (approved / candidate status of each) and their `PROVENANCE-*.md` generation records |
+| `library/scenes/` | the four approved drawn-scene references (Live C v10 style) and their prompts, for causes, actors and stories (EXPL-1) |
 | `library/backgrounds/` | the approved charcoal grain background |
 | `library/sfx/` | 124 CC0 one-shots + generated effects (register, riser, shutter) (`generated.json`, prompt per file) + `manifest.json` (source page and licence for each file) |
 | `library/voice/` | `lexicon.json`: words the cloned voice gets wrong (`replace` respellings, `watch` flags) |

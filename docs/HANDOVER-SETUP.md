@@ -20,8 +20,9 @@ python -m playwright install chromium
 python engine/make.py doctor
 ```
 
-   `doctor` lists anything still missing. Codex's reference sheets live in Kanz's private repo, so without them use the
-   approved objects in `library/objects/` (`docs/routes/images.md`).
+   `doctor` lists anything still missing. The image pass (`engine/codex_assets.py`) runs the Codex CLI (`codex exec`),
+   so install and sign in to the Codex CLI too; `doctor` warns when it is not found. Codex's reference sheets live in Kanz's private repo, so without them use the
+   approved objects in `library/objects/` and the approved drawn scenes in `library/scenes/` (`docs/routes/images.md`).
 
 4. Supply an approved script or an authorized recording. For text-to-speech, configure your own ElevenLabs key and voice locally using `.env.example`; never commit `.env` or share credentials. Source voice recordings and generated MP4s are separate deliveries.
 5. Follow the route in `docs/routes/` (voice note, script or shorts) and the checklist in `AGENTS.md`; finish with `make.py ship`; review transcript/captions, visual contact sheets and the final MP4 before delivery. Keep supplied copy unchanged except for reviewed transcription corrections.

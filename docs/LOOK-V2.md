@@ -8,7 +8,8 @@
 > lines 28 px and labels 34 px minimum, contrast kept on the paper world. The rules in force are in [RULES.md](RULES.md).
 > `projects/_sample-real-estate-v3/` below is local to Ahmed's copy (not in the public repo).
 
-Approved by Ahmed 2026-10-10 for **new videos only** (finished Reels are not re-timed or re-rendered).
+Approved by Ahmed 2026-10-10 for **new videos only** (finished Reels are not re-timed or re-rendered unless Ahmed asks
+for a re-do, VOICE-10, or a revision that gets the new sound, SND-5).
 No music: that was his decision on 2026-10-10, so sound stays voice + SFX.
 
 New projects copied from `projects/_template` load `runtime/kanz-look.css` + `runtime/kanz-look.js`
@@ -58,10 +59,11 @@ tighten these numbers if needed.
 - **safe**: text outside the zones above; focal objects cut by them.
 - **dead**: from 2.5 s with nothing new on screen and the camera still; an empty frame is caught by fill from 1.5 s (REV-1).
 - **thin**: 1.5 s or longer where content covers less than 30% of the safe area.
-- **hook**: the first visual arriving after 1.0 s.
+- **hook**: the first visual arriving after 0.3 s (`--hook`, since 2026-10-11), or a first frame below the fill threshold.
 
 It writes `out/lint.json` and `out/lint.jpg` (one frame per finding, the unsafe zones shaded red).
-These are review flags, not hard failures. Fix them or say why they stay. For calibration,
+`make.py ship` runs `lint.py --strict`: fix each finding or justify it in `lint-ok.json`; an empty stretch over 1.5 s
+outside the 0-3 s title window cannot be justified (REV-1). For calibration,
 the-cost-of-a-mistake v5 (old look) scores: median fill 31%, 4 dead stretches, 6 thin stretches.
 
 ## 3. Fill the frame
@@ -98,8 +100,9 @@ the-cost-of-a-mistake v5 (old look) scores: median fill 31%, 4 dead stretches, 6
   **as it is spoken**. Coordinates are in the screenshot's own pixels. `{ frame: true }` draws a box instead.
 - `K.docFocus(t, doc, x, y, scale, dur)`: camera push onto that point of the screenshot. Don't use
   `{ via }` on the `K.cam()` right after it.
-- `K.photo(board, src, { x, y, w, h, at, out, credit, graded, pos, kb })`: a real photo, slow push-in,
-  credit line. Without `graded: true` it applies a reversible CSS grade (grayscale, quiet edges, light
+- `K.photo(board, src, { x, y, w, h, at, out, credit, graded, pos, kb })` (**legacy**, kept for old scenes: new Reels
+  use `K.screen` for a place and an untouched slim `K.snap35` print for a real person or moment, with no credit on
+  screen; IMG-4, IMG-6, IMG-11): a real photo, slow push-in, credit line. Without `graded: true` it applies a reversible CSS grade (grayscale, quiet edges, light
   purple-black). The full treatment in Kanz `brand/image-treatment/CREATE-A-BRANDED-IMAGE.md` is done on
   the file beforehand, then passed with `graded: true`.
 - `K.map(board, src, { x, y, w, at })` + `K.pin(board, x, y, label, { at, side })` +
@@ -136,15 +139,15 @@ about 30%. Small true differences get a bracket, never a stretched bar.
 
 ## 7. The first two seconds
 
-Open on the most dramatic image of the story, then rewind into it. The first visual must land by 1.0 s
-(lint checks this). Big hero object + headline + glow by 0.3 s. Not a single word on an empty board.
+Open on the most dramatic image of the story, then rewind into it. The first visual lands by 0.3 s (lint `hook`
+checks this): the headline and the hero or photo are complete on frame 1. Not a single word on an empty board.
 
 **Question-hero opening (HOOK-1..3):** the question headline and ONE hero object, nothing else.
 No second object, character, tag, arrow, label, foreground blur or extra beat until the question has been asked;
 use glow without idle float, `K.settle` on arrival, then camera drift (PACE-9). He rejected the busy us-dollar-decisions v2 hook
 (dollar + wallet + rate arrow + two tags + foreground stack). Lint may report the hook as `dead`; that is expected.
 Approved as the default on 2026-10-11 (Ahmed: "this can be the default"): the us-dollar-decisions v4 hook is the reference
-(`projects/us-dollar-decisions/scene.js`, section 1): headline in three short lines with the keyword last in lavender, one
+(local to Ahmed's copy; the public copy of it is section 1 of `examples/us-dollar-decisions-pace/scene.js`): headline in three short lines with the keyword last in lavender, one
 hero object at 600 board px centred under it (glow, slight rotation). The old float/push is superseded by
 `K.settle` and no idle motion. Voice-note/script Reels now prefer photo openings (HOOK-4): `K.screen` from 0,
 a headline and `K.captionsFrom = 0`, optionally a moving explanatory element over the photo. Only the
@@ -182,7 +185,8 @@ New videos only. Worked example: `projects/_sample-real-estate-v3/` (a copy of t
 these applied; not for posting).
 
 - **First frame is complete.** The question headline and the hero object are on screen from frame 1: no `at` on the
-  hero `K.img`, headline parts with no `at` (shown from frame 1). Movement (push, float) starts after. `engine/lint.py` now flags a first
+  hero `K.img`, headline parts with no `at` (shown from frame 1). Camera movement starts after; the hero itself never
+  idles (no float, PACE-9). `engine/lint.py` now flags a first
   visual after 0.3 s (`--hook`) and a first frame under the fill threshold. The hook stays simple: headline + one
   hero object only (section 7).
 - **Fill the frame when the voice names a thing.** Hero objects 500-600 board px, a second object for the
@@ -209,7 +213,9 @@ these applied; not for posting).
 - **Sound mix 2** (Ahmed 2026-10-11: "sometimes the sound effects are too loud"): `K.mix = 2` (the template has it).
   Library files differ by up to 20 dB inside one category and the engine picks one at random, so `engine/render.py`
   levels every file to the same loudness first, ducks the SFX about 5 dB under speech, caps them below the voice,
-  then brings the whole mix to -16 LUFS with a -1 dBFS limiter. `sfx: false` is silent (older scenes fell back to the
+  then brings the whole mix to -16 LUFS with a -1 dBFS limiter. **Updated 2026-10-18 (SND-5, current):** one effect
+  at a time, the SFX ducked 7 dB while he speaks and kept 6 dB under his speech, the voice high-passed and gently
+  compressed, two-pass loudness to -16 LUFS with a -1.5 dBTP ceiling (`engine/render.py`). `sfx: false` is silent (older scenes fell back to the
   default sound). Measured on real-estate v5: loudest effects went from 4 dB under the voice to 9 dB under it.
   Listening test: `projects/_sample-real-estate-v3/out/sound-ab.mp4`.
 - **Cover, style A ("the idea in an object").** `projects/<slug>/cover.json` -> `python engine/cover.py projects/<slug>`

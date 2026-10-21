@@ -13,7 +13,8 @@ scene but not render it).
    previews and a picker page (`shorts/casino-wins-in-the-end/work/picker.py`). Leave out passages that attack people by
    religion or repeat unproven allegations and say why (SHORT-2). Ahmed picks.
 4. **Project.** Copy `projects/_template/` to a new `projects/short-<slug>/` first (PowerShell:
-   `Copy-Item -Recurse projects/_template projects/short-<slug>`; do not overwrite an existing project).
+   `Copy-Item -Recurse projects/_template projects/short-<slug>`; do not overwrite an existing project). Then delete
+   the copied `lint-ok.json`: its waivers are for the voiceless template stub only and would hide real findings.
    Then `python engine/footage.py projects/short-<slug> <source.mp4> <transcript.raw.json> <start> <end>
    --video-from <first clean frame>`: face frames (git-ignored), voice and word timings. Start on a word, drop lines that
    point back to the long video, end before the next sentence starts (SHORT-3). The ending guard is automatic: the audio
