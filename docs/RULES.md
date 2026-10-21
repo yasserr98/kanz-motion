@@ -10,7 +10,7 @@ they were.
 
 | Id | Rule | Check |
 | --- | --- | --- |
-| REPO-1 | kanz-motion is public. Engine, runtime, docs, template, demos and `examples/` only; never keys, voice recordings, renders, unreleased scripts, record ids, Drive ids or emails | `.gitignore` |
+| REPO-1 | kanz-motion is public. Engine, runtime, docs, template, demos and `examples/` only; never keys, voice recordings, renders, unreleased scripts, record ids, Drive ids, emails, server paths or files whose licence forbids redistribution (Thmanyah Display: each machine downloads it). Commits use the GitHub no-reply address | `.gitignore`, pre-push hook |
 | REPO-2 | Editors' copies: projects, voices and MP4s stay on the editor's machine; never `git add`, commit or push there, never ask them to | |
 | REPO-3 | Updates come one way through `docs/UPDATE.md`; never `reset --hard`, `clean`, `checkout -- .` or drop a stash in an editor's copy | |
 | REPO-4 | `projects/` is local (git-ignored) except `_template` and the `_*-demo` engine demos; worked examples live in `examples/` | `.gitignore` |

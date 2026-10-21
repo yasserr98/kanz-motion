@@ -47,6 +47,11 @@ voice note ─► transcribe (word timings) ─► cut retakes, tighten pauses, 
 
 Needs Python 3.11+, Node.js 18+, `ffmpeg` on PATH and (for voice notes) [`uv`](https://docs.astral.sh/uv/).
 
+**Headline font, once per machine:** Thmanyah Display is free for design work, including these videos, but its
+licence forbids sharing the files, so it is not in this repo. Download it from https://font.thmanyah.com (they email
+the package) and save the Display Bold file as `brand/fonts/ThmanyahDisplay-Bold.woff2` (or `.otf` / `.ttf`, same
+name). Git ignores it there; never commit or forward it. `doctor` checks it.
+
 ```bash
 git clone https://github.com/yasserr98/kanz-motion.git
 cd kanz-motion
@@ -62,6 +67,34 @@ voice Ahmed names for that key (VOICE-4; never commit `.env`). With a key,
 the engine also uses ElevenLabs for transcription (Scribe v2, which tags coughs/sighs), for timing
 captions to the exact script (forced alignment, cached), for the optional voice isolator and for
 generated sound effects. Without one it falls back to local faster-whisper. A Freesound key is optional.
+
+## What to connect, and what each one unlocks
+
+The engine runs on your computer. These accounts and tools make more of it work; none of their keys or ids ever go
+into this repo.
+
+**For making videos (anyone with a copy):**
+
+| Connect | Needed? | What it unlocks |
+| --- | --- | --- |
+| **Claude** (Claude Code / the Claude desktop app) | Yes | The operator. It reads `AGENTS.md`, plans the storyboard, writes the scene, runs every step and reviews the contact sheets. Opus plans and reviews, Sonnet builds ([EFFICIENCY](docs/EFFICIENCY.md)). |
+| **Codex CLI**, signed in | Strongly recommended | The image pass: from the shot list it draws icons and explanatory scenes in the approved Kanz style and makes full-screen place photos (`engine/codex_assets.py`). Without it, use the approved `library/objects/` and `library/scenes/`. |
+| **ElevenLabs** API key | Recommended | Accurate transcription with word timings that also marks coughs and sighs, captions locked to the exact script, a voice cleaner for noisy notes, and new sound effects. Without it, transcription runs locally (slower, less exact) and there is no written-script route. |
+| **Ahmed's voice on ElevenLabs** | For written scripts | A written script becomes a voiceover in his voice (the "Ahmed Shaaban Shorts" clone), with known mispronunciations fixed automatically (`library/voice/lexicon.json`). The clone lives in Ahmed's ElevenLabs account: Ahmed's copy uses it directly; anyone else uses the voice Ahmed names for their own key. |
+| **yt-dlp + OpenCV** (`requirements-shorts.txt`) | For shorts | Downloads a long YouTube video or X Live and follows his face around the frame, so shorts can be cut from it. |
+| **Freesound** key | Optional | Searching for more free (CC0) sound effects. |
+| A render server (`KANZ_RENDER_HOST`) | Optional | Renders on a server instead of this computer, only when Ahmed asks for that job (REV-4). |
+
+**For the Kanz team's publishing side (Ahmed's private Kanz repo, not this one):**
+
+| Connect | What it unlocks |
+| --- | --- |
+| **Airtable** (Kanz Content) | Every piece's record: the approved script, its status (In Review, Ready to be posted, Posted), the Drive link, the caption and the posting dates. Connected, Claude takes the approved script from the record and updates status, caption and links after delivery. |
+| **Google Drive** (Kanz Content folder) | One folder per Reel holding the final `01.mp4`. Airtable links to it and Metricool takes the video from it. |
+| **Metricool** | Scheduling and auto-publishing Reels to TikTok, Instagram, Facebook, X and YouTube at the agreed times, after Ahmed's go-ahead for each batch, and confirming when each one is live. |
+| **Apify** | Web data on request: checking what is actually live on each platform so the accounts stay in sync, pulling Ahmed's articles, and finding reference videos for research. Paid per run. |
+
+GitHub is not needed to get or update this repo (it is public); only Ahmed's copy pushes.
 
 ## Make a video from a voice note
 
@@ -201,7 +234,7 @@ with its check; `projects/_guards-demo` shows every one, clean and broken):
 | --- | --- |
 | `engine/` | `make.py` (step runner), `transcribe` (Scribe / Whisper), `tts`, `align` (forced alignment), `captions`, `edit_audio`, `breaths` (sighs to mute), `retime` (pace: pauses + tempo), `voicecheck` (TTS failures, `library/voice/lexicon.json`), `render`, `contact` (review sheets), `lint` (pre-render checks), `doctor` (setup check), `objects` (object approval status), `contrast` (headline contrast over photos), `cover` (Reel cover, style A), `data` (real series for charts, with sources), `codex_assets` (images and icons through Codex, from `shots.json`), `footage` (shorts cut from a long video), `footage_track` (workshop shorts with a tracked camera), `tighten_footage` (dead air out of footage shorts), `faces` (face boxes and freezes), `shortinfo` (what the engine knows about a short), `guards` (lint checks from Ahmed's recurring notes), `shipcheck` (checks on the rendered MP4), `slot` (one Chromium job per machine), `sfx_library`, `sfx_gen` (generated SFX), `eleven` (API client), `provenance` (hashes for voice-derived timings), `console` (UTF-8 output), `vps_render.sh` (render on a server, only with explicit `--host`) |
 | `runtime/` | `kanz.js` (timeline + components) and `kanz.css` (brand tokens, layout); `kanz-look.js/.css` look v2 (safe zones, light, depth, documents, photos, maps, counting numbers, piles), see [docs/LOOK-V2.md](docs/LOOK-V2.md); `kanz-pace.js` pacing layer (arrive built, drift, carry, room tone, frame guard), see [docs/PACE.md](docs/PACE.md); `kanz-3d.js` (`K.flip`, `K.browser`, `K.fold`, worked example `projects/_3d-demo`); `kanz-snap.js` (`K.screen` full-screen photos, `K.snap35` disposable prints); `kanz-footage.js` (`K.footage`, face windows for shorts); `kanz-split.js` (`K.split`, the 50/50 workshop split) |
-| `brand/` | Kanz fonts, logo and colour tokens (copied from the Kanz repo's `assets/kanz-brand-current`) |
+| `brand/` | IBM Plex Sans Arabic fonts with their OFL licence, logo and colour tokens (from the Kanz repo's `assets/kanz-brand-current`); Thmanyah Display is downloaded into `brand/fonts/` on each machine (Setup) |
 | `library/objects/` | grayscale editorial objects (from the Kanz motion library), `manifest.json` (approved / candidate status of each) and their `PROVENANCE-*.md` generation records |
 | `library/scenes/` | the four approved drawn-scene references (Live C v10 style) and their prompts, for causes, actors and stories (EXPL-1) |
 | `library/backgrounds/` | the approved charcoal grain background |
@@ -223,10 +256,12 @@ rules, and never put real market numbers on screen without a source.
 
 ## Licences
 
-- SFX: CC0 (Kenney.nl and BigSoundBank), plus effects generated with ElevenLabs on a paid plan (commercial use), each in its own category and listed with its prompt in `library/sfx/generated.json`. See `library/sfx/manifest.json`.
+- SFX: CC0 (Kenney.nl and BigSoundBank), plus seven effects generated with ElevenLabs on a paid plan, each in its own category and listed with its prompt in `library/sfx/generated.json`. ElevenLabs: paid plans include a commercial licence, without attribution ([help centre](https://elevenlabs.io/docs/help-center/legal/can-i-publish-the-content-i-generate-on-the-platform), checked 2026-10-21). See `library/sfx/manifest.json`.
 - GSAP: free under the GreenSock standard licence (npm).
-- Fonts: IBM Plex Sans Arabic is OFL. **Thmanyah Display's redistribution terms have not been
-  checked**, and this repository is public, so its font files are downloadable by anyone. Open item for Ahmed.
+- Fonts: IBM Plex Sans Arabic is SIL OFL 1.1 (IBM Corp., reserved name "Plex"); the licence is in
+  `brand/fonts/OFL-IBM-Plex.txt`. Thmanyah Display (Thmanyah) is free for personal and commercial design work, but
+  its licence forbids redistributing, uploading or hosting the files, so it is not in this repo: each machine
+  downloads it from https://font.thmanyah.com (Setup).
 - Objects, logo and brand assets belong to Kanz.
 
 ## Sharing this repo
@@ -235,6 +270,7 @@ The repo is public: send the link. No GitHub account is needed to clone or updat
 (`git clone https://github.com/yasserr98/kanz-motion.git`). A "Download ZIP" copy works too: `docs/UPDATE.md`
 updates either kind of folder, with or without Git. Editors only pull; their projects and videos stay on their
 machine and never go back to GitHub (AGENTS.md, "Which copy you are in"). They get the engine and shared assets:
-engine, brand fonts, objects, sounds and the worked examples. They do **not** get `.env` (keys), voice-note audio,
-or rendered videos; each person uses their own ElevenLabs key. Treat Kanz objects and logo as Kanz-only, not for
+engine, the IBM Plex fonts, objects, drawn scenes, sounds and the worked examples. They do **not** get `.env` (keys),
+voice-note audio, rendered videos or the Thmanyah font (each person downloads it, Setup); each person uses their own
+ElevenLabs key. Treat Kanz objects and logo as Kanz-only, not for
 other brands.

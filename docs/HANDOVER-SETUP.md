@@ -11,7 +11,10 @@ The engine itself uses local Python, Node.js, Chromium and ffmpeg. Claude and it
 1. Clone this repository (`git clone https://github.com/yasserr98/kanz-motion.git`; no account or login needed) and
    open the folder in Claude with the Codex plugin enabled. "Download ZIP" also works; [UPDATE.md](UPDATE.md) updates either.
 2. Read `AGENTS.md` (the checklist) and `docs/RULES.md` (the rules in force). Historical research notes are not new approval.
-3. Install Python 3.11+, Node.js 18+ and ffmpeg, then run the following from the repository folder:
+3. Install Python 3.11+, Node.js 18+ and ffmpeg. Download the headline font Thmanyah Display (free) from
+   https://font.thmanyah.com and save the Display Bold file as `brand/fonts/ThmanyahDisplay-Bold.woff2` (or `.otf` /
+   `.ttf`); its licence forbids sharing the file, so never commit or forward it. Then run the following from the
+   repository folder:
 
 ```sh
 npm ci

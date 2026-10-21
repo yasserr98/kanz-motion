@@ -338,3 +338,16 @@ existing runtime behavior. The four approved drawn-scene references are the expl
   review passes; Sonnet 5.5 (medium) builds the scene, renders and fixes notes. The previous Sonnet-only video
   usage policy (Opus only for engine work) in AGENTS/EFFICIENCY is **Superseded** by this split. One fresh session
   per video stays. Workflow guidance in AGENTS/EFFICIENCY; no new rule id.
+
+## 2026-10-21
+
+- **Public history cleaned** (audit of the public repo; on the list of private details still in old commits, Ahmed:
+  "adjust it"). **Replaces** the 2026-10-17 "No history rewrite". Removed from every commit: the old video projects
+  (their delivery receipts, record and folder ids, emails and drafts; `_template` and the `_*-demo` engine demos stay),
+  the Thmanyah font file, a private server path and the private folder and record ids that sat in older docs. Commits
+  now carry the GitHub no-reply address. Old copies of the repo keep the old history: `docs/UPDATE.md` says how to move
+  over, and a pre-push hook in Ahmed's copy refuses pushes that would bring it back. Rule: REPO-1.
+- **Thmanyah Display is downloaded, not shipped.** Its licence (in the font file; official page https://font.thmanyah.com)
+  allows personal and commercial design use, including our videos, and forbids redistributing, uploading or hosting
+  the files. The file left the repo; each machine downloads it into `brand/fonts/` (README, Setup), and `make.py doctor`
+  checks it. IBM Plex Sans Arabic stays, with its OFL licence beside it (`brand/fonts/OFL-IBM-Plex.txt`). Rule: REPO-1.

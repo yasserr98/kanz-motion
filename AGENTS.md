@@ -69,12 +69,16 @@ anything, and say where it really was if it differs (REV-5).
 ## Brand authority (Kanz repo, when it is alongside)
 
 `docs/21-kanz-visual-identity.md`, `brand/explainer-icons/README.md`, `brand/image-treatment/CREATE-A-BRANDED-IMAGE.md`,
-`brand/KANZ-CONTENT-DELIVERY.md`. Open item: Thmanyah Display's redistribution terms are unchecked while its font files
-are public (README, Licences).
+`brand/KANZ-CONTENT-DELIVERY.md`. Thmanyah Display is not in this repo: its licence forbids redistributing the files, so
+each machine downloads it from https://font.thmanyah.com into `brand/fonts/` (README, Setup); never commit it.
 
 ## Repo hygiene
 
-- Never commit `node_modules/`, `library/sfx/raw/`, `out/`, voice audio, `.env`, `delivery.json`, record ids, Drive ids or
-  emails. Only Ahmed's sessions push, and only engine, runtime, docs, template, demos and examples.
+- Never commit `node_modules/`, `library/sfx/raw/`, `out/`, voice audio, `.env`, `delivery.json`, record ids, Drive ids,
+  emails, server paths or files whose licence forbids redistribution (the Thmanyah font). Only Ahmed's sessions push, and
+  only engine, runtime, docs, template, demos and examples. Commits use the GitHub no-reply address set in this repo's
+  Git config, never a personal email.
+- The public history was cleaned on 2026-10-21 (DECISIONS). A branch started before that is on the old history: rebase
+  its own commits onto the current `main` before merging; the pre-push hook refuses pushes that carry the old history.
 - Reusable components go in `runtime/` and get documented in README and `docs/` (REPO-5). A new rule from Ahmed goes in
   `docs/RULES.md` (one line, an id) and `docs/DECISIONS.md` (dated, his words) in the same change.

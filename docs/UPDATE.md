@@ -19,6 +19,10 @@ Pick the route:
 
 Route A (Git, no account):
 1. `git status --short`, then `git fetch https://github.com/yasserr98/kanz-motion.git main`.
+   If `git merge-base HEAD FETCH_HEAD` prints nothing, this copy predates the 2026-10-21 history clean-up and cannot
+   merge: do not merge, rebase or `reset --hard`. Instead follow Route B steps 1-5 on this folder, then run
+   `git reset FETCH_HEAD` (plain, never `--hard`: it moves only Git's pointer and index, and changes no file in the
+   folder), show me `git status --short`, and go on with "Then (both routes)". Skip the rest of Route A.
    Show me the new commits: `git log --oneline HEAD..FETCH_HEAD`. If there are none, say I'm up to date and stop.
    Then list files the update would delete: `git diff --name-status HEAD FETCH_HEAD | grep "^D"`. Ahmed's old
    projects left GitHub on 2026-10-17, so an older copy loses `projects/<name>/` folders it still tracks. Before going on,
@@ -52,9 +56,23 @@ Then (both routes):
    If I make shorts and requirements-shorts.txt is new or changed, `python -m pip install -r requirements-shorts.txt`,
    then `python engine/make.py doctor --shorts`.
    After a Playwright upgrade, run `python -m playwright install chromium`, then `python engine/make.py doctor`.
+   If `doctor` says the Thmanyah font is missing, or this folder has a `brand/fonts/ThmanyahDisplay-Bold.woff2` that
+   came with an older copy of the repo, tell me to download the font myself from https://font.thmanyah.com and save
+   the Display Bold file under that name (README, Setup); its licence forbids passing the file around.
 7. Re-read AGENTS.md, README.md and the "Recent changes" list in docs/UPDATE.md, then tell me in a few lines what is new
    and which of my videos I should re-render to get a fix.
 ```
+
+Recent changes (2026-10-21, no re-render needed):
+
+- **History cleaned:** old video projects, private ids and a server path were removed from every past commit, so a copy
+  cloned before today cannot merge: the prompt above moves it over without touching your files.
+- **Headline font downloaded, not shipped:** Thmanyah Display's licence forbids sharing the file. Download it once from
+  https://font.thmanyah.com into `brand/fonts/` (README, Setup); `make.py doctor` checks it.
+- **What to connect:** README "What to connect" lists each account (Claude, Codex, ElevenLabs, Ahmed's voice, shorts
+  tools; Airtable, Drive, Metricool and Apify on Ahmed's side) and what it unlocks.
+- **Docs audit:** stale numbers and superseded rules fixed across README, LOOK-V2, PACE and the routes; the shorts route
+  deletes the template's stub `lint-ok.json` after copying it.
 
 Recent changes (2026-10-18 to 2026-10-20). Every rule below is a line in `docs/RULES.md`; the reasons are in
 `docs/DECISIONS.md`.
