@@ -61,13 +61,7 @@ def checks(proj=None, shorts=False):
         except subprocess.TimeoutExpired:
             ok, why = False, "Playwright did not answer in 90 s"
         yield ("OK" if ok else "FAIL", "Playwright Chromium", why)
-    # Thmanyah Display is not in the repo: its licence forbids redistributing the files (README, Setup)
-    thm = [ROOT / "brand" / "fonts" / f"ThmanyahDisplay-Bold.{ext}" for ext in ("woff2", "otf", "ttf")]
-    found = next((f for f in thm if f.exists()), None)
-    yield ("OK" if found else "FAIL", "font Thmanyah Display Bold",
-           f"brand/fonts/{found.name}" if found else "missing: download it free from https://font.thmanyah.com and save "
-           "the Display Bold file as brand/fonts/ThmanyahDisplay-Bold.woff2 (or .otf / .ttf); never commit it")
-    for font in ("IBM-Regular.ttf", "IBM-Medium.ttf"):
+    for font in ("ThmanyahDisplay-Bold.woff2", "IBM-Regular.ttf", "IBM-Medium.ttf"):
         f = ROOT / "brand" / "fonts" / font
         yield ("OK" if f.exists() else "FAIL", f"font {font}", "brand/fonts" if f.exists() else "missing from brand/fonts")
     import eleven

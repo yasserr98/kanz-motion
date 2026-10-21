@@ -160,5 +160,5 @@ Music is a separate open item (a source with a commercial licence for Instagram 
    editorial lane's deep purple? (Recommended: charcoal, since it's already approved for explainer video.)
 3. **Charts**: keep market charts left→right in time while everything else runs right→left?
 4. **Repo**: OK to create a private `kanz-motion` repo for the engine? Fonts: IBM Plex Sans Arabic is open source (OFL);
-   Thmanyah's redistribution terms need checking before the repo is shared outside the team. (Checked 2026-10-21: redistribution is forbidden, so the font is downloaded per machine, README Setup.)
+   Thmanyah's redistribution terms need checking before the repo is shared outside the team. (Checked 2026-10-21: the font's licence restricts redistribution; Ahmed decided to keep it in the repo.)
 5. **Freesound key** if you want the large CC0 catalogue (optional; Kenney + BigSoundBank + generated sounds cover the start).

@@ -56,9 +56,6 @@ Then (both routes):
    If I make shorts and requirements-shorts.txt is new or changed, `python -m pip install -r requirements-shorts.txt`,
    then `python engine/make.py doctor --shorts`.
    After a Playwright upgrade, run `python -m playwright install chromium`, then `python engine/make.py doctor`.
-   If `doctor` says the Thmanyah font is missing, or this folder has a `brand/fonts/ThmanyahDisplay-Bold.woff2` that
-   came with an older copy of the repo, tell me to download the font myself from https://font.thmanyah.com and save
-   the Display Bold file under that name (README, Setup); its licence forbids passing the file around.
 7. Re-read AGENTS.md, README.md and the "Recent changes" list in docs/UPDATE.md, then tell me in a few lines what is new
    and which of my videos I should re-render to get a fix.
 ```
@@ -70,8 +67,6 @@ Recent changes (2026-10-21, no re-render needed):
   it. Shorts still open on his face.
 - **History cleaned:** old video projects, private ids and a server path were removed from every past commit, so a copy
   cloned before today cannot merge: the prompt above moves it over without touching your files.
-- **Headline font downloaded, not shipped:** Thmanyah Display's licence forbids sharing the file. Download it once from
-  https://font.thmanyah.com into `brand/fonts/` (README, Setup); `make.py doctor` checks it.
 - **What to connect:** README "What to connect" lists each account (Claude, Codex, ElevenLabs, Ahmed's voice, shorts
   tools; Airtable, Drive, Metricool and Apify on Ahmed's side) and what it unlocks.
 - **Docs audit:** stale numbers and superseded rules fixed across README, LOOK-V2, PACE and the routes; the shorts route

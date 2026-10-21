@@ -51,5 +51,3 @@ examples/*/assets/codex/**/*.log
 projects/*/assets/half/
 examples/*/assets/half/
 .local-render.lock
-# Thmanyah Display: free to use, but its licence forbids redistributing or hosting the files (README, Setup)
-brand/fonts/ThmanyahDisplay-Bold.*

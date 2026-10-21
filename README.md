@@ -47,11 +47,6 @@ voice note ─► transcribe (word timings) ─► cut retakes, tighten pauses, 
 
 Needs Python 3.11+, Node.js 18+, `ffmpeg` on PATH and (for voice notes) [`uv`](https://docs.astral.sh/uv/).
 
-**Headline font, once per machine:** Thmanyah Display is free for design work, including these videos, but its
-licence forbids sharing the files, so it is not in this repo. Download it from https://font.thmanyah.com (they email
-the package) and save the Display Bold file as `brand/fonts/ThmanyahDisplay-Bold.woff2` (or `.otf` / `.ttf`, same
-name). Git ignores it there; never commit or forward it. `doctor` checks it.
-
 ```bash
 git clone https://github.com/yasserr98/kanz-motion.git
 cd kanz-motion
@@ -234,7 +229,7 @@ with its check; `projects/_guards-demo` shows every one, clean and broken):
 | --- | --- |
 | `engine/` | `make.py` (step runner), `transcribe` (Scribe / Whisper), `tts`, `align` (forced alignment), `captions`, `edit_audio`, `breaths` (sighs to mute), `retime` (pace: pauses + tempo), `voicecheck` (TTS failures, `library/voice/lexicon.json`), `render`, `contact` (review sheets), `lint` (pre-render checks), `doctor` (setup check), `objects` (object approval status), `contrast` (headline contrast over photos), `cover` (Reel cover, style A), `data` (real series for charts, with sources), `codex_assets` (images and icons through Codex, from `shots.json`), `footage` (shorts cut from a long video), `footage_track` (workshop shorts with a tracked camera), `tighten_footage` (dead air out of footage shorts), `faces` (face boxes and freezes), `shortinfo` (what the engine knows about a short), `guards` (lint checks from Ahmed's recurring notes), `shipcheck` (checks on the rendered MP4), `slot` (one Chromium job per machine), `sfx_library`, `sfx_gen` (generated SFX), `eleven` (API client), `provenance` (hashes for voice-derived timings), `console` (UTF-8 output), `vps_render.sh` (render on a server, only with explicit `--host`) |
 | `runtime/` | `kanz.js` (timeline + components) and `kanz.css` (brand tokens, layout); `kanz-look.js/.css` look v2 (safe zones, light, depth, documents, photos, maps, counting numbers, piles), see [docs/LOOK-V2.md](docs/LOOK-V2.md); `kanz-pace.js` pacing layer (arrive built, drift, carry, room tone, frame guard), see [docs/PACE.md](docs/PACE.md); `kanz-3d.js` (`K.flip`, `K.browser`, `K.fold`, worked example `projects/_3d-demo`); `kanz-snap.js` (`K.screen` full-screen photos, `K.snap35` disposable prints); `kanz-footage.js` (`K.footage`, face windows for shorts); `kanz-split.js` (`K.split`, the 50/50 workshop split) |
-| `brand/` | IBM Plex Sans Arabic fonts with their OFL licence, logo and colour tokens (from the Kanz repo's `assets/kanz-brand-current`); Thmanyah Display is downloaded into `brand/fonts/` on each machine (Setup) |
+| `brand/` | Kanz fonts (Thmanyah Display, IBM Plex Sans Arabic with its OFL licence), logo and colour tokens (from the Kanz repo's `assets/kanz-brand-current`) |
 | `library/objects/` | grayscale editorial objects (from the Kanz motion library), `manifest.json` (approved / candidate status of each) and their `PROVENANCE-*.md` generation records |
 | `library/scenes/` | the four approved drawn-scene references (Live C v10 style) and their prompts, for causes, actors and stories (EXPL-1) |
 | `library/backgrounds/` | the approved charcoal grain background |
@@ -259,9 +254,8 @@ rules, and never put real market numbers on screen without a source.
 - SFX: CC0 (Kenney.nl and BigSoundBank), plus seven effects generated with ElevenLabs on a paid plan, each in its own category and listed with its prompt in `library/sfx/generated.json`. ElevenLabs: paid plans include a commercial licence, without attribution ([help centre](https://elevenlabs.io/docs/help-center/legal/can-i-publish-the-content-i-generate-on-the-platform), checked 2026-10-21). See `library/sfx/manifest.json`.
 - GSAP: free under the GreenSock standard licence (npm).
 - Fonts: IBM Plex Sans Arabic is SIL OFL 1.1 (IBM Corp., reserved name "Plex"); the licence is in
-  `brand/fonts/OFL-IBM-Plex.txt`. Thmanyah Display (Thmanyah) is free for personal and commercial design work, but
-  its licence forbids redistributing, uploading or hosting the files, so it is not in this repo: each machine
-  downloads it from https://font.thmanyah.com (Setup).
+  `brand/fonts/OFL-IBM-Plex.txt`. Thmanyah Display (Thmanyah) ships in `brand/fonts/` by Ahmed's decision
+  (2026-10-21); its own licence terms are in the font file.
 - Objects, logo and brand assets belong to Kanz.
 
 ## Sharing this repo
@@ -270,7 +264,6 @@ The repo is public: send the link. No GitHub account is needed to clone or updat
 (`git clone https://github.com/yasserr98/kanz-motion.git`). A "Download ZIP" copy works too: `docs/UPDATE.md`
 updates either kind of folder, with or without Git. Editors only pull; their projects and videos stay on their
 machine and never go back to GitHub (AGENTS.md, "Which copy you are in"). They get the engine and shared assets:
-engine, the IBM Plex fonts, objects, drawn scenes, sounds and the worked examples. They do **not** get `.env` (keys),
-voice-note audio, rendered videos or the Thmanyah font (each person downloads it, Setup); each person uses their own
-ElevenLabs key. Treat Kanz objects and logo as Kanz-only, not for
+engine, brand fonts, objects, drawn scenes, sounds and the worked examples. They do **not** get `.env` (keys),
+voice-note audio or rendered videos; each person uses their own ElevenLabs key. Treat Kanz objects and logo as Kanz-only, not for
 other brands.
