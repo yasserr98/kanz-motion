@@ -38,6 +38,7 @@ tests/.tmp*/
 # Receipts and the usage log live in Ahmed's private Kanz repo (reports/kanz-motion-deliveries/).
 projects/*
 !projects/_template/
+!projects/_workshop-template/
 !projects/_*-demo/
 **/delivery.json
 examples/*/out/

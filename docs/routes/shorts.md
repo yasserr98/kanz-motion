@@ -24,7 +24,7 @@ scene but not render it).
    Join passages with `--also S E` (repeatable); aim for total silence about 0.25 s at each join (SHORT-13).
    Confirm boundaries on the source waveform and by listening, never from transcript edges alone. If a syllable sounds
    clipped, check for the source's own jump cut and show short listening options before choosing (Casino H v12 used 0.2 s).
-   Workshop footage: `engine/footage_track.py` with the same
+   Workshop footage (editor preset for workshop shorts, opt-in: [workshop-editor-preset.md](workshop-editor-preset.md)): `engine/footage_track.py` with the same
    arguments; it tightens dead air by default (`--no-tighten` keeps it). Both finish with `engine/faces.py`:
    `assets/faces.json` (his eyes-and-mouth box per frame) and `assets/freezes.json` (frozen source stretches: choose
    other seconds if one falls where his face shows, SHORT-17). Skip the source's transitions and glitch
