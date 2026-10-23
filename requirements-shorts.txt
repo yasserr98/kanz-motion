@@ -1,4 +1,5 @@
 # Optional shorts route: install in addition to the base tools below.
 -r requirements.txt
-opencv-python-headless>=4.10
+# below 5: OpenCV 5 dropped cv2.CascadeClassifier, which footage_track.py and faces.py use to find his face
+opencv-python-headless>=4.10,<5
 yt-dlp>=2024.8.6

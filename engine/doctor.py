@@ -40,6 +40,13 @@ def checks(proj=None, shorts=False):
             ok = importlib.util.find_spec(mod) is not None
             yield ("OK" if ok else "FAIL", f"python module {mod}",
                    why if ok else "python -m pip install -r requirements-shorts.txt")
+        if importlib.util.find_spec("cv2") is not None:
+            # OpenCV 5 removed the Haar cascades footage_track.py and faces.py use: an installed cv2 is not enough
+            import cv2
+            haar = hasattr(cv2, "CascadeClassifier")
+            yield ("OK" if haar else "FAIL", "OpenCV face detector",
+                   f"cv2 {cv2.__version__}" if haar else
+                   f"cv2 {cv2.__version__} has no CascadeClassifier: python -m pip install \"opencv-python-headless>=4.10,<5\"")
     for tool in ("ffmpeg", "ffprobe"):
         v = version([tool, "-version"])
         yield ("OK" if v else "FAIL", tool, v.split(" Copyright")[0] if v else "not on PATH (install ffmpeg)")
